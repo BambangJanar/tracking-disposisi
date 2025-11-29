@@ -56,10 +56,10 @@ $jenisSuratList = JenisSuratService::getAll();
                                     <?= $index + 1 ?>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900"><?= $jenis['nama_jenis'] ?></div>
+                                    <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($jenis['nama_jenis']) ?></div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-600"><?= $jenis['keterangan'] ?? '-' ?></div>
+                                    <div class="text-sm text-gray-600"><?= htmlspecialchars($jenis['keterangan'] ?? '-') ?></div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-2">
@@ -87,7 +87,6 @@ $jenisSuratList = JenisSuratService::getAll();
     </div>
 </div>
 
-<!-- Modal Add/Edit -->
 <div id="jenisModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
@@ -95,7 +94,7 @@ $jenisSuratList = JenisSuratService::getAll();
                 <h3 id="modalTitle" class="text-lg font-semibold text-gray-800">Tambah Jenis Surat</h3>
             </div>
             
-            <form id="jenisForm" method="POST" action="modules/jenis_surat/jenis_surat_handler.php">
+            <form id="jenisForm" method="POST" action="../modules/jenis_surat/jenis_surat_handler.php">
                 <input type="hidden" name="action" id="formAction" value="create">
                 <input type="hidden" name="id" id="jenisId">
                 
@@ -129,11 +128,16 @@ $jenisSuratList = JenisSuratService::getAll();
 </div>
 
 <script>
+// Path handler yang benar (Relatif terhadap file public/jenis_surat.php)
+const handlerPath = '../modules/jenis_surat/jenis_surat_handler.php';
+
 function openAddModal() {
     document.getElementById('modalTitle').textContent = 'Tambah Jenis Surat';
     document.getElementById('formAction').value = 'create';
     document.getElementById('jenisForm').reset();
     document.getElementById('jenisId').value = '';
+    // Set action URL manual
+    document.getElementById('jenisForm').action = handlerPath;
     document.getElementById('jenisModal').classList.remove('hidden');
 }
 
@@ -143,6 +147,8 @@ function openEditModal(jenis) {
     document.getElementById('jenisId').value = jenis.id;
     document.getElementById('nama_jenis').value = jenis.nama_jenis;
     document.getElementById('keterangan').value = jenis.keterangan || '';
+    // Set action URL manual
+    document.getElementById('jenisForm').action = handlerPath;
     document.getElementById('jenisModal').classList.remove('hidden');
 }
 
@@ -150,11 +156,12 @@ function closeModal() {
     document.getElementById('jenisModal').classList.add('hidden');
 }
 
+// Fungsi Hapus tanpa SweetAlert (Menggunakan native confirm)
 function deleteJenis(id) {
-    confirmDelete(function() {
+    if (confirm('Apakah Anda yakin ingin menghapus jenis surat ini?')) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = 'modules/jenis_surat/jenis_surat_handler.php';
+        form.action = handlerPath;
         
         const actionInput = document.createElement('input');
         actionInput.type = 'hidden';
@@ -170,7 +177,7 @@ function deleteJenis(id) {
         form.appendChild(idInput);
         document.body.appendChild(form);
         form.submit();
-    }, 'Jenis surat ini');
+    }
 }
 
 document.addEventListener('keydown', function(e) {

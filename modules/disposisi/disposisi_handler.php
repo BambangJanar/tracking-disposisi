@@ -1,6 +1,9 @@
 <?php
 // modules/disposisi/disposisi_handler.php
 
+// 1. PENTING: Mulai buffering di baris paling atas untuk menangkap output tak terduga (seperti notice/warning)
+ob_start();
+
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/auth.php';
@@ -8,59 +11,142 @@ require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/disposisi_service.php';
 require_once __DIR__ . '/../surat/surat_service.php';
 
+// Deteksi apakah request adalah AJAX
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+
+// 2. Cek session. Jika habis dan ini AJAX, kirim JSON 401 agar JS bisa redirect.
+if (!isLoggedIn()) {
+    ob_end_clean(); // Hapus output HTML/error sebelumnya
+    http_response_code(401); // Unauthorized
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => false,
+        'message' => 'Sesi login Anda telah habis. Silakan refresh halaman.'
+    ]);
+    exit;
+}
+
 requireLogin();
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $user = getCurrentUser();
 
 /**
- * Build redirect URL dengan path yang benar
- * Menangani berbagai format input redirect path
+ * Fungsi Helper: Generate HTML Timeline
+ * Digunakan untuk merender ulang tampilan timeline via AJAX tanpa refresh halaman
+ */
+function generateTimelineHtml($history) {
+    if (empty($history)) {
+        return '
+        <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-inbox text-4xl mb-2"></i>
+            <p>Belum ada disposisi untuk surat ini</p>
+        </div>';
+    }
+
+    $html = '<div class="relative">';
+    $html .= '<div class="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>'; // Garis vertikal
+    $html .= '<div class="space-y-6">';
+
+    foreach ($history as $disp) {
+        // Tentukan styling berdasarkan status
+        $bgClass = 'bg-blue-100';
+        $iconClass = 'fa-paper-plane text-blue-600';
+        
+        if ($disp['status_disposisi'] === 'selesai') {
+            $bgClass = 'bg-green-100'; $iconClass = 'fa-check text-green-600';
+        } elseif ($disp['status_disposisi'] === 'ditolak') {
+            $bgClass = 'bg-red-100'; $iconClass = 'fa-times text-red-600';
+        } elseif ($disp['status_disposisi'] === 'diproses') {
+            $bgClass = 'bg-yellow-100'; $iconClass = 'fa-spinner text-yellow-600';
+        } elseif ($disp['status_disposisi'] === 'diterima') {
+            $bgClass = 'bg-indigo-100'; $iconClass = 'fa-envelope-open text-indigo-600';
+        }
+
+        $badgeClass = getDisposisiStatusBadge($disp['status_disposisi']);
+        $statusLabel = ucfirst($disp['status_disposisi']);
+        
+        $catatanHtml = '';
+        if ($disp['catatan']) {
+            $catatanHtml = '<div class="mt-2 p-2 bg-white rounded border-l-4 border-blue-500"><p class="text-sm text-gray-700">'.nl2br(sanitize($disp['catatan'])).'</p></div>';
+        }
+        
+        $tglDisposisi = formatDateTime($disp['tanggal_disposisi']);
+        $tglResponHtml = '';
+        if ($disp['tanggal_respon']) {
+            $tglResponHtml = '<span class="ml-4"><i class="fas fa-check-circle mr-1"></i> Respon: '.formatDateTime($disp['tanggal_respon']).'</span>';
+        }
+
+        // Susun HTML Item
+        $html .= '
+        <div class="relative pl-14">
+            <div class="absolute left-0 w-12 h-12 rounded-full flex items-center justify-center '.$bgClass.'">
+                <i class="fas '.$iconClass.'"></i>
+            </div>
+            
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="flex-1">
+                        <p class="font-semibold text-gray-800">
+                            '.sanitize($disp['dari_user_nama']).' 
+                            <i class="fas fa-arrow-right text-gray-400 mx-2"></i>
+                            '.sanitize($disp['ke_user_nama']).'
+                        </p>
+                        <p class="text-xs text-gray-500">
+                            '.getRoleLabel($disp['dari_user_role']).' → '.getRoleLabel($disp['ke_user_role']).'
+                        </p>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full '.$badgeClass.'">
+                        '.$statusLabel.'
+                    </span>
+                </div>
+                
+                '.$catatanHtml.'
+                
+                <div class="mt-2 flex items-center text-xs text-gray-500">
+                    <i class="fas fa-clock mr-1"></i>
+                    Dikirim: '.$tglDisposisi.'
+                    '.$tglResponHtml.'
+                </div>
+            </div>
+        </div>';
+    }
+
+    $html .= '</div></div>';
+    return $html;
+}
+
+/**
+ * Helper: Build Redirect URL
  */
 function buildRedirectUrl($redirectPath, $params = []) {
-    // Normalisasi path
     $redirectPath = trim($redirectPath);
-    
-    // Parse URL untuk mendapatkan path dan query
     $parsedUrl = parse_url($redirectPath);
     $path = $parsedUrl['path'] ?? $redirectPath;
     
-    // Ambil existing query parameters
     $existingParams = [];
     if (isset($parsedUrl['query'])) {
         parse_str($parsedUrl['query'], $existingParams);
     }
     
-    // Merge dengan params baru (params baru override existing)
     $allParams = array_merge($existingParams, $params);
     
-    // Deteksi dan normalisasi path
-    // Jika path sudah absolut dengan BASE_URL, gunakan langsung
+    // Normalisasi path
     if (strpos($redirectPath, BASE_URL) === 0) {
         $finalPath = $redirectPath;
-    }
-    // Jika path sudah include '../../public/', gunakan langsung
-    elseif (strpos($path, '../../public/') === 0) {
+    } elseif (strpos($path, '../../public/') === 0) {
         $finalPath = $path;
-    }
-    // Jika path sudah mulai dengan 'public/', tambahkan ../../ saja
-    elseif (strpos($path, 'public/') === 0) {
+    } elseif (strpos($path, 'public/') === 0) {
         $finalPath = '../../' . $path;
-    }
-    // Jika path adalah BASE_URL relatif yang include /public/
-    elseif (strpos($path, '/public/') !== false) {
-        // Extract dari /public/ ke akhir
+    } elseif (strpos($path, '/public/') !== false) {
         $publicPos = strpos($path, '/public/');
-        $relativePath = substr($path, $publicPos + 8); // +8 untuk skip '/public/'
+        $relativePath = substr($path, $publicPos + 8);
         $finalPath = '../../public/' . $relativePath;
-    }
-    // Jika hanya nama file, tambahkan prefix lengkap
-    else {
+    } else {
         $filename = basename($path);
         $finalPath = '../../public/' . $filename;
     }
     
-    // Build final URL dengan query string
     if (!empty($allParams)) {
         $finalPath .= '?' . http_build_query($allParams);
     }
@@ -75,27 +161,21 @@ try {
             $keUserId = (int)$_POST['ke_user_id'];
             $catatan = sanitize($_POST['catatan'] ?? '');
             
-            // Validate surat exists
+            // Validasi surat
             $surat = SuratService::getById($suratId);
-            if (!$surat) {
-                throw new Exception('Surat tidak ditemukan');
-            }
+            if (!$surat) throw new Exception('Surat tidak ditemukan');
             
-            // Check if user can dispose
+            // Validasi hak akses
             if (!DisposisiService::canDispose($user['id'], $suratId) && $surat['dibuat_oleh'] != $user['id']) {
                 throw new Exception('Anda tidak memiliki akses untuk mendisposisi surat ini');
             }
             
-            // Validate target user
+            // Validasi user tujuan
             $targetUser = dbSelectOne("SELECT id, nama_lengkap FROM users WHERE id = ? AND status_aktif = 1", [$keUserId], 'i');
-            if (!$targetUser) {
-                throw new Exception('User tujuan tidak valid');
-            }
+            if (!$targetUser) throw new Exception('User tujuan tidak valid');
             
-            // Prevent disposing to self
-            if ($keUserId == $user['id']) {
-                throw new Exception('Tidak dapat mendisposisi ke diri sendiri');
-            }
+            // Cek self-disposisi
+            if ($keUserId == $user['id']) throw new Exception('Tidak dapat mendisposisi ke diri sendiri');
             
             $data = [
                 'id_surat' => $suratId,
@@ -105,21 +185,38 @@ try {
                 'catatan' => $catatan
             ];
             
-            $disposisiId = DisposisiService::create($data);
+            DisposisiService::create($data);
             
-            // Update surat status to 'proses' if still 'baru'
+            // Update status surat jika masih baru
             if ($surat['status_surat'] === 'baru') {
                 SuratService::updateStatus($suratId, 'proses');
             }
             
             logActivity($user['id'], 'disposisi_surat', "Mendisposisi surat {$surat['nomor_agenda']} ke {$targetUser['nama_lengkap']}");
             
+            // --- JIKA REQUEST ADALAH AJAX ---
+            if ($isAjax) {
+                // Generate timeline terbaru
+                $newHistory = DisposisiService::getHistoryBySurat($suratId);
+                $html = generateTimelineHtml($newHistory);
+                
+                // 3. PENTING: Bersihkan buffer sebelum kirim JSON
+                ob_end_clean(); 
+                
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Disposisi berhasil dikirim',
+                    'html' => $html,
+                    'count' => count($newHistory)
+                ]);
+                exit;
+            }
+
+            // Fallback untuk request biasa (non-AJAX)
             setFlash('success', 'Disposisi berhasil dikirim');
-            
-            // Build redirect URL dengan benar
             $redirectBase = $_POST['redirect_url'] ?? $_POST['redirect'] ?? "surat_detail.php?id={$suratId}";
             $redirectUrl = buildRedirectUrl($redirectBase, ['success' => 'sent']);
-            
             header("Location: {$redirectUrl}");
             exit;
             break;
@@ -129,52 +226,48 @@ try {
             $status = sanitize($_POST['status']);
             $catatan = sanitize($_POST['catatan'] ?? '');
             
-            // Validate status
             $allowedStatus = ['diterima', 'diproses', 'selesai', 'ditolak'];
-            if (!in_array($status, $allowedStatus)) {
-                throw new Exception('Status tidak valid');
-            }
+            if (!in_array($status, $allowedStatus)) throw new Exception('Status tidak valid');
             
-            // Get disposisi
             $disposisi = DisposisiService::getById($id);
-            if (!$disposisi) {
-                throw new Exception('Disposisi tidak ditemukan');
-            }
+            if (!$disposisi) throw new Exception('Disposisi tidak ditemukan');
             
-            // Check if user is the recipient
             if ($disposisi['ke_user_id'] != $user['id']) {
                 throw new Exception('Anda tidak memiliki akses untuk mengubah disposisi ini');
             }
             
             DisposisiService::updateStatus($id, $status, $catatan);
             
-            // Update surat status based on disposition status
+            // Update status surat induk jika perlu
             if ($status === 'selesai') {
-                // Check if all dispositions are completed
                 $allDispositions = DisposisiService::getHistoryBySurat($disposisi['id_surat']);
                 $allCompleted = true;
                 foreach ($allDispositions as $disp) {
                     if ($disp['status_disposisi'] !== 'selesai' && $disp['id'] != $id) {
-                        $allCompleted = false;
-                        break;
+                        $allCompleted = false; break;
                     }
                 }
-                
-                if ($allCompleted) {
-                    SuratService::updateStatus($disposisi['id_surat'], 'disetujui');
-                }
+                if ($allCompleted) SuratService::updateStatus($disposisi['id_surat'], 'disetujui');
             } elseif ($status === 'ditolak') {
                 SuratService::updateStatus($disposisi['id_surat'], 'ditolak');
             }
             
             logActivity($user['id'], 'update_disposisi', "Mengubah status disposisi ID {$id} menjadi {$status}");
             
+            // Jika AJAX
+            if ($isAjax) {
+                ob_end_clean();
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Status disposisi berhasil diperbarui'
+                ]);
+                exit;
+            }
+
             setFlash('success', 'Status disposisi berhasil diperbarui');
-            
-            // Build redirect URL dengan benar
             $redirectBase = $_POST['redirect'] ?? 'disposisi_inbox.php';
             $redirectUrl = buildRedirectUrl($redirectBase, ['success' => 'updated']);
-            
             header("Location: {$redirectUrl}");
             exit;
             break;
@@ -183,12 +276,24 @@ try {
             throw new Exception('Action tidak valid');
     }
     
-} catch (Exception $e) {
+} catch (Exception $e) { // Bisa diganti Throwable untuk PHP 7+ jika ingin menangkap fatal error
+    if ($isAjax) {
+        // 4. PENTING: Bersihkan buffer agar pesan error HTML tidak tercampur JSON
+        ob_end_clean();
+        
+        http_response_code(400); // Bad Request
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+        exit;
+    }
+
     setFlash('error', $e->getMessage());
-    
     $redirectBase = $_POST['redirect'] ?? $_GET['redirect'] ?? 'disposisi_inbox.php';
     $redirectUrl = buildRedirectUrl($redirectBase, ['error' => 'process_failed']);
-    
     header("Location: {$redirectUrl}");
     exit;
 }
+?>

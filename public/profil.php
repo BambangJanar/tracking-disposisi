@@ -9,6 +9,7 @@ require_once __DIR__ . '/../modules/users/users_service.php';
 requireLogin();
 
 $user = getCurrentUser();
+// Ambil data terbaru dari database
 $userData = UsersService::getById($user['id']);
 $pageTitle = 'Profil';
 ?>
@@ -26,15 +27,14 @@ $pageTitle = 'Profil';
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Profile Info Card -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-lg shadow p-6">
                         <div class="text-center">
                             <div class="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
                                 <?= strtoupper(substr($userData['nama_lengkap'], 0, 2)) ?>
                             </div>
-                            <h2 class="text-xl font-bold text-gray-800 mb-1"><?= $userData['nama_lengkap'] ?></h2>
-                            <p class="text-sm text-gray-600 mb-2"><?= $userData['email'] ?></p>
+                            <h2 class="text-xl font-bold text-gray-800 mb-1"><?= htmlspecialchars($userData['nama_lengkap']) ?></h2>
+                            <p class="text-sm text-gray-600 mb-2"><?= htmlspecialchars($userData['email']) ?></p>
                             <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800">
                                 <?= getRoleLabel($userData['nama_role']) ?>
                             </span>
@@ -48,11 +48,11 @@ $pageTitle = 'Profil';
                                     <span class="ml-auto font-medium text-gray-800"><?= formatTanggal($userData['created_at']) ?></span>
                                 </div>
                                 
-                                <?php if ($userData['nama_bagian']): ?>
+                                <?php if (!empty($userData['nama_bagian'])): ?>
                                 <div class="flex items-center text-sm">
                                     <i class="fas fa-building text-gray-400 w-5 mr-2"></i>
                                     <span class="text-gray-600">Bagian:</span>
-                                    <span class="ml-auto font-medium text-gray-800"><?= $userData['nama_bagian'] ?></span>
+                                    <span class="ml-auto font-medium text-gray-800"><?= htmlspecialchars($userData['nama_bagian']) ?></span>
                                 </div>
                                 <?php endif; ?>
                                 
@@ -65,13 +65,11 @@ $pageTitle = 'Profil';
                     </div>
                 </div>
                 
-                <!-- Forms -->
                 <div class="lg:col-span-2 space-y-6">
-                    <!-- Update Profile Form -->
                     <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Profil</h3>
                         
-                        <form method="POST" action="modules/users/users_handler.php">
+                        <form method="POST" action="../modules/users/users_handler.php">
                             <input type="hidden" name="action" value="update_profile">
                             
                             <div class="space-y-4">
@@ -79,7 +77,7 @@ $pageTitle = 'Profil';
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap *</label>
                                     <input type="text" 
                                            name="nama_lengkap" 
-                                           value="<?= $userData['nama_lengkap'] ?>" 
+                                           value="<?= htmlspecialchars($userData['nama_lengkap']) ?>" 
                                            required
                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                 </div>
@@ -88,7 +86,7 @@ $pageTitle = 'Profil';
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                                     <input type="email" 
                                            name="email" 
-                                           value="<?= $userData['email'] ?>" 
+                                           value="<?= htmlspecialchars($userData['email']) ?>" 
                                            required
                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                 </div>
@@ -103,11 +101,10 @@ $pageTitle = 'Profil';
                         </form>
                     </div>
                     
-                    <!-- Change Password Form -->
                     <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Ganti Password</h3>
                         
-                        <form method="POST" action="modules/users/users_handler.php" id="passwordForm">
+                        <form method="POST" action="../modules/users/users_handler.php" id="passwordForm">
                             <input type="hidden" name="action" value="change_password">
                             
                             <div class="space-y-4">
@@ -158,14 +155,14 @@ $pageTitle = 'Profil';
 </div>
 
 <script>
-// Validate password confirmation
+// Validasi Password tanpa SweetAlert
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
     const passwordBaru = document.getElementById('password_baru').value;
     const passwordKonfirmasi = document.getElementById('password_konfirmasi').value;
     
     if (passwordBaru !== passwordKonfirmasi) {
         e.preventDefault();
-        showError('Password baru dan konfirmasi password tidak cocok');
+        alert('Password baru dan konfirmasi password tidak cocok!');
     }
 });
 </script>

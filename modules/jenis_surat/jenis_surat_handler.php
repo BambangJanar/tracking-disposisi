@@ -29,7 +29,8 @@ try {
             logActivity($user['id'], 'tambah_jenis_surat', "Menambah jenis surat: {$data['nama_jenis']}");
             
             setFlash('success', 'Jenis surat berhasil ditambahkan');
-            redirect('../jenis_surat.php?success=added');
+            // Redirect menggunakan BASE_URL agar path absolut dan aman
+            redirect(BASE_URL . '/jenis_surat.php?success=added');
             break;
             
         case 'update':
@@ -47,7 +48,7 @@ try {
             logActivity($user['id'], 'edit_jenis_surat', "Mengedit jenis surat ID: {$id}");
             
             setFlash('success', 'Jenis surat berhasil diperbarui');
-            redirect('../jenis_surat.php?success=updated');
+            redirect(BASE_URL . '/jenis_surat.php?success=updated');
             break;
             
         case 'delete':
@@ -58,7 +59,7 @@ try {
             logActivity($user['id'], 'hapus_jenis_surat', "Menghapus jenis surat ID: {$id}");
             
             setFlash('success', 'Jenis surat berhasil dihapus');
-            redirect('../jenis_surat.php?success=deleted');
+            redirect(BASE_URL . '/jenis_surat.php?success=deleted');
             break;
             
         default:
@@ -67,5 +68,6 @@ try {
     
 } catch (Exception $e) {
     setFlash('error', $e->getMessage());
-    redirect('../jenis_surat.php?error=process_failed');
+    redirect(BASE_URL . '/jenis_surat.php?error=process_failed');
 }
+?>

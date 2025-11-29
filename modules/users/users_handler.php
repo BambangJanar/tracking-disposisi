@@ -24,21 +24,24 @@ try {
                 throw new Exception('Nama dan email harus diisi');
             }
             
-            // Check email uniqueness
+            // Cek apakah email sudah digunakan user lain
             if (UsersService::emailExists($data['email'], $user['id'])) {
                 throw new Exception('Email sudah digunakan oleh user lain');
             }
             
             UsersService::updateProfile($user['id'], $data);
             
-            // Update session
+            // Update data di session agar langsung berubah
             $_SESSION['nama_lengkap'] = $data['nama_lengkap'];
             $_SESSION['email'] = $data['email'];
             
             logActivity($user['id'], 'update_profil', 'Mengupdate profil');
             
             setFlash('success', 'Profil berhasil diperbarui');
-            redirect('../profil.php?success=updated');
+            
+            // PERBAIKAN: Redirect menggunakan BASE_URL
+            header("Location: " . BASE_URL . "/profil.php?success=updated");
+            exit;
             break;
             
         case 'change_password':
@@ -50,15 +53,15 @@ try {
                 throw new Exception('Semua field password harus diisi');
             }
             
-            // Get current user data
+            // Ambil data user saat ini untuk cek password lama
             $currentUser = UsersService::getById($user['id']);
             
-            // Verify old password (plain text as per requirement)
+            // Verifikasi password lama (plain text sesuai request Anda sebelumnya)
             if ($passwordLama !== $currentUser['password']) {
                 throw new Exception('Password lama tidak sesuai');
             }
             
-            // Validate new password
+            // Validasi password baru
             if ($passwordBaru !== $passwordKonfirmasi) {
                 throw new Exception('Password baru dan konfirmasi tidak cocok');
             }
@@ -71,7 +74,10 @@ try {
             logActivity($user['id'], 'ganti_password', 'Mengganti password');
             
             setFlash('success', 'Password berhasil diubah');
-            redirect('../profil.php?success=password_changed');
+            
+            // PERBAIKAN: Redirect menggunakan BASE_URL
+            header("Location: " . BASE_URL . "/profil.php?success=password_changed");
+            exit;
             break;
             
         default:
@@ -80,5 +86,8 @@ try {
     
 } catch (Exception $e) {
     setFlash('error', $e->getMessage());
-    redirect('../profil.php?error=process_failed');
+    // Redirect balik jika error
+    header("Location: " . BASE_URL . "/profil.php?error=process_failed");
+    exit;
 }
+?>
