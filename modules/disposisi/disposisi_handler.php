@@ -13,6 +13,61 @@ requireLogin();
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $user = getCurrentUser();
 
+/**
+ * Build redirect URL dengan path yang benar
+ * Menangani berbagai format input redirect path
+ */
+function buildRedirectUrl($redirectPath, $params = []) {
+    // Normalisasi path
+    $redirectPath = trim($redirectPath);
+    
+    // Parse URL untuk mendapatkan path dan query
+    $parsedUrl = parse_url($redirectPath);
+    $path = $parsedUrl['path'] ?? $redirectPath;
+    
+    // Ambil existing query parameters
+    $existingParams = [];
+    if (isset($parsedUrl['query'])) {
+        parse_str($parsedUrl['query'], $existingParams);
+    }
+    
+    // Merge dengan params baru (params baru override existing)
+    $allParams = array_merge($existingParams, $params);
+    
+    // Deteksi dan normalisasi path
+    // Jika path sudah absolut dengan BASE_URL, gunakan langsung
+    if (strpos($redirectPath, BASE_URL) === 0) {
+        $finalPath = $redirectPath;
+    }
+    // Jika path sudah include '../../public/', gunakan langsung
+    elseif (strpos($path, '../../public/') === 0) {
+        $finalPath = $path;
+    }
+    // Jika path sudah mulai dengan 'public/', tambahkan ../../ saja
+    elseif (strpos($path, 'public/') === 0) {
+        $finalPath = '../../' . $path;
+    }
+    // Jika path adalah BASE_URL relatif yang include /public/
+    elseif (strpos($path, '/public/') !== false) {
+        // Extract dari /public/ ke akhir
+        $publicPos = strpos($path, '/public/');
+        $relativePath = substr($path, $publicPos + 8); // +8 untuk skip '/public/'
+        $finalPath = '../../public/' . $relativePath;
+    }
+    // Jika hanya nama file, tambahkan prefix lengkap
+    else {
+        $filename = basename($path);
+        $finalPath = '../../public/' . $filename;
+    }
+    
+    // Build final URL dengan query string
+    if (!empty($allParams)) {
+        $finalPath .= '?' . http_build_query($allParams);
+    }
+    
+    return $finalPath;
+}
+
 try {
     switch ($action) {
         case 'create':
@@ -61,9 +116,12 @@ try {
             
             setFlash('success', 'Disposisi berhasil dikirim');
             
-            // Redirect based on referrer
-            $redirect = $_POST['redirect'] ?? 'disposisi_outbox.php';
-            redirect("../{$redirect}?success=sent");
+            // Build redirect URL dengan benar
+            $redirectBase = $_POST['redirect_url'] ?? $_POST['redirect'] ?? "surat_detail.php?id={$suratId}";
+            $redirectUrl = buildRedirectUrl($redirectBase, ['success' => 'sent']);
+            
+            header("Location: {$redirectUrl}");
+            exit;
             break;
             
         case 'update_status':
@@ -113,8 +171,12 @@ try {
             
             setFlash('success', 'Status disposisi berhasil diperbarui');
             
-            $redirect = $_POST['redirect'] ?? 'disposisi_inbox.php';
-            redirect("../{$redirect}?success=updated");
+            // Build redirect URL dengan benar
+            $redirectBase = $_POST['redirect'] ?? 'disposisi_inbox.php';
+            $redirectUrl = buildRedirectUrl($redirectBase, ['success' => 'updated']);
+            
+            header("Location: {$redirectUrl}");
+            exit;
             break;
             
         default:
@@ -124,6 +186,9 @@ try {
 } catch (Exception $e) {
     setFlash('error', $e->getMessage());
     
-    $redirect = $_POST['redirect'] ?? $_GET['redirect'] ?? 'disposisi.php';
-    redirect("../{$redirect}?error=process_failed");
+    $redirectBase = $_POST['redirect'] ?? $_GET['redirect'] ?? 'disposisi_inbox.php';
+    $redirectUrl = buildRedirectUrl($redirectBase, ['error' => 'process_failed']);
+    
+    header("Location: {$redirectUrl}");
+    exit;
 }

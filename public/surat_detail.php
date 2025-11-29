@@ -23,6 +23,32 @@ $disposisiHistory = DisposisiService::getHistoryBySurat($suratId);
 $availableUsers = UsersService::getAll($user['id']);
 
 $pageTitle = 'Detail Surat';
+
+// Handle success/error messages
+$successMessage = '';
+$errorMessage = '';
+
+if (isset($_GET['success'])) {
+    switch ($_GET['success']) {
+        case 'sent':
+            $successMessage = 'Disposisi berhasil dikirim';
+            break;
+        case 'updated':
+            $successMessage = 'Disposisi berhasil diupdate';
+            break;
+    }
+}
+
+if (isset($_GET['error'])) {
+    switch ($_GET['error']) {
+        case 'failed':
+            $errorMessage = 'Gagal mengirim disposisi';
+            break;
+        case 'invalid':
+            $errorMessage = 'Data tidak valid';
+            break;
+    }
+}
 ?>
 
 <?php include 'partials/header.php'; ?>
@@ -32,6 +58,31 @@ $pageTitle = 'Detail Surat';
     
     <div class="flex-1 lg:ml-64">
         <main class="p-6 lg:p-8">
+            <!-- Success/Error Messages -->
+            <?php if ($successMessage): ?>
+            <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span><?= $successMessage ?></span>
+                </div>
+                <button onclick="this.parentElement.remove()" class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <?php endif; ?>
+            
+            <?php if ($errorMessage): ?>
+            <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span><?= $errorMessage ?></span>
+                </div>
+                <button onclick="this.parentElement.remove()" class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <?php endif; ?>
+            
             <!-- Header -->
             <div class="mb-6 flex items-center justify-between">
                 <div>
@@ -289,10 +340,10 @@ $pageTitle = 'Detail Surat';
                 <h3 class="text-lg font-semibold text-gray-800">Disposisi Surat</h3>
             </div>
             
-            <form method="POST" action="modules/disposisi/disposisi_handler.php">
+            <form id="disposisiForm" method="POST" action="../modules/disposisi/disposisi_handler.php">
                 <input type="hidden" name="action" value="create">
                 <input type="hidden" name="id_surat" value="<?= $suratId ?>">
-                <input type="hidden" name="redirect" value="surat_detail.php?id=<?= $suratId ?>">
+                <input type="hidden" name="redirect_url" value="<?= BASE_URL ?>/public/surat_detail.php?id=<?= $suratId ?>">
                 
                 <div class="px-6 py-4 space-y-4">
                     <!-- Tujuan User -->
@@ -339,11 +390,55 @@ function openDisposisiModal() {
 
 function closeDisposisiModal() {
     document.getElementById('disposisiModal').classList.add('hidden');
+    // Reset form
+    document.getElementById('disposisiForm').reset();
 }
 
+// Form validation
+document.getElementById('disposisiForm').addEventListener('submit', function(e) {
+    const keUserId = document.querySelector('[name="ke_user_id"]').value;
+    
+    if (!keUserId) {
+        e.preventDefault();
+        alert('Pilih user tujuan disposisi');
+        return false;
+    }
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...';
+    
+    // If submission fails, restore button
+    setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }, 5000);
+});
+
+// Close modal on escape
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeDisposisiModal();
     }
 });
+
+// Click outside modal to close
+document.getElementById('disposisiModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDisposisiModal();
+    }
+});
+
+// Auto-hide success/error messages after 5 seconds
+setTimeout(() => {
+    document.querySelectorAll('[role="alert"]').forEach(alert => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+    });
+}, 5000);
 </script>
+
+<?php include 'partials/footer.php'; ?>

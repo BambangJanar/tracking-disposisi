@@ -9,25 +9,25 @@ require_once __DIR__ . '/../modules/disposisi/disposisi_service.php';
 
 requireLogin();
 
-$user = getCurrentUser();
-$pageTitle = 'Disposisi Masuk';
+ $user = getCurrentUser();
+ $pageTitle = 'Disposisi Masuk';
 
 // Get filters
-$filters = [
+ $filters = [
     'ke_user_id' => $user['id'],
     'status_disposisi' => $_GET['status'] ?? '',
     'search' => $_GET['search'] ?? ''
 ];
 
 // Pagination
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$perPage = 10;
-$offset = ($page - 1) * $perPage;
+ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+ $perPage = 10;
+ $offset = ($page - 1) * $perPage;
 
-$totalDisposisi = DisposisiService::count($filters);
-$pagination = new Pagination($totalDisposisi, $perPage, $page);
+ $totalDisposisi = DisposisiService::count($filters);
+ $pagination = new Pagination($totalDisposisi, $perPage, $page);
 
-$disposisiList = DisposisiService::getAll($filters, $perPage, $offset);
+ $disposisiList = DisposisiService::getAll($filters, $perPage, $offset);
 ?>
 
 <?php include 'partials/header.php'; ?>
@@ -165,7 +165,7 @@ $disposisiList = DisposisiService::getAll($filters, $perPage, $offset);
                 <h3 class="text-lg font-semibold text-gray-800">Update Status Disposisi</h3>
             </div>
             
-            <form method="POST" action="modules/disposisi/disposisi_handler.php">
+            <form id="updateDisposisiForm" method="POST">
                 <input type="hidden" name="action" value="update_status">
                 <input type="hidden" name="id" id="disposisiId">
                 <input type="hidden" name="redirect" value="disposisi_inbox.php">
@@ -215,12 +215,14 @@ $disposisiList = DisposisiService::getAll($filters, $perPage, $offset);
 </div>
 
 <script>
+// Set correct path untuk disposisi handler
+const disposisiHandlerPath = '../modules/disposisi/disposisi_handler.php';
+
 function openUpdateModal(disposisi) {
     document.getElementById('disposisiId').value = disposisi.id;
     document.getElementById('modalNomorAgenda').textContent = disposisi.nomor_agenda;
     document.getElementById('modalPerihal').textContent = disposisi.perihal;
     
-    // Set current status as default
     const statusSelect = document.getElementById('statusSelect');
     if (disposisi.status_disposisi === 'dikirim') {
         statusSelect.value = 'diterima';
@@ -230,6 +232,8 @@ function openUpdateModal(disposisi) {
         statusSelect.value = 'selesai';
     }
     
+    // Set form action dengan path yang benar
+    document.getElementById('updateDisposisiForm').action = disposisiHandlerPath;
     document.getElementById('updateModal').classList.remove('hidden');
 }
 

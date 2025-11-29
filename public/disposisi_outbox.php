@@ -9,23 +9,23 @@ require_once __DIR__ . '/../modules/disposisi/disposisi_service.php';
 
 requireLogin();
 
-$user = getCurrentUser();
-$pageTitle = 'Disposisi Keluar';
+ $user = getCurrentUser();
+ $pageTitle = 'Disposisi Keluar';
 
-$filters = [
+ $filters = [
     'dari_user_id' => $user['id'],
     'status_disposisi' => $_GET['status'] ?? '',
     'search' => $_GET['search'] ?? ''
 ];
 
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$perPage = 10;
-$offset = ($page - 1) * $perPage;
+ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+ $perPage = 10;
+ $offset = ($page - 1) * $perPage;
 
-$totalDisposisi = DisposisiService::count($filters);
-$pagination = new Pagination($totalDisposisi, $perPage, $page);
+ $totalDisposisi = DisposisiService::count($filters);
+ $pagination = new Pagination($totalDisposisi, $perPage, $page);
 
-$disposisiList = DisposisiService::getAll($filters, $perPage, $offset);
+ $disposisiList = DisposisiService::getAll($filters, $perPage, $offset);
 ?>
 
 <?php include 'partials/header.php'; ?>

@@ -184,6 +184,7 @@ $jenisSuratList = JenisSuratService::getAll();
     </div>
 </div>
 
+<!-- Modal Add/Edit Surat -->
 <div id="suratModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -191,7 +192,7 @@ $jenisSuratList = JenisSuratService::getAll();
                 <h3 id="modalTitle" class="text-lg font-semibold text-gray-800">Tambah Surat</h3>
             </div>
             
-            <form id="suratForm" method="POST" enctype="multipart/form-data" action="<?php echo BASE_URL; ?>/../modules/surat/surat_handler.php">
+            <form id="suratForm" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" id="formAction" value="create">
                 <input type="hidden" name="id" id="suratId">
                 
@@ -210,18 +211,20 @@ $jenisSuratList = JenisSuratService::getAll();
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Surat *</label>
                             <input type="text" name="nomor_surat" id="nomor_surat" required 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Contoh: 123/PEM/XI/2025">
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Surat *</label>
                             <input type="date" name="tanggal_surat" id="tanggal_surat" required 
+                                   value="<?= date('Y-m-d') ?>"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Diterima (opsional)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Diterima</label>
                         <input type="date" name="tanggal_diterima" id="tanggal_diterima" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
@@ -230,34 +233,38 @@ $jenisSuratList = JenisSuratService::getAll();
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Dari Instansi</label>
                             <input type="text" name="dari_instansi" id="dari_instansi" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Nama instansi pengirim">
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Ke Instansi</label>
                             <input type="text" name="ke_instansi" id="ke_instansi" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Nama instansi tujuan">
                         </div>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Surat *</label>
                         <textarea name="alamat_surat" id="alamat_surat" required rows="2"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                  placeholder="Alamat lengkap instansi"></textarea>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Perihal *</label>
                         <textarea name="perihal" id="perihal" required rows="3"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                  placeholder="Isi perihal surat"></textarea>
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Lampiran File (PDF, JPG, PNG - Max 5MB)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Lampiran File</label>
                         <input type="file" name="lampiran_file" id="lampiran_file" 
                                accept=".pdf,.jpg,.jpeg,.png"
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        <p class="text-xs text-gray-500 mt-1">File saat ini: <span id="currentFile">-</span></p>
+                        <p class="text-xs text-gray-500 mt-1">Format: PDF, JPG, PNG (Max 5MB). File saat ini: <span id="currentFile">-</span></p>
                     </div>
                 </div>
                 
@@ -268,7 +275,7 @@ $jenisSuratList = JenisSuratService::getAll();
                     </button>
                     <button type="submit" 
                             class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
-                        Simpan
+                        <i class="fas fa-save mr-2"></i>Simpan
                     </button>
                 </div>
             </form>
@@ -277,13 +284,20 @@ $jenisSuratList = JenisSuratService::getAll();
 </div>
 
 <script>
+// Get handler path
+const handlerPath = '<?= dirname($_SERVER['PHP_SELF']) ?>/../modules/surat/surat_handler.php';
+
 function openAddModal() {
     document.getElementById('modalTitle').textContent = 'Tambah Surat';
     document.getElementById('formAction').value = 'create';
     document.getElementById('suratForm').reset();
     document.getElementById('suratId').value = '';
     document.getElementById('currentFile').textContent = '-';
+    document.getElementById('tanggal_surat').value = '<?= date('Y-m-d') ?>';
     document.getElementById('suratModal').classList.remove('hidden');
+    
+    // Set form action
+    document.getElementById('suratForm').action = handlerPath;
 }
 
 function openEditModal(surat) {
@@ -300,62 +314,118 @@ function openEditModal(surat) {
     document.getElementById('perihal').value = surat.perihal;
     document.getElementById('currentFile').textContent = surat.lampiran_file || '-';
     document.getElementById('suratModal').classList.remove('hidden');
+    
+    // Set form action
+    document.getElementById('suratForm').action = handlerPath;
 }
 
 function closeModal() {
     document.getElementById('suratModal').classList.add('hidden');
 }
 
-// PERBAIKAN: action Javascript juga diarahkan ke ../modules/surat/surat_handler.php
 function arsipkanSurat(id) {
     confirmAction('Arsipkan surat ini?', function() {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '../modules/surat/surat_handler.php'; // Updated path
-        
-        const actionInput = document.createElement('input');
-        actionInput.type = 'hidden';
-        actionInput.name = 'action';
-        actionInput.value = 'arsipkan';
-        
-        const idInput = document.createElement('input');
-        idInput.type = 'hidden';
-        idInput.name = 'id';
-        idInput.value = id;
-        
-        form.appendChild(actionInput);
-        form.appendChild(idInput);
-        document.body.appendChild(form);
-        form.submit();
+        submitAction('arsipkan', id);
     });
 }
 
 function deleteSurat(id) {
     confirmDelete(function() {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '../modules/surat/surat_handler.php'; // Updated path
-        
-        const actionInput = document.createElement('input');
-        actionInput.type = 'hidden';
-        actionInput.name = 'action';
-        actionInput.value = 'delete';
-        
-        const idInput = document.createElement('input');
-        idInput.type = 'hidden';
-        idInput.name = 'id';
-        idInput.value = id;
-        
-        form.appendChild(actionInput);
-        form.appendChild(idInput);
-        document.body.appendChild(form);
-        form.submit();
+        submitAction('delete', id);
     }, 'Surat ini');
 }
 
+function submitAction(action, id) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = handlerPath;
+    
+    const actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'action';
+    actionInput.value = action;
+    
+    const idInput = document.createElement('input');
+    idInput.type = 'hidden';
+    idInput.name = 'id';
+    idInput.value = id;
+    
+    form.appendChild(actionInput);
+    form.appendChild(idInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Form validation before submit
+document.getElementById('suratForm').addEventListener('submit', function(e) {
+    const jenisId = document.getElementById('id_jenis').value;
+    const nomorSurat = document.getElementById('nomor_surat').value.trim();
+    const tanggalSurat = document.getElementById('tanggal_surat').value;
+    const alamatSurat = document.getElementById('alamat_surat').value.trim();
+    const perihal = document.getElementById('perihal').value.trim();
+    
+    if (!jenisId) {
+        e.preventDefault();
+        showError('Jenis surat harus dipilih');
+        return false;
+    }
+    
+    if (!nomorSurat) {
+        e.preventDefault();
+        showError('Nomor surat harus diisi');
+        return false;
+    }
+    
+    if (!tanggalSurat) {
+        e.preventDefault();
+        showError('Tanggal surat harus diisi');
+        return false;
+    }
+    
+    if (!alamatSurat) {
+        e.preventDefault();
+        showError('Alamat surat harus diisi');
+        return false;
+    }
+    
+    if (!perihal) {
+        e.preventDefault();
+        showError('Perihal harus diisi');
+        return false;
+    }
+    
+    // Validate file if present
+    const fileInput = document.getElementById('lampiran_file');
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        
+        if (!allowedTypes.includes(file.type)) {
+            e.preventDefault();
+            showError('Format file harus PDF, JPG, atau PNG');
+            return false;
+        }
+        
+        if (file.size > maxSize) {
+            e.preventDefault();
+            showError('Ukuran file maksimal 5MB');
+            return false;
+        }
+    }
+    
+    // Show loading
+    showLoading('Menyimpan data...');
+    return true;
+});
+
+// Close modal on escape
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeModal();
     }
 });
+
+// Log untuk debugging
+console.log('Handler path:', handlerPath);
 </script>

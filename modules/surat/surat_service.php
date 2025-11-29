@@ -137,6 +137,8 @@ class SuratService {
     
     // Create new surat
     public static function create($data) {
+        error_log("SuratService::create called with data: " . print_r($data, true));
+        
         $query = "INSERT INTO surat (
                     id_jenis, 
                     nomor_agenda, 
@@ -157,9 +159,9 @@ class SuratService {
             $data['nomor_agenda'],
             $data['nomor_surat'],
             $data['tanggal_surat'],
-            $data['tanggal_diterima'] ?? null,
-            $data['dari_instansi'] ?? null,
-            $data['ke_instansi'] ?? null,
+            $data['tanggal_diterima'],
+            $data['dari_instansi'],
+            $data['ke_instansi'],
             $data['alamat_surat'],
             $data['perihal'],
             $data['lampiran_file'] ?? null,
@@ -167,11 +169,25 @@ class SuratService {
             $data['dibuat_oleh']
         ];
         
-        // 12 parameter -> 12 karakter type
-        $types = 'isssssssssis';
+        error_log("Query: " . $query);
+        error_log("Params: " . print_r($params, true));
         
-        $result = dbExecute($query, $params, $types);
-        return $result['insert_id'] ?? null;
+        // 12 parameters: i=int, s=string
+        // id_jenis(i), nomor_agenda(s), nomor_surat(s), tanggal_surat(s), tanggal_diterima(s),
+        // dari_instansi(s), ke_instansi(s), alamat_surat(s), perihal(s), lampiran_file(s),
+        // status_surat(s), dibuat_oleh(i)
+        $types = 'issssssssssi';
+        
+        error_log("Types: " . $types);
+        
+        try {
+            $result = dbExecute($query, $params, $types);
+            error_log("Insert result: " . print_r($result, true));
+            return $result['insert_id'] ?? null;
+        } catch (Exception $e) {
+            error_log("Error in SuratService::create: " . $e->getMessage());
+            throw $e;
+        }
     }
     
     // Update surat
@@ -193,9 +209,9 @@ class SuratService {
             $data['id_jenis'],
             $data['nomor_surat'],
             $data['tanggal_surat'],
-            $data['tanggal_diterima'] ?? null,
-            $data['dari_instansi'] ?? null,
-            $data['ke_instansi'] ?? null,
+            $data['tanggal_diterima'],
+            $data['dari_instansi'],
+            $data['ke_instansi'],
             $data['alamat_surat'],
             $data['perihal'],
             $data['lampiran_file'],
@@ -203,7 +219,7 @@ class SuratService {
             $id
         ];
         
-        // 11 parameter -> 11 type
+        // 11 parameters
         $types = 'isssssssssi';
         
         return dbExecute($query, $params, $types);
