@@ -13,13 +13,14 @@ use Dompdf\Options;
 requireLogin();
 
 $user = getCurrentUser();
-
-// Get date filters
 $tanggalDari = $_GET['tanggal_dari'] ?? date('Y-m-01');
 $tanggalSampai = $_GET['tanggal_sampai'] ?? date('Y-m-d');
 
+// Load settings dinamis
+$settings = getAllSettings();
+
 $filters = [
-    'id_jenis' => 1, // Surat Masuk
+    'id_jenis' => 1,
     'tanggal_dari' => $tanggalDari,
     'tanggal_sampai' => $tanggalSampai,
     'include_arsip' => true
@@ -28,7 +29,6 @@ $filters = [
 $suratList = SuratService::getAll($filters, 1000, 0);
 $totalSurat = count($suratList);
 
-// Group by status
 $byStatus = [];
 foreach ($suratList as $surat) {
     $status = $surat['status_surat'];
@@ -38,276 +38,158 @@ foreach ($suratList as $surat) {
     $byStatus[$status]++;
 }
 
-// ============================================================================
-// HTML TEMPLATE
-// ============================================================================
 ob_start();
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Surat Masuk</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        body { font-family: Arial, sans-serif; font-size: 11pt; }
         
-        body {
-            font-family: 'Arial', sans-serif;
-            font-size: 10pt;
-            line-height: 1.4;
-            color: #333;
-        }
-        
-        .header {
+        .kop-surat {
             text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #2563eb;
-        }
-        
-        .header h1 {
-            font-size: 18pt;
-            color: #1e40af;
-            margin-bottom: 5px;
-        }
-        
-        .header h2 {
-            font-size: 14pt;
-            color: #374151;
-            font-weight: normal;
-            margin-bottom: 3px;
-        }
-        
-        .header p {
-            font-size: 9pt;
-            color: #6b7280;
-        }
-        
-        .info-box {
-            background: #eff6ff;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            border-left: 4px solid #2563eb;
-        }
-        
-        .info-box p {
-            margin: 3px 0;
-            font-size: 9pt;
-        }
-        
-        .stats-grid {
-            display: table;
-            width: 100%;
+            border-bottom: 3px double #000;
+            padding-bottom: 10px;
             margin-bottom: 20px;
         }
-        
-        .stat-row {
-            display: table-row;
-        }
-        
-        .stat-cell {
-            display: table-cell;
-            width: 25%;
-            padding: 10px;
-            text-align: center;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .stat-cell .label {
-            font-size: 8pt;
-            color: #6b7280;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-        
-        .stat-cell .value {
-            font-size: 18pt;
-            font-weight: bold;
-            color: #1f2937;
-        }
-        
-        .stat-cell.blue .value { color: #2563eb; }
-        .stat-cell.yellow .value { color: #d97706; }
-        .stat-cell.green .value { color: #059669; }
-        .stat-cell.red .value { color: #dc2626; }
-        
-        table {
+        .kop-surat table { width: 100%; }
+        .kop-surat .logo-cell { width: 80px; text-align: center; vertical-align: middle; }
+        .kop-surat .text-cell { text-align: center; vertical-align: middle; }
+        .kop-surat img { max-height: 70px; max-width: 70px; }
+        .kop-surat h2 { margin: 0; font-size: 14pt; text-transform: uppercase; }
+        .kop-surat p { margin: 2px 0; font-size: 10pt; }
+
+        .judul { text-align: center; margin-bottom: 20px; }
+        .judul h3 { margin: 0; text-decoration: underline; font-size: 12pt; }
+        .judul p { margin: 5px 0; font-size: 10pt; }
+
+        table.data {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            font-size: 10pt;
         }
-        
-        thead {
-            background: #1e40af;
-            color: white;
+        table.data th, table.data td {
+            border: 1px solid #000;
+            padding: 5px;
+            vertical-align: top;
         }
-        
-        thead th {
-            padding: 8px 6px;
-            text-align: left;
-            font-size: 8pt;
-            font-weight: 600;
-            text-transform: uppercase;
-            border: 1px solid #1e3a8a;
+        table.data th {
+            background-color: #eee;
+            text-align: center;
+            font-weight: bold;
         }
-        
-        tbody td {
-            padding: 6px;
-            border: 1px solid #e5e7eb;
-            font-size: 8pt;
+
+        .ttd-wrapper {
+            width: 100%;
+            margin-top: 40px;
+            display: table;
         }
-        
-        tbody tr:nth-child(even) {
-            background: #f9fafb;
+        .ttd-box {
+            float: right;
+            width: 40%;
+            text-align: center;
         }
-        
-        tbody tr:hover {
-            background: #f3f4f6;
+        .ttd-nama {
+            margin-top: 70px;
+            font-weight: bold;
+            text-decoration: underline;
         }
-        
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 7pt;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        .badge.baru { background: #dbeafe; color: #1e40af; }
-        .badge.proses { background: #fef3c7; color: #92400e; }
-        .badge.disetujui { background: #d1fae5; color: #065f46; }
-        .badge.ditolak { background: #fee2e2; color: #991b1b; }
-        .badge.arsip { background: #f3f4f6; color: #374151; }
-        
-        .footer {
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 2px solid #e5e7eb;
-            font-size: 8pt;
-            color: #6b7280;
-        }
-        
-        .footer .signature {
-            margin-top: 50px;
-            text-align: right;
-        }
-        
-        .page-break {
-            page-break-after: always;
-        }
-        
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .font-bold { font-weight: bold; }
-        .text-sm { font-size: 9pt; }
-        .mb-2 { margin-bottom: 8px; }
     </style>
 </head>
 <body>
-    <!-- HEADER -->
-    <div class="header">
-        <h1><?= APP_NAME ?></h1>
-        <h2>LAPORAN SURAT MASUK</h2>
-        <p>Periode: <?= formatTanggal($tanggalDari) ?> - <?= formatTanggal($tanggalSampai) ?></p>
+
+    <div class="kop-surat">
+        <table>
+            <tr>
+                <?php if (!empty($settings['instansi_logo'])): ?>
+                <td class="logo-cell">
+                    <img src="<?= SETTINGS_UPLOAD_DIR . $settings['instansi_logo'] ?>" alt="Logo">
+                </td>
+                <?php endif; ?>
+                <td class="text-cell">
+                    <h2><?= nl2br(htmlspecialchars($settings['instansi_nama'])) ?></h2>
+                    <?php if (!empty($settings['instansi_alamat'])): ?>
+                    <p><?= nl2br(htmlspecialchars($settings['instansi_alamat'])) ?></p>
+                    <?php endif; ?>
+                    <?php if (!empty($settings['instansi_telepon']) || !empty($settings['instansi_email'])): ?>
+                    <p>
+                        <?php if (!empty($settings['instansi_telepon'])): ?>
+                        Telp: <?= htmlspecialchars($settings['instansi_telepon']) ?>
+                        <?php endif; ?>
+                        <?php if (!empty($settings['instansi_email'])): ?>
+                        | Email: <?= htmlspecialchars($settings['instansi_email']) ?>
+                        <?php endif; ?>
+                    </p>
+                    <?php endif; ?>
+                </td>
+                <?php if (!empty($settings['instansi_logo'])): ?>
+                <td class="logo-cell"></td>
+                <?php endif; ?>
+            </tr>
+        </table>
     </div>
-    
-    <!-- INFO BOX -->
-    <div class="info-box">
-        <p><strong>Dicetak oleh:</strong> <?= htmlspecialchars($user['nama_lengkap']) ?> (<?= getRoleLabel($user['role']) ?>)</p>
-        <p><strong>Tanggal cetak:</strong> <?= formatDateTime(date('Y-m-d H:i:s')) ?></p>
-        <p><strong>Total data:</strong> <?= $totalSurat ?> surat</p>
+
+    <div class="judul">
+        <h3>LAPORAN SURAT MASUK</h3>
+        <p>Periode: <?= date('d-m-Y', strtotime($tanggalDari)) ?> s/d <?= date('d-m-Y', strtotime($tanggalSampai)) ?></p>
     </div>
-    
-    <!-- STATISTICS -->
-    <div class="stats-grid">
-        <div class="stat-row">
-            <div class="stat-cell">
-                <div class="label">Total Surat</div>
-                <div class="value"><?= $totalSurat ?></div>
-            </div>
-            <div class="stat-cell blue">
-                <div class="label">Baru</div>
-                <div class="value"><?= $byStatus['baru'] ?? 0 ?></div>
-            </div>
-            <div class="stat-cell yellow">
-                <div class="label">Diproses</div>
-                <div class="value"><?= $byStatus['proses'] ?? 0 ?></div>
-            </div>
-            <div class="stat-cell green">
-                <div class="label">Selesai</div>
-                <div class="value"><?= $byStatus['disetujui'] ?? 0 ?></div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- TABLE -->
-    <table>
+
+    <table class="data">
         <thead>
             <tr>
-                <th style="width: 5%;">NO</th>
-                <th style="width: 15%;">NO. AGENDA</th>
-                <th style="width: 20%;">DARI INSTANSI</th>
-                <th style="width: 30%;">PERIHAL</th>
-                <th style="width: 12%;">TGL SURAT</th>
-                <th style="width: 12%;">TGL DITERIMA</th>
-                <th style="width: 6%;">STATUS</th>
+                <th width="5%">No</th>
+                <th width="15%">No. Agenda</th>
+                <th width="20%">Dari Instansi</th>
+                <th width="30%">Perihal</th>
+                <th width="15%">Tgl Surat</th>
+                <th width="15%">Status</th>
             </tr>
         </thead>
         <tbody>
-            <?php if (empty($suratList)): ?>
-            <tr>
-                <td colspan="7" class="text-center">Tidak ada data surat masuk untuk periode ini</td>
-            </tr>
-            <?php else: ?>
-                <?php foreach ($suratList as $index => $surat): ?>
+            <?php 
+            if (!empty($suratList)): 
+                foreach($suratList as $no => $row):
+            ?>
                 <tr>
-                    <td class="text-center"><?= $index + 1 ?></td>
-                    <td class="font-bold"><?= htmlspecialchars($surat['nomor_agenda']) ?></td>
-                    <td><?= htmlspecialchars($surat['dari_instansi'] ?? '-') ?></td>
-                    <td><?= htmlspecialchars(truncate($surat['perihal'], 80)) ?></td>
-                    <td class="text-center"><?= formatTanggal($surat['tanggal_surat']) ?></td>
-                    <td class="text-center"><?= formatTanggal($surat['tanggal_diterima']) ?></td>
-                    <td class="text-center">
-                        <span class="badge <?= $surat['status_surat'] ?>">
-                            <?= ucfirst($surat['status_surat']) ?>
-                        </span>
-                    </td>
+                    <td style="text-align: center;"><?= $no + 1 ?></td>
+                    <td><b><?= htmlspecialchars($row['nomor_agenda']) ?></b></td>
+                    <td><?= htmlspecialchars($row['dari_instansi'] ?? '-') ?></td>
+                    <td><?= htmlspecialchars(truncate($row['perihal'], 80)) ?></td>
+                    <td style="text-align: center;"><?= date('d/m/Y', strtotime($row['tanggal_surat'])) ?></td>
+                    <td style="text-align: center;"><?= ucfirst($row['status_surat']) ?></td>
                 </tr>
-                <?php endforeach; ?>
+            <?php 
+                endforeach; 
+            else: 
+            ?>
+                <tr>
+                    <td colspan="6" style="text-align: center;">Tidak ada data surat masuk pada periode ini.</td>
+                </tr>
             <?php endif; ?>
         </tbody>
     </table>
-    
-    <!-- FOOTER -->
-    <div class="footer">
-        <p class="mb-2"><strong>Catatan:</strong></p>
-        <p>- Laporan ini dibuat secara otomatis oleh sistem</p>
-        <p>- Data yang ditampilkan sesuai dengan filter periode yang dipilih</p>
-        
-        <div class="signature">
-            <p>Banjarmasin, <?= formatTanggal(date('Y-m-d')) ?></p>
-            <p style="margin-top: 60px;">
-                <strong><?= htmlspecialchars($user['nama_lengkap']) ?></strong><br>
-                <?= getRoleLabel($user['role']) ?>
-            </p>
+
+    <div class="ttd-wrapper">
+        <div class="ttd-box">
+            <p><?= htmlspecialchars($settings['ttd_kota']) ?>, <?= date('d F Y') ?></p>
+            <p><?= htmlspecialchars($settings['ttd_jabatan']) ?></p> 
+            
+            <div class="ttd-nama">
+                <?= htmlspecialchars($settings['ttd_nama_penandatangan']) ?>
+            </div>
+            <?php if (!empty($settings['ttd_nip'])): ?>
+            <div>NIP. <?= htmlspecialchars($settings['ttd_nip']) ?></div>
+            <?php endif; ?>
         </div>
     </div>
+
 </body>
 </html>
 <?php
 $html = ob_get_clean();
 
-// ============================================================================
-// GENERATE PDF
-// ============================================================================
 $options = new Options();
 $options->set('isHtml5ParserEnabled', true);
 $options->set('isRemoteEnabled', true);
@@ -318,6 +200,5 @@ $dompdf->loadHtml($html);
 $dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
 
-// Output PDF (inline = tampil di browser, attachment = download)
 $filename = 'Laporan_Surat_Masuk_' . date('Ymd_His') . '.pdf';
-$dompdf->stream($filename, ["Attachment" => false]); // false = tampil di browser
+$dompdf->stream($filename, ["Attachment" => false]);

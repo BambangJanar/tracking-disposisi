@@ -3,13 +3,21 @@
 if (!defined('APP_NAME')) {
     require_once __DIR__ . '/../../config/config.php';
 }
+
+// Load settings dinamis
+$appName = getSetting('app_name', APP_NAME);
+$appFavicon = getSetting('app_favicon');
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $pageTitle ?? 'Dashboard' ?> - <?= APP_NAME ?></title>
+    <title><?= $pageTitle ?? 'Dashboard' ?> - <?= htmlspecialchars($appName) ?></title>
+    
+    <?php if ($appFavicon): ?>
+    <link rel="icon" href="<?= SETTINGS_UPLOAD_URL . htmlspecialchars($appFavicon) ?>" type="image/x-icon">
+    <?php endif; ?>
     
     <!-- Tailwind CSS via Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>

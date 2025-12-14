@@ -1,11 +1,11 @@
 <?php
 // public/laporan/laporan_disposisi_pdf.php
+
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/helpers.php';
-require_once __DIR__ . '/../../modules/disposisi/disposisi_service.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -13,9 +13,16 @@ use Dompdf\Options;
 requireLogin();
 
 $user = getCurrentUser();
+
+// --- PERBAIKAN ERROR DATABASE DI SINI ---
+// Kita harus memanggil fungsi getConnection() untuk mendapatkan objek koneksi
+$conn = getConnection(); 
+
+// Ambil filter tanggal
 $tanggalDari = $_GET['tanggal_dari'] ?? date('Y-m-01');
 $tanggalSampai = $_GET['tanggal_sampai'] ?? date('Y-m-d');
 
+// Query Data Disposisi
 $query = "SELECT d.*, 
                  s.nomor_agenda, s.nomor_surat, s.perihal,
                  js.nama_jenis,
@@ -27,31 +34,15 @@ $query = "SELECT d.*,
           JOIN users u1 ON d.dari_user_id = u1.id
           JOIN users u2 ON d.ke_user_id = u2.id
           WHERE DATE(d.tanggal_disposisi) BETWEEN ? AND ?
-          ORDER BY d.tanggal_disposisi DESC";
+          ORDER BY d.tanggal_disposisi ASC";
 
-$disposisiList = dbSelect($query, [$tanggalDari, $tanggalSampai], 'ss');
-$totalDisposisi = count($disposisiList);
+// Menggunakan Prepared Statement agar lebih aman
+$stmt = $conn->prepare($query);
+$stmt->bind_param("ss", $tanggalDari, $tanggalSampai);
+$stmt->execute();
+$result = $stmt->get_result();
 
-$byStatus = [];
-foreach ($disposisiList as $disp) {
-    $status = $disp['status_disposisi'];
-    if (!isset($byStatus[$status])) $byStatus[$status] = 0;
-    $byStatus[$status]++;
-}
-
-$totalResponseTime = 0;
-$respondedCount = 0;
-foreach ($disposisiList as $disp) {
-    if ($disp['tanggal_respon']) {
-        $sent = strtotime($disp['tanggal_disposisi']);
-        $responded = strtotime($disp['tanggal_respon']);
-        $diff = $responded - $sent;
-        $totalResponseTime += $diff;
-        $respondedCount++;
-    }
-}
-$avgResponseHours = $respondedCount > 0 ? round($totalResponseTime / $respondedCount / 3600, 1) : 0;
-
+// Mulai buffering HTML untuk PDF
 ob_start();
 ?>
 <!DOCTYPE html>
@@ -60,130 +51,132 @@ ob_start();
     <meta charset="UTF-8">
     <title>Laporan Disposisi</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.4; color: #333; }
-        .header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #ea580c; }
-        .header h1 { font-size: 18pt; color: #c2410c; margin-bottom: 5px; }
-        .header h2 { font-size: 14pt; color: #374151; font-weight: normal; margin-bottom: 3px; }
-        .header p { font-size: 9pt; color: #6b7280; }
-        .info-box { background: #fed7aa; padding: 10px; border-radius: 5px; margin-bottom: 15px; border-left: 4px solid #ea580c; }
-        .info-box p { margin: 3px 0; font-size: 9pt; }
-        .stats-grid { display: table; width: 100%; margin-bottom: 20px; }
-        .stat-row { display: table-row; }
-        .stat-cell { display: table-cell; width: 20%; padding: 10px; text-align: center; background: #f9fafb; border: 1px solid #e5e7eb; }
-        .stat-cell .label { font-size: 8pt; color: #6b7280; text-transform: uppercase; margin-bottom: 5px; }
-        .stat-cell .value { font-size: 16pt; font-weight: bold; color: #1f2937; }
-        .stat-cell.blue .value { color: #2563eb; }
-        .stat-cell.yellow .value { color: #d97706; }
-        .stat-cell.green .value { color: #059669; }
-        .stat-cell.purple .value { color: #7c3aed; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        thead { background: #c2410c; color: white; }
-        thead th { padding: 7px 5px; text-align: left; font-size: 7pt; font-weight: 600; text-transform: uppercase; border: 1px solid #9a3412; }
-        tbody td { padding: 5px; border: 1px solid #e5e7eb; font-size: 7pt; }
-        tbody tr:nth-child(even) { background: #f9fafb; }
-        .badge { display: inline-block; padding: 2px 6px; border-radius: 10px; font-size: 6pt; font-weight: 600; text-transform: uppercase; }
-        .badge.dikirim { background: #dbeafe; color: #1e40af; }
-        .badge.diterima { background: #e0e7ff; color: #3730a3; }
-        .badge.diproses { background: #fef3c7; color: #92400e; }
-        .badge.selesai { background: #d1fae5; color: #065f46; }
-        .badge.ditolak { background: #fee2e2; color: #991b1b; }
-        .footer { margin-top: 30px; padding-top: 15px; border-top: 2px solid #e5e7eb; font-size: 8pt; color: #6b7280; }
-        .footer .signature { margin-top: 50px; text-align: right; }
-        .text-center { text-align: center; }
-        .font-bold { font-weight: bold; }
-        .mb-2 { margin-bottom: 8px; }
+        body { font-family: Arial, sans-serif; font-size: 11pt; }
+        
+        /* Layout Kop Surat */
+        .kop-surat {
+            text-align: center;
+            border-bottom: 3px double #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .kop-surat h2 { margin: 0; font-size: 16pt; text-transform: uppercase; }
+        .kop-surat p { margin: 2px 0; font-size: 10pt; }
+
+        /* Judul Laporan */
+        .judul { text-align: center; margin-bottom: 20px; }
+        .judul h3 { margin: 0; text-decoration: underline; font-size: 12pt; }
+        .judul p { margin: 5px 0; font-size: 10pt; }
+
+        /* Tabel Sederhana */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+        }
+        table th, table td {
+            border: 1px solid #000;
+            padding: 5px;
+            vertical-align: top;
+        }
+        table th {
+            background-color: #eee; /* Sedikit abu-abu biar header jelas, tapi tetap BW */
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Tanda Tangan */
+        .ttd-wrapper {
+            width: 100%;
+            margin-top: 40px;
+            display: table; /* Hack layout untuk dompdf */
+        }
+        .ttd-box {
+            float: right;
+            width: 40%;
+            text-align: center;
+        }
+        .ttd-nama {
+            margin-top: 70px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1><?= APP_NAME ?></h1>
-        <h2>LAPORAN DISPOSISI SURAT</h2>
-        <p>Periode: <?= formatTanggal($tanggalDari) ?> - <?= formatTanggal($tanggalSampai) ?></p>
+
+    <div class="kop-surat">
+        <h2>PEMERINTAH KABUPATEN CONTOH</h2>
+        <h2>DINAS CONTOH APLIKASI SURAT</h2>
+        <p>Jl. Contoh Alamat No. 123, Kota Contoh, Provinsi Contoh</p>
+        <p>Telp: (021) 555-5555 | Email: admin@instansi.gov.id</p>
     </div>
-    
-    <div class="info-box">
-        <p><strong>Dicetak oleh:</strong> <?= htmlspecialchars($user['nama_lengkap']) ?> (<?= getRoleLabel($user['role']) ?>)</p>
-        <p><strong>Tanggal cetak:</strong> <?= formatDateTime(date('Y-m-d H:i:s')) ?></p>
-        <p><strong>Total data:</strong> <?= $totalDisposisi ?> disposisi</p>
+
+    <div class="judul">
+        <h3>LAPORAN DISPOSISI SURAT</h3>
+        <p>Periode: <?= date('d-m-Y', strtotime($tanggalDari)) ?> s/d <?= date('d-m-Y', strtotime($tanggalSampai)) ?></p>
     </div>
-    
-    <div class="stats-grid">
-        <div class="stat-row">
-            <div class="stat-cell">
-                <div class="label">Total</div>
-                <div class="value"><?= $totalDisposisi ?></div>
-            </div>
-            <div class="stat-cell blue">
-                <div class="label">Dikirim</div>
-                <div class="value"><?= $byStatus['dikirim'] ?? 0 ?></div>
-            </div>
-            <div class="stat-cell yellow">
-                <div class="label">Diproses</div>
-                <div class="value"><?= $byStatus['diproses'] ?? 0 ?></div>
-            </div>
-            <div class="stat-cell green">
-                <div class="label">Selesai</div>
-                <div class="value"><?= $byStatus['selesai'] ?? 0 ?></div>
-            </div>
-            <div class="stat-cell purple">
-                <div class="label">Avg Response</div>
-                <div class="value"><?= $avgResponseHours ?>h</div>
-            </div>
-        </div>
-    </div>
-    
+
     <table>
         <thead>
             <tr>
-                <th style="width: 4%;">NO</th>
-                <th style="width: 13%;">NO. AGENDA</th>
-                <th style="width: 15%;">DARI</th>
-                <th style="width: 15%;">KEPADA</th>
-                <th style="width: 13%;">TGL DISPOSISI</th>
-                <th style="width: 13%;">TGL RESPON</th>
-                <th style="width: 10%;">STATUS</th>
-                <th style="width: 17%;">CATATAN</th>
+                <th width="5%">No</th>
+                <th width="15%">Tgl Disposisi</th>
+                <th width="30%">Surat / Perihal</th>
+                <th width="25%">Dari / Kepada</th>
+                <th width="25%">Isi Disposisi</th>
             </tr>
         </thead>
         <tbody>
-            <?php if (empty($disposisiList)): ?>
-            <tr><td colspan="8" class="text-center">Tidak ada data disposisi untuk periode ini</td></tr>
-            <?php else: ?>
-                <?php foreach ($disposisiList as $index => $disp): ?>
+            <?php 
+            if ($result->num_rows > 0): 
+                $no = 1;
+                while($row = $result->fetch_assoc()):
+            ?>
                 <tr>
-                    <td class="text-center"><?= $index + 1 ?></td>
-                    <td class="font-bold"><?= htmlspecialchars($disp['nomor_agenda']) ?></td>
-                    <td><?= htmlspecialchars($disp['dari_user_nama']) ?></td>
-                    <td><?= htmlspecialchars($disp['ke_user_nama']) ?></td>
-                    <td class="text-center"><?= formatDateTime($disp['tanggal_disposisi']) ?></td>
-                    <td class="text-center"><?= $disp['tanggal_respon'] ? formatDateTime($disp['tanggal_respon']) : '-' ?></td>
-                    <td class="text-center">
-                        <span class="badge <?= $disp['status_disposisi'] ?>">
-                            <?= ucfirst($disp['status_disposisi']) ?>
-                        </span>
+                    <td style="text-align: center;"><?= $no++ ?></td>
+                    <td style="text-align: center;"><?= date('d/m/Y', strtotime($row['tanggal_disposisi'])) ?></td>
+                    <td>
+                        <b>No:</b> <?= htmlspecialchars($row['nomor_surat']) ?><br>
+                        <b>Hal:</b> <?= htmlspecialchars($row['perihal']) ?>
                     </td>
-                    <td><?= htmlspecialchars(truncate($disp['catatan'] ?? '-', 50)) ?></td>
+                    <td>
+                        <b>Dari:</b> <?= htmlspecialchars($row['dari_user_nama']) ?><br>
+                        <b>Ke:</b> <?= htmlspecialchars($row['ke_user_nama']) ?>
+                    </td>
+                    <td>
+                        <?= htmlspecialchars($row['catatan']) ?>
+                        <br>
+                        <small><i>(Status: <?= $row['status_disposisi'] ?>)</i></small>
+                    </td>
                 </tr>
-                <?php endforeach; ?>
+            <?php 
+                endwhile; 
+            else: 
+            ?>
+                <tr>
+                    <td colspan="5" style="text-align: center;">Tidak ada data disposisi pada periode ini.</td>
+                </tr>
             <?php endif; ?>
         </tbody>
     </table>
-    
-    <div class="footer">
-        <p class="mb-2"><strong>Catatan:</strong></p>
-        <p>- Laporan ini dibuat secara otomatis oleh sistem</p>
-        <p>- Avg Response = Rata-rata waktu respon disposisi (dalam jam)</p>
-        <div class="signature">
-            <p>Banjarmasin, <?= formatTanggal(date('Y-m-d')) ?></p>
-            <p style="margin-top: 60px;">
-                <strong><?= htmlspecialchars($user['nama_lengkap']) ?></strong><br>
-                <?= getRoleLabel($user['role']) ?>
-            </p>
+
+    <div class="ttd-wrapper">
+        <div class="ttd-box">
+            <p>Kota Contoh, <?= date('d F Y') ?></p>
+            <p>Mengetahui,</p>
+            <p>Kepala Dinas / Pimpinan</p> 
+            
+            <div class="ttd-nama">
+                <?= htmlspecialchars($user['nama_lengkap']) ?>
+            </div>
+            <div>NIP. 19xxxxxxxxxxxxxx</div>
         </div>
     </div>
+
 </body>
 </html>
+
 <?php
 $html = ob_get_clean();
 
@@ -194,8 +187,10 @@ $options->set('defaultFont', 'Arial');
 
 $dompdf = new Dompdf($options);
 $dompdf->loadHtml($html);
-$dompdf->setPaper('A4', 'landscape'); // Landscape untuk lebih banyak kolom
-$dompdf->render();
 
-$filename = 'Laporan_Disposisi_' . date('Ymd_His') . '.pdf';
-$dompdf->stream($filename, ["Attachment" => false]);
+// Set Kertas Portrait A4
+$dompdf->setPaper('A4', 'portrait');
+
+$dompdf->render();
+$dompdf->stream("Laporan_Disposisi_Simple.pdf", array("Attachment" => false));
+?>

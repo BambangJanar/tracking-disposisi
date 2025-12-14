@@ -1,7 +1,6 @@
 <?php
 // public/partials/sidebar.php
 
-// Pastikan BASE_URL tersedia, jika sidebar di-load terpisah (safety check)
 if (!defined('BASE_URL')) {
     require_once __DIR__ . '/../../config/config.php';
 }
@@ -9,6 +8,10 @@ if (!defined('BASE_URL')) {
 $currentPage = basename($_SERVER['PHP_SELF']);
 $user = getCurrentUser();
 $role = $user['role'] ?? '';
+
+// Load settings dinamis
+$appName = getSetting('app_name', 'Tracking Disposisi');
+$appLogo = getSetting('app_logo');
 
 function isActive($page) {
     global $currentPage;
@@ -18,7 +21,12 @@ function isActive($page) {
 
 <div class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
     <div class="flex items-center justify-between p-4">
-        <h1 class="text-xl font-bold text-gray-800"><?= APP_NAME ?></h1>
+        <div class="flex items-center space-x-2">
+            <?php if ($appLogo): ?>
+            <img src="<?= SETTINGS_UPLOAD_URL . $appLogo ?>" alt="Logo" class="h-8 w-auto">
+            <?php endif; ?>
+            <h1 class="text-xl font-bold text-gray-800"><?= htmlspecialchars($appName) ?></h1>
+        </div>
         <button id="mobile-menu-button" class="text-gray-600 hover:text-gray-800">
             <i class="fas fa-bars text-2xl"></i>
         </button>
@@ -28,7 +36,12 @@ function isActive($page) {
 <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
     <div class="flex flex-col h-full">
         <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <h1 class="text-xl font-bold text-gray-800">Tracking Surat</h1>
+            <div class="flex items-center space-x-2">
+                <?php if ($appLogo): ?>
+                <img src="<?= SETTINGS_UPLOAD_URL . $appLogo ?>" alt="Logo" class="h-8 w-auto">
+                <?php endif; ?>
+                <h1 class="text-xl font-bold text-gray-800"><?= htmlspecialchars($appName) ?></h1>
+            </div>
             <button id="close-sidebar" class="lg:hidden text-gray-600">
                 <i class="fas fa-times text-xl"></i>
             </button>
@@ -129,6 +142,13 @@ function isActive($page) {
         </nav>
         
         <div class="border-t border-gray-200 p-4 space-y-1">
+            <?php if (hasRole('superadmin')): ?>
+            <a href="<?= BASE_URL ?>/pengaturan.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('pengaturan.php') ?>">
+                <i class="fas fa-cog w-5 mr-3"></i>
+                Pengaturan Sistem
+            </a>
+            <?php endif; ?>
+            
             <a href="<?= BASE_URL ?>/profil.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('profil.php') ?>">
                 <i class="fas fa-user w-5 mr-3"></i>
                 Profil
@@ -174,7 +194,6 @@ function confirmLogout() {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            // Perbaiki redirect logout menggunakan BASE_URL
             window.location.href = '<?= BASE_URL ?>/login.php?action=logout';
         }
     });

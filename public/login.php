@@ -29,7 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = loginUser($email, $password);
         
         if ($result['success']) {
-            // Redirect to intended page or dashboard
             $redirect = $_SESSION['redirect_after_login'] ?? 'index.php';
             unset($_SESSION['redirect_after_login']);
             redirect($redirect);
@@ -40,6 +39,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Load settings dinamis
+$appName = getSetting('app_name', APP_NAME);
+$appDescription = getSetting('app_description', 'Sistem Disposisi Digital');
+$appLogo = getSetting('app_logo');
+$appFavicon = getSetting('app_favicon');
+
 $pageTitle = 'Login';
 ?>
 <!DOCTYPE html>
@@ -47,7 +52,11 @@ $pageTitle = 'Login';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $pageTitle ?> - <?= APP_NAME ?></title>
+    <title><?= $pageTitle ?> - <?= htmlspecialchars($appName) ?></title>
+    
+    <?php if ($appFavicon): ?>
+    <link rel="icon" href="<?= SETTINGS_UPLOAD_URL . htmlspecialchars($appFavicon) ?>" type="image/x-icon">
+    <?php endif; ?>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -64,10 +73,14 @@ $pageTitle = 'Login';
         <!-- Logo/Header -->
         <div class="text-center mb-8">
             <div class="inline-block p-4 bg-white rounded-full shadow-lg mb-4">
-                <i class="fas fa-envelope-open-text text-5xl text-blue-600"></i>
+                <?php if ($appLogo): ?>
+                    <img src="<?= SETTINGS_UPLOAD_URL . $appLogo ?>" alt="Logo" class="h-16 w-auto">
+                <?php else: ?>
+                    <i class="fas fa-envelope-open-text text-5xl text-blue-600"></i>
+                <?php endif; ?>
             </div>
-            <h1 class="text-3xl font-bold text-white mb-2"><?= APP_NAME ?></h1>
-            <p class="text-blue-100">Bank Kalsel - Sistem Disposisi Digital</p>
+            <h1 class="text-3xl font-bold text-white mb-2"><?= htmlspecialchars($appName) ?></h1>
+            <p class="text-blue-100"><?= htmlspecialchars($appDescription) ?></p>
         </div>
         
         <!-- Login Card -->
@@ -150,7 +163,7 @@ $pageTitle = 'Login';
         
         <!-- Footer -->
         <div class="text-center mt-6 text-white text-sm">
-            <p>&copy; <?= date('Y') ?> Bank Kalsel. All rights reserved.</p>
+            <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($appName) ?>. All rights reserved.</p>
         </div>
     </div>
     
