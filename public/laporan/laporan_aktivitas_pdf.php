@@ -17,6 +17,36 @@ $tanggalDari = $_GET['tanggal_dari'] ?? date('Y-m-d');
 $tanggalSampai = $_GET['tanggal_sampai'] ?? date('Y-m-d');
 $userId = $_GET['user_id'] ?? '';
 
+// Load settings dinamis
+$settings = getAllSettings();
+
+// ============================================================================
+// 1. LOGIKA LOGO INSTANSI (Base64)
+// ============================================================================
+$logoBase64 = '';
+if (!empty($settings['instansi_logo'])) {
+    $path = SETTINGS_UPLOAD_DIR . $settings['instansi_logo'];
+    if (file_exists($path)) {
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        $data = file_get_contents($path);
+        $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+    }
+}
+
+// ============================================================================
+// 2. LOGIKA GAMBAR TTD (Base64)
+// ============================================================================
+$ttdBase64 = '';
+if (!empty($settings['ttd_image'])) {
+    $pathTtd = SETTINGS_UPLOAD_DIR . $settings['ttd_image'];
+    if (file_exists($pathTtd)) {
+        $typeTtd = pathinfo($pathTtd, PATHINFO_EXTENSION);
+        $dataTtd = file_get_contents($pathTtd);
+        $ttdBase64 = 'data:image/' . $typeTtd . ';base64,' . base64_encode($dataTtd);
+    }
+}
+// ============================================================================
+
 $query = "SELECT l.*, u.nama_lengkap, u.email
           FROM log_aktivitas l
           JOIN users u ON l.user_id = u.id
@@ -35,13 +65,6 @@ $query .= " ORDER BY l.created_at DESC LIMIT 500";
 
 $logList = dbSelect($query, $params, $types);
 
-$byActivity = [];
-foreach ($logList as $log) {
-    $act = $log['aktivitas'];
-    if (!isset($byActivity[$act])) $byActivity[$act] = 0;
-    $byActivity[$act]++;
-}
-
 ob_start();
 ?>
 <!DOCTYPE html>
@@ -50,116 +73,158 @@ ob_start();
     <meta charset="UTF-8">
     <title>Log Aktivitas Sistem</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.4; color: #333; }
-        .header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #7c3aed; }
-        .header h1 { font-size: 18pt; color: #6d28d9; margin-bottom: 5px; }
-        .header h2 { font-size: 14pt; color: #374151; font-weight: normal; margin-bottom: 3px; }
-        .header p { font-size: 9pt; color: #6b7280; }
-        .info-box { background: #ede9fe; padding: 10px; border-radius: 5px; margin-bottom: 15px; border-left: 4px solid #7c3aed; }
-        .info-box p { margin: 3px 0; font-size: 9pt; }
-        .stats-container { margin-bottom: 20px; }
-        .stats-title { font-size: 10pt; font-weight: bold; margin-bottom: 10px; color: #374151; }
-        .stats-grid { display: table; width: 100%; }
-        .stats-row { display: table-row; }
-        .stat-item { display: table-cell; width: 16.66%; padding: 8px; text-align: center; background: #f9fafb; border: 1px solid #e5e7eb; }
-        .stat-item .label { font-size: 7pt; color: #6b7280; text-transform: uppercase; margin-bottom: 3px; }
-        .stat-item .value { font-size: 14pt; font-weight: bold; color: #1f2937; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        thead { background: #6d28d9; color: white; }
-        thead th { padding: 7px 5px; text-align: left; font-size: 7pt; font-weight: 600; text-transform: uppercase; border: 1px solid #5b21b6; }
-        tbody td { padding: 5px; border: 1px solid #e5e7eb; font-size: 7pt; }
-        tbody tr:nth-child(even) { background: #f9fafb; }
-        .badge { display: inline-block; padding: 2px 6px; border-radius: 10px; font-size: 6pt; font-weight: 600; text-transform: uppercase; background: #dbeafe; color: #1e40af; }
-        .footer { margin-top: 30px; padding-top: 15px; border-top: 2px solid #e5e7eb; font-size: 8pt; color: #6b7280; }
-        .footer .signature { margin-top: 50px; text-align: right; }
-        .text-center { text-align: center; }
-        .font-bold { font-weight: bold; }
-        .mb-2 { margin-bottom: 8px; }
+        body { font-family: Arial, sans-serif; font-size: 11pt; }
+        
+        .kop-surat {
+            text-align: center;
+            border-bottom: 3px double #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .kop-surat table { width: 100%; border-collapse: collapse; border: none; }
+        .kop-surat td { border: none; }
+        .kop-surat .logo-cell { width: 100px; text-align: center; vertical-align: middle; }
+        .kop-surat .text-cell { text-align: center; vertical-align: middle; }
+        .kop-surat img { max-height: 80px; max-width: 80px; }
+        .kop-surat h2 { margin: 0; font-size: 16pt; text-transform: uppercase; font-weight: bold; }
+        .kop-surat p { margin: 2px 0; font-size: 10pt; }
+
+        .judul { text-align: center; margin-bottom: 20px; }
+        .judul h3 { margin: 0; text-decoration: underline; font-size: 12pt; font-weight: bold; }
+        .judul p { margin: 5px 0; font-size: 10pt; }
+
+        table.data {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+        }
+        table.data th, table.data td {
+            border: 1px solid #000;
+            padding: 4px;
+            vertical-align: top;
+        }
+        table.data th {
+            background-color: #eee;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .ttd-wrapper {
+            width: 100%;
+            margin-top: 40px;
+            display: table;
+        }
+        .ttd-box {
+            float: right;
+            width: 40%;
+            text-align: center;
+        }
+        .ttd-image {
+            height: 80px; /* Tinggi gambar TTD */
+            margin: 10px auto;
+        }
+        .ttd-spacer {
+            height: 80px; /* Jarak jika tidak ada gambar */
+        }
+        .ttd-nama {
+            font-weight: bold;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1><?= APP_NAME ?></h1>
-        <h2>LOG AKTIVITAS SISTEM</h2>
-        <p>Periode: <?= formatTanggal($tanggalDari) ?> - <?= formatTanggal($tanggalSampai) ?></p>
-    </div>
-    
-    <div class="info-box">
-        <p><strong>Dicetak oleh:</strong> <?= htmlspecialchars($user['nama_lengkap']) ?> (<?= getRoleLabel($user['role']) ?>)</p>
-        <p><strong>Tanggal cetak:</strong> <?= formatDateTime(date('Y-m-d H:i:s')) ?></p>
-        <p><strong>Total log:</strong> <?= count($logList) ?> aktivitas (Max 500 terbaru)</p>
-    </div>
-    
-    <div class="stats-container">
-        <div class="stats-title">Ringkasan Aktivitas</div>
-        <div class="stats-grid">
-            <div class="stats-row">
-                <?php 
-                $count = 0;
-                foreach ($byActivity as $activity => $total): 
-                    if ($count > 0 && $count % 6 == 0): ?>
-                        </div><div class="stats-row">
+
+    <div class="kop-surat">
+        <table>
+            <tr>
+                <td class="logo-cell">
+                    <?php if (!empty($logoBase64)): ?>
+                        <img src="<?= $logoBase64 ?>" alt="Logo">
                     <?php endif; ?>
-                    <div class="stat-item">
-                        <div class="label"><?= ucfirst(str_replace('_', ' ', $activity)) ?></div>
-                        <div class="value"><?= $total ?></div>
-                    </div>
-                <?php 
-                    $count++;
-                endforeach; 
-                ?>
-            </div>
-        </div>
+                </td>
+                <td class="text-cell">
+                    <h2><?= nl2br(htmlspecialchars($settings['instansi_nama'])) ?></h2>
+                    <?php if (!empty($settings['instansi_alamat'])): ?>
+                    <p><?= nl2br(htmlspecialchars($settings['instansi_alamat'])) ?></p>
+                    <?php endif; ?>
+                    <?php if (!empty($settings['instansi_telepon']) || !empty($settings['instansi_email'])): ?>
+                    <p>
+                        <?php if (!empty($settings['instansi_telepon'])): ?>
+                        Telp: <?= htmlspecialchars($settings['instansi_telepon']) ?>
+                        <?php endif; ?>
+                        <?php if (!empty($settings['instansi_telepon']) && !empty($settings['instansi_email'])): ?> | <?php endif; ?>
+                        <?php if (!empty($settings['instansi_email'])): ?>
+                        Email: <?= htmlspecialchars($settings['instansi_email']) ?>
+                        <?php endif; ?>
+                    </p>
+                    <?php endif; ?>
+                </td>
+                <td class="logo-cell"></td>
+            </tr>
+        </table>
     </div>
-    
-    <table>
+
+    <div class="judul">
+        <h3>LOG AKTIVITAS SISTEM</h3>
+        <p>Periode: <?= date('d/m/Y', strtotime($tanggalDari)) ?> s/d <?= date('d/m/Y', strtotime($tanggalSampai)) ?></p>
+        <p style="font-size: 9pt;">Total: <?= count($logList) ?> aktivitas (Max 500 terbaru)</p>
+    </div>
+
+    <table class="data">
         <thead>
             <tr>
-                <th style="width: 4%;">NO</th>
-                <th style="width: 15%;">WAKTU</th>
-                <th style="width: 18%;">USER</th>
-                <th style="width: 13%;">AKTIVITAS</th>
-                <th style="width: 50%;">KETERANGAN</th>
+                <th width="5%">NO</th>
+                <th width="15%">WAKTU</th>
+                <th width="18%">USER</th>
+                <th width="13%">AKTIVITAS</th>
+                <th width="49%">KETERANGAN</th>
             </tr>
         </thead>
         <tbody>
             <?php if (empty($logList)): ?>
-            <tr><td colspan="5" class="text-center">Tidak ada log aktivitas untuk periode ini</td></tr>
+            <tr><td colspan="5" style="text-align: center; padding: 20px;">Tidak ada log aktivitas untuk periode ini</td></tr>
             <?php else: ?>
                 <?php foreach ($logList as $index => $log): ?>
                 <tr>
-                    <td class="text-center"><?= $index + 1 ?></td>
-                    <td class="text-center"><?= formatDateTime($log['created_at']) ?></td>
+                    <td style="text-align: center;"><?= $index + 1 ?></td>
+                    <td style="text-align: center; font-size: 8pt;"><?= formatDateTime($log['created_at']) ?></td>
                     <td>
-                        <div class="font-bold"><?= htmlspecialchars($log['nama_lengkap']) ?></div>
-                        <div style="font-size: 6pt; color: #6b7280;"><?= htmlspecialchars($log['email']) ?></div>
+                        <b><?= htmlspecialchars($log['nama_lengkap']) ?></b><br>
+                        <span style="font-size: 7pt; color: #666;"><?= htmlspecialchars($log['email']) ?></span>
                     </td>
-                    <td class="text-center">
-                        <span class="badge">
-                            <?= ucfirst(str_replace('_', ' ', $log['aktivitas'])) ?>
-                        </span>
+                    <td style="text-align: center; font-size: 8pt;">
+                        <?= ucfirst(str_replace('_', ' ', $log['aktivitas'])) ?>
                     </td>
-                    <td><?= htmlspecialchars($log['keterangan'] ?? '-') ?></td>
+                    <td style="font-size: 8pt;"><?= htmlspecialchars($log['keterangan'] ?? '-') ?></td>
                 </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
         </tbody>
     </table>
-    
-    <div class="footer">
-        <p class="mb-2"><strong>Catatan:</strong></p>
-        <p>- Laporan ini dibuat secara otomatis oleh sistem</p>
-        <p>- Maksimal 500 log aktivitas terbaru yang ditampilkan</p>
-        <p>- Data ini bersifat rahasia dan hanya untuk keperluan audit internal</p>
-        <div class="signature">
-            <p>Banjarmasin, <?= formatTanggal(date('Y-m-d')) ?></p>
-            <p style="margin-top: 60px;">
-                <strong><?= htmlspecialchars($user['nama_lengkap']) ?></strong><br>
-                <?= getRoleLabel($user['role']) ?>
+
+    <div class="ttd-wrapper">
+        <div class="ttd-box">
+            <p>
+                <?= htmlspecialchars($settings['ttd_kota']) ?>, 
+                <?= date('d F Y') ?>
             </p>
+            <p><?= htmlspecialchars($settings['ttd_jabatan']) ?></p> 
+            
+            <?php if (!empty($ttdBase64)): ?>
+                <img src="<?= $ttdBase64 ?>" class="ttd-image" alt="TTD">
+            <?php else: ?>
+                <div class="ttd-spacer"></div>
+            <?php endif; ?>
+            
+            <div class="ttd-nama">
+                <?= htmlspecialchars($settings['ttd_nama_penandatangan']) ?>
+            </div>
+            <?php if (!empty($settings['ttd_nip'])): ?>
+            <div>NIP. <?= htmlspecialchars($settings['ttd_nip']) ?></div>
+            <?php endif; ?>
         </div>
     </div>
+
 </body>
 </html>
 <?php
@@ -177,3 +242,4 @@ $dompdf->render();
 
 $filename = 'Log_Aktivitas_' . date('Ymd_His') . '.pdf';
 $dompdf->stream($filename, ["Attachment" => false]);
+?>

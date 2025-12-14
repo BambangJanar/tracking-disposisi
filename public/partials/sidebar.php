@@ -5,17 +5,35 @@ if (!defined('BASE_URL')) {
     require_once __DIR__ . '/../../config/config.php';
 }
 
+// Load UsersService untuk badge notifikasi (Cek file ada dulu untuk keamanan)
+if (file_exists(__DIR__ . '/../../modules/users/users_service.php')) {
+    require_once __DIR__ . '/../../modules/users/users_service.php';
+}
+
 $currentPage = basename($_SERVER['PHP_SELF']);
 $user = getCurrentUser();
 $role = $user['role'] ?? '';
 
-// Load settings dinamis
-$appName = getSetting('app_name', 'Tracking Disposisi');
-$appLogo = getSetting('app_logo');
+// Load settings
+$appName = function_exists('getSetting') ? getSetting('app_name', 'Tracking Disposisi') : 'Tracking Disposisi';
+$appLogo = function_exists('getSetting') ? getSetting('app_logo') : null;
+
+// Hitung Pending User (Hanya untuk Superadmin)
+$pendingCount = 0;
+if (hasRole('superadmin') && class_exists('UsersService')) {
+    $pendingCount = UsersService::countPending();
+}
 
 function isActive($page) {
     global $currentPage;
-    return $currentPage === $page ? 'sidebar-active' : '';
+    return $currentPage === $page 
+        ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' 
+        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900';
+}
+
+function isGroupActive($pages) {
+    global $currentPage;
+    return in_array($currentPage, $pages) ? 'block' : 'hidden';
 }
 ?>
 
@@ -25,171 +43,198 @@ function isActive($page) {
             <?php if ($appLogo): ?>
             <img src="<?= SETTINGS_UPLOAD_URL . $appLogo ?>" alt="Logo" class="h-8 w-auto">
             <?php endif; ?>
-            <h1 class="text-xl font-bold text-gray-800"><?= htmlspecialchars($appName) ?></h1>
+            <h1 class="text-lg font-bold text-gray-800 truncate"><?= htmlspecialchars($appName) ?></h1>
         </div>
-        <button id="mobile-menu-button" class="text-gray-600 hover:text-gray-800">
+        <button id="mobile-menu-button" class="text-gray-600 hover:text-gray-800 focus:outline-none">
             <i class="fas fa-bars text-2xl"></i>
         </button>
     </div>
 </div>
 
-<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
-    <div class="flex flex-col h-full">
-        <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <div class="flex items-center space-x-2">
-                <?php if ($appLogo): ?>
-                <img src="<?= SETTINGS_UPLOAD_URL . $appLogo ?>" alt="Logo" class="h-8 w-auto">
-                <?php endif; ?>
-                <h1 class="text-xl font-bold text-gray-800"><?= htmlspecialchars($appName) ?></h1>
-            </div>
-            <button id="close-sidebar" class="lg:hidden text-gray-600">
-                <i class="fas fa-times text-xl"></i>
-            </button>
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
+    
+    <div class="flex items-center h-16 px-6 border-b border-gray-200">
+        <div class="flex items-center space-x-2">
+            <?php if ($appLogo): ?>
+            <img src="<?= SETTINGS_UPLOAD_URL . $appLogo ?>" alt="Logo" class="h-8 w-auto">
+            <?php endif; ?>
+            <h1 class="text-lg font-bold text-gray-800 truncate"><?= htmlspecialchars($appName) ?></h1>
         </div>
-        
-        <div class="p-4 border-b border-gray-200">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                    <?= strtoupper(substr($user['nama_lengkap'], 0, 1)) ?>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-800 truncate"><?= $user['nama_lengkap'] ?></p>
-                    <p class="text-xs text-gray-500"><?= getRoleLabel($role) ?></p>
+        <button id="close-sidebar" class="lg:hidden ml-auto text-gray-600 focus:outline-none">
+            <i class="fas fa-times text-xl"></i>
+        </button>
+    </div>
+    
+    <div class="p-4 border-b border-gray-200 bg-gray-50">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow text-lg">
+                <?= strtoupper(substr($user['nama_lengkap'], 0, 1)) ?>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-800 truncate"><?= $user['nama_lengkap'] ?></p>
+                <div class="flex items-center mt-0.5">
+                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                    <p class="text-xs text-gray-500 capitalize"><?= getRoleLabel($role) ?></p>
                 </div>
             </div>
         </div>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-6">
         
-        <nav class="flex-1 overflow-y-auto py-4">
-            <div class="px-3 space-y-1">
-                <a href="<?= BASE_URL ?>/index.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('index.php') ?>">
-                    <i class="fas fa-home w-5 mr-3"></i>
+        <div>
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Utama</p>
+            <div class="space-y-1">
+                <a href="<?= BASE_URL ?>/index.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors <?= isActive('index.php') ?>">
+                    <i class="fas fa-home w-6 text-center mr-2"></i>
                     Dashboard
                 </a>
-                
-                <a href="<?= BASE_URL ?>/surat.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('surat.php') ?>">
-                    <i class="fas fa-envelope w-5 mr-3"></i>
-                    Manajemen Surat
+            </div>
+        </div>
+
+        <div>
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Persuratan</p>
+            <div class="space-y-1">
+                <a href="<?= BASE_URL ?>/surat.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors <?= isActive('surat.php') ?>">
+                    <i class="fas fa-envelope w-6 text-center mr-2"></i>
+                    Semua Surat
                 </a>
-                
-                <div class="pt-2">
-                    <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Disposisi</p>
-                    
-                    <a href="<?= BASE_URL ?>/disposisi_inbox.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('disposisi_inbox.php') ?>">
-                        <i class="fas fa-inbox w-5 mr-3"></i>
-                        Disposisi Masuk
-                    </a>
-                    
-                    <a href="<?= BASE_URL ?>/disposisi_outbox.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('disposisi_outbox.php') ?>">
-                        <i class="fas fa-paper-plane w-5 mr-3"></i>
-                        Disposisi Keluar
-                    </a>
-                    
-                    <?php if (hasRole(['admin', 'superadmin'])): ?>
-                    <a href="<?= BASE_URL ?>/disposisi.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('disposisi.php') ?>">
-                        <i class="fas fa-exchange-alt w-5 mr-3"></i>
-                        Semua Disposisi
-                    </a>
-                    <?php endif; ?>
-                </div>
-                
+                <a href="<?= BASE_URL ?>/disposisi_inbox.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors <?= isActive('disposisi_inbox.php') ?>">
+                    <i class="fas fa-inbox w-6 text-center mr-2"></i>
+                    Disposisi Masuk
+                </a>
+                <a href="<?= BASE_URL ?>/disposisi_outbox.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors <?= isActive('disposisi_outbox.php') ?>">
+                    <i class="fas fa-paper-plane w-6 text-center mr-2"></i>
+                    Disposisi Keluar
+                </a>
                 <?php if (hasRole(['admin', 'superadmin'])): ?>
-                <div class="pt-2">
-                    <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Master Data</p>
-                    
-                    <a href="<?= BASE_URL ?>/jenis_surat.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('jenis_surat.php') ?>">
-                        <i class="fas fa-list w-5 mr-3"></i>
-                        Jenis Surat
-                    </a>
-                </div>
+                <a href="<?= BASE_URL ?>/disposisi.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors <?= isActive('disposisi.php') ?>">
+                    <i class="fas fa-exchange-alt w-6 text-center mr-2"></i>
+                    Monitoring Disposisi
+                </a>
                 <?php endif; ?>
-                
-                <div class="pt-2">
-                    <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Laporan</p>
-                    
-                    <a href="<?= BASE_URL ?>/laporan/laporan_surat_masuk.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('laporan_surat_masuk.php') ?>">
-                        <i class="fas fa-file-alt w-5 mr-3"></i>
-                        Surat Masuk
-                    </a>
-                    
-                    <a href="<?= BASE_URL ?>/laporan/laporan_surat_keluar.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('laporan_surat_keluar.php') ?>">
-                        <i class="fas fa-file-export w-5 mr-3"></i>
-                        Surat Keluar
-                    </a>
-                    
-                    <a href="<?= BASE_URL ?>/laporan/laporan_proposal.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('laporan_proposal.php') ?>">
-                        <i class="fas fa-file-invoice w-5 mr-3"></i>
-                        Proposal
-                    </a>
-                    
-                    <a href="<?= BASE_URL ?>/laporan/laporan_disposisi.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('laporan_disposisi.php') ?>">
-                        <i class="fas fa-chart-line w-5 mr-3"></i>
-                        Laporan Disposisi
-                    </a>
-                    
-                    <?php if (hasRole(['superadmin'])): ?>
-                    <a href="<?= BASE_URL ?>/laporan/laporan_aktivitas.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('laporan_aktivitas.php') ?>">
-                        <i class="fas fa-history w-5 mr-3"></i>
-                        Log Aktivitas
-                    </a>
-                    <?php endif; ?>
+            </div>
+        </div>
+
+        <div>
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Laporan & Arsip</p>
+            <div class="space-y-1">
+                <div class="relative">
+                    <button type="button" class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-50 focus:outline-none transition-colors" onclick="toggleMenu('laporan-menu')">
+                        <div class="flex items-center">
+                            <i class="fas fa-file-alt w-6 text-center mr-2"></i>
+                            <span>Pusat Laporan</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-xs transition-transform duration-200" id="laporan-arrow"></i>
+                    </button>
+                    <div id="laporan-menu" class="<?= isGroupActive(['laporan_surat_masuk.php', 'laporan_surat_keluar.php', 'laporan_proposal.php', 'laporan_disposisi.php', 'laporan_aktivitas.php']) ?> pl-9 space-y-1 mt-1">
+                        <a href="<?= BASE_URL ?>/laporan/laporan_surat_masuk.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50 <?= isActive('laporan_surat_masuk.php') ?>">Surat Masuk</a>
+                        <a href="<?= BASE_URL ?>/laporan/laporan_surat_keluar.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50 <?= isActive('laporan_surat_keluar.php') ?>">Surat Keluar</a>
+                        <a href="<?= BASE_URL ?>/laporan/laporan_proposal.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50 <?= isActive('laporan_proposal.php') ?>">Proposal</a>
+                        <a href="<?= BASE_URL ?>/laporan/laporan_disposisi.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50 <?= isActive('laporan_disposisi.php') ?>">Disposisi</a>
+                        <?php if (hasRole(['superadmin'])): ?>
+                        <a href="<?= BASE_URL ?>/laporan/laporan_aktivitas.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50 <?= isActive('laporan_aktivitas.php') ?>">Log Aktivitas</a>
+                        <?php endif; ?>
+                    </div>
                 </div>
-                
-                <a href="<?= BASE_URL ?>/arsip_surat.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('arsip_surat.php') ?>">
-                    <i class="fas fa-archive w-5 mr-3"></i>
-                    Arsip Surat
+
+                <a href="<?= BASE_URL ?>/arsip_surat.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors <?= isActive('arsip_surat.php') ?>">
+                    <i class="fas fa-archive w-6 text-center mr-2"></i>
+                    Arsip Digital
                 </a>
             </div>
-        </nav>
-        
-        <div class="border-t border-gray-200 p-4 space-y-1">
-            <?php if (hasRole('superadmin')): ?>
-            <a href="<?= BASE_URL ?>/pengaturan.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('pengaturan.php') ?>">
-                <i class="fas fa-cog w-5 mr-3"></i>
-                Pengaturan Sistem
-            </a>
-            <?php endif; ?>
-            
-            <a href="<?= BASE_URL ?>/profil.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 <?= isActive('profil.php') ?>">
-                <i class="fas fa-user w-5 mr-3"></i>
-                Profil
-            </a>
-            
-            <button onclick="confirmLogout()" class="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50">
-                <i class="fas fa-sign-out-alt w-5 mr-3"></i>
-                Logout
-            </button>
         </div>
+
+        <?php if (hasRole(['admin', 'superadmin'])): ?>
+        <div>
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Administrator</p>
+            <div class="space-y-1">
+                <a href="<?= BASE_URL ?>/jenis_surat.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors <?= isActive('jenis_surat.php') ?>">
+                    <i class="fas fa-tags w-6 text-center mr-2"></i>
+                    Master Jenis Surat
+                </a>
+
+                <?php if (hasRole('superadmin')): ?>
+                <a href="<?= BASE_URL ?>/users.php" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors <?= isActive('users.php') ?>">
+                    <div class="flex items-center">
+                        <i class="fas fa-users-cog w-6 text-center mr-2"></i>
+                        Manajemen User
+                    </div>
+                    <?php if ($pendingCount > 0): ?>
+                    <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
+                        <?= $pendingCount ?>
+                    </span>
+                    <?php endif; ?>
+                </a>
+
+                <a href="<?= BASE_URL ?>/pengaturan.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors <?= isActive('pengaturan.php') ?>">
+                    <i class="fas fa-cog w-6 text-center mr-2"></i>
+                    Pengaturan Sistem
+                </a>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
+    </nav>
+
+    <div class="p-4 border-t border-gray-200 bg-gray-50">
+        <a href="<?= BASE_URL ?>/profil.php" class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-white hover:shadow-sm transition-all <?= isActive('profil.php') ?>">
+            <i class="fas fa-user-circle w-6 text-center mr-2"></i>
+            Profil Saya
+        </a>
+        <button onclick="confirmLogout()" class="w-full mt-2 flex items-center px-3 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50 transition-colors">
+            <i class="fas fa-sign-out-alt w-6 text-center mr-2"></i>
+            Logout
+        </button>
     </div>
 </aside>
 
-<div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
+<div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden transition-opacity"></div>
 
 <script>
-// Mobile menu toggle
-document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
-    document.getElementById('sidebar').classList.remove('-translate-x-full');
-    document.getElementById('sidebar-overlay').classList.remove('hidden');
+// Toggle Submenu logic
+function toggleMenu(menuId) {
+    const menu = document.getElementById(menuId);
+    const arrow = document.getElementById('laporan-arrow');
+    
+    if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        if(arrow) arrow.style.transform = 'rotate(180deg)';
+    } else {
+        menu.classList.add('hidden');
+        if(arrow) arrow.style.transform = 'rotate(0deg)';
+    }
+}
+
+// Mobile sidebar logic
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+const mobileBtn = document.getElementById('mobile-menu-button');
+const closeBtn = document.getElementById('close-sidebar');
+
+mobileBtn?.addEventListener('click', () => {
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
 });
 
-document.getElementById('close-sidebar')?.addEventListener('click', function() {
-    document.getElementById('sidebar').classList.add('-translate-x-full');
-    document.getElementById('sidebar-overlay').classList.add('hidden');
-});
+closeBtn?.addEventListener('click', closeSidebar);
+overlay?.addEventListener('click', closeSidebar);
 
-document.getElementById('sidebar-overlay')?.addEventListener('click', function() {
-    document.getElementById('sidebar').classList.add('-translate-x-full');
-    this.classList.add('hidden');
-});
+function closeSidebar() {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+}
 
-// Logout confirmation
+// Logout Confirmation
 function confirmLogout() {
     Swal.fire({
-        title: 'Yakin ingin logout?',
-        text: 'Anda akan keluar dari sistem',
+        title: 'Konfirmasi Logout',
+        text: 'Apakah Anda yakin ingin keluar dari sistem?',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
         confirmButtonText: 'Ya, Logout',
         cancelButtonText: 'Batal'
     }).then((result) => {

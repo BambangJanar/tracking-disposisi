@@ -13,7 +13,7 @@ define('APP_VERSION', '1.0.0');
 $isLocalhost = in_array($_SERVER['SERVER_NAME'], ['localhost', '127.0.0.1', '::1']);
 
 // ============================================================================
-// AUTO-DETECT BASE URL
+// AUTO-DETECT BASE URL (PERBAIKAN LOGIKA)
 // ============================================================================
 if ($isLocalhost) {
     $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
@@ -24,14 +24,24 @@ if ($isLocalhost) {
         $portString = ':' . $port;
     }
     
-    $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
-    if (basename($scriptPath) === 'public') {
-        $scriptPath = dirname($scriptPath);
+    // PERBAIKAN: Cari posisi folder '/public' di URL untuk menentukan root path yang valid
+    // Ini mencegah error path ganda (seperti /public/laporan/public/) saat diakses dari subfolder
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $publicPos = strpos($scriptName, '/public');
+    
+    if ($publicPos !== false) {
+        // Ambil path sebelum '/public' (misal: /tracking-disposisi)
+        $basePath = substr($scriptName, 0, $publicPos);
+    } else {
+        $basePath = dirname($scriptName);
     }
-    $basePath = ($scriptPath === '/' || $scriptPath === '\\') ? '' : $scriptPath;
+    
+    // Hapus trailing slash jika ada
+    $basePath = rtrim($basePath, '/\\');
     
     define('BASE_URL', $protocol . '://' . $host . $portString . $basePath . '/public');
 } else {
+    // Sesuaikan dengan domain production Anda
     define('BASE_URL', 'https://' . $_SERVER['SERVER_NAME'] . '/public');
 }
 
@@ -40,54 +50,19 @@ if ($isLocalhost) {
 // ============================================================================
 define('UPLOAD_DIR', dirname(__DIR__) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'surat' . DIRECTORY_SEPARATOR);
 
-if ($isLocalhost) {
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-    $host = $_SERVER['SERVER_NAME'];
-    $port = $_SERVER['SERVER_PORT'];
-    $portString = '';
-    if (($protocol === 'http' && $port != 80) || ($protocol === 'https' && $port != 443)) {
-        $portString = ':' . $port;
-    }
-    
-    $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
-    if (basename($scriptPath) === 'public') {
-        $scriptPath = dirname($scriptPath);
-    }
-    $basePath = ($scriptPath === '/' || $scriptPath === '\\') ? '' : $scriptPath;
-    
-    define('UPLOAD_URL', $protocol . '://' . $host . $portString . $basePath . '/uploads/surat/');
-} else {
-    define('UPLOAD_URL', 'https://' . $_SERVER['SERVER_NAME'] . '/uploads/surat/');
-}
+// Tentukan URL Upload
+// Menggunakan dirname(BASE_URL) untuk naik satu level dari /public ke root, lalu ke /uploads
+define('UPLOAD_URL', dirname(BASE_URL) . '/uploads/surat/');
 
 if (!is_dir(UPLOAD_DIR)) {
     mkdir(UPLOAD_DIR, 0755, true);
 }
 
 // ============================================================================
-// PATH UPLOAD SETTINGS (Logo, Favicon)
+// PATH UPLOAD SETTINGS
 // ============================================================================
 define('SETTINGS_UPLOAD_DIR', dirname(__DIR__) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'settings' . DIRECTORY_SEPARATOR);
-
-if ($isLocalhost) {
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-    $host = $_SERVER['SERVER_NAME'];
-    $port = $_SERVER['SERVER_PORT'];
-    $portString = '';
-    if (($protocol === 'http' && $port != 80) || ($protocol === 'https' && $port != 443)) {
-        $portString = ':' . $port;
-    }
-    
-    $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
-    if (basename($scriptPath) === 'public') {
-        $scriptPath = dirname($scriptPath);
-    }
-    $basePath = ($scriptPath === '/' || $scriptPath === '\\') ? '' : $scriptPath;
-    
-    define('SETTINGS_UPLOAD_URL', $protocol . '://' . $host . $portString . $basePath . '/uploads/settings/');
-} else {
-    define('SETTINGS_UPLOAD_URL', 'https://' . $_SERVER['SERVER_NAME'] . '/uploads/settings/');
-}
+define('SETTINGS_UPLOAD_URL', dirname(BASE_URL) . '/uploads/settings/');
 
 if (!is_dir(SETTINGS_UPLOAD_DIR)) {
     mkdir(SETTINGS_UPLOAD_DIR, 0755, true);
@@ -100,13 +75,10 @@ define('ALLOWED_EXTENSIONS', ['pdf', 'jpg', 'jpeg', 'png']);
 define('MAX_FILE_SIZE', 5242880); // 5MB in bytes
 
 // ============================================================================
-// TIMEZONE
+// TIMEZONE & SESSION
 // ============================================================================
 date_default_timezone_set('Asia/Makassar');
 
-// ============================================================================
-// SESSION CONFIGURATION
-// ============================================================================
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
 
@@ -128,7 +100,6 @@ if ($isLocalhost) {
 } else {
     error_reporting(E_ALL);
     ini_set('display_errors', 0);
-    ini_set('display_startup_errors', 0);
     ini_set('log_errors', 1);
     ini_set('error_log', dirname(__DIR__) . '/logs/error.log');
     
@@ -141,14 +112,11 @@ if ($isLocalhost) {
 define('DEBUG_MODE', $isLocalhost);
 
 // ============================================================================
-// FUNGSI HELPER - GET SETTINGS DINAMIS
+// FUNGSI HELPER
 // ============================================================================
 
 /**
  * Get setting value dari database dengan cache
- * @param string $key Nama setting
- * @param mixed $default Default value jika tidak ada
- * @return mixed
  */
 function getSetting($key, $default = null) {
     static $settings = null;
@@ -172,8 +140,7 @@ function getSetting($key, $default = null) {
 }
 
 /**
- * Get all settings as array
- * @return array
+ * Get all settings as array (DIBUTUHKAN OLEH FILE LAPORAN PDF)
  */
 function getAllSettings() {
     static $settings = null;
@@ -185,6 +152,7 @@ function getAllSettings() {
             $settings = dbSelectOne($query);
             
             if (!$settings) {
+                // Default fallback jika database kosong
                 $settings = [
                     'app_name' => APP_NAME,
                     'app_description' => 'Aplikasi Pelacakan Surat dan Disposisi',
@@ -205,10 +173,7 @@ function getAllSettings() {
             error_log("Error loading all settings: " . $e->getMessage());
             $settings = [
                 'app_name' => APP_NAME,
-                'app_description' => 'Aplikasi Pelacakan Surat dan Disposisi',
                 'instansi_nama' => 'DINAS KOMUNIKASI DAN INFORMATIKA',
-                'ttd_jabatan' => 'Kepala Dinas',
-                'ttd_kota' => 'Banjarmasin'
             ];
         }
     }
@@ -220,13 +185,10 @@ function getAllSettings() {
  * Clear settings cache (call after update)
  */
 function clearSettingsCache() {
-    // Force reload pada next call
+    // Force reload pada next call (jika diimplementasikan dengan memcached/redis)
+    // Untuk static var PHP request-scoped, ini sebenarnya otomatis reset tiap request baru
     $GLOBALS['_settings_cache_cleared'] = true;
 }
-
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
 
 function getFullUrl($path = '') {
     $path = ltrim($path, '/');
@@ -240,3 +202,4 @@ function getUploadUrl($filename) {
 function getSettingsUploadUrl($filename) {
     return SETTINGS_UPLOAD_URL . $filename;
 }
+?>

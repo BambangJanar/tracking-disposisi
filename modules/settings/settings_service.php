@@ -7,37 +7,70 @@ require_once __DIR__ . '/../../config/config.php';
 class SettingsService {
     
     /**
-     * Get current settings
-     * @return array|null
+     * Ambil data settings
      */
     public static function getSettings() {
-        $query = "SELECT * FROM settings WHERE id = 1 LIMIT 1";
-        return dbSelectOne($query);
+        $conn = getConnection();
+        $sql = "SELECT * FROM settings WHERE id = 1 LIMIT 1";
+        $result = $conn->query($sql);
+        
+        if ($result && $result->num_rows > 0) {
+            return $result->fetch_assoc();
+        }
+        
+        return null;
     }
-    
+
     /**
-     * Update settings
-     * @param array $data
-     * @return array
+     * Initialize default settings jika tabel kosong
+     */
+    public static function initializeDefaults() {
+        $conn = getConnection();
+        
+        // Cek apakah sudah ada data
+        $check = $conn->query("SELECT id FROM settings WHERE id = 1");
+        if ($check && $check->num_rows > 0) return;
+
+        $sql = "INSERT INTO settings (id, app_name, app_description, instansi_nama, ttd_jabatan, ttd_kota) 
+                VALUES (1, 'Tracking Disposisi', 'Aplikasi Manajemen Surat', 'DINAS KOMUNIKASI DAN INFORMATIKA', 'Kepala Dinas', 'Banjarmasin')";
+        
+        $conn->query($sql);
+    }
+
+    /**
+     * Update settings (SUDAH DIPERBAIKI UNTUK TTD IMAGE)
      */
     public static function update($data) {
-        $query = "UPDATE settings SET
-                    app_name = ?,
-                    app_description = ?,
-                    app_logo = ?,
-                    app_favicon = ?,
-                    instansi_nama = ?,
-                    instansi_alamat = ?,
-                    instansi_telepon = ?,
-                    instansi_email = ?,
-                    instansi_logo = ?,
-                    ttd_nama_penandatangan = ?,
-                    ttd_nip = ?,
-                    ttd_jabatan = ?,
-                    ttd_kota = ?
-                  WHERE id = 1";
+        $conn = getConnection();
         
-        $params = [
+        // Query update mencakup kolom ttd_image yang baru
+        $sql = "UPDATE settings SET 
+                app_name = ?,
+                app_description = ?,
+                app_logo = ?,
+                app_favicon = ?,
+                instansi_nama = ?,
+                instansi_alamat = ?,
+                instansi_telepon = ?,
+                instansi_email = ?,
+                instansi_logo = ?,
+                ttd_nama_penandatangan = ?,
+                ttd_nip = ?,
+                ttd_jabatan = ?,
+                ttd_kota = ?,
+                ttd_image = ?
+                WHERE id = 1";
+        
+        $stmt = $conn->prepare($sql);
+        
+        if (!$stmt) {
+            throw new Exception("Database prepare failed: " . $conn->error);
+        }
+
+        // Pastikan ttd_image ada dalam data, jika tidak set null
+        $ttdImage = isset($data['ttd_image']) ? $data['ttd_image'] : null;
+
+        $stmt->bind_param("ssssssssssssss", 
             $data['app_name'],
             $data['app_description'],
             $data['app_logo'],
@@ -50,119 +83,66 @@ class SettingsService {
             $data['ttd_nama_penandatangan'],
             $data['ttd_nip'],
             $data['ttd_jabatan'],
-            $data['ttd_kota']
-        ];
+            $data['ttd_kota'],
+            $ttdImage
+        );
         
-        $types = 'sssssssssssss';
+        $result = $stmt->execute();
         
-        return dbExecute($query, $params, $types);
+        if (!$result) {
+            throw new Exception("Gagal menyimpan pengaturan: " . $stmt->error);
+        }
+        
+        return $result;
     }
-    
+
     /**
-     * Upload logo atau favicon
-     * @param array $file $_FILES array
-     * @param string $oldFilename Nama file lama untuk dihapus
-     * @return array ['success' => bool, 'filename' => string, 'message' => string]
+     * Handle file upload
      */
-    public static function uploadFile($file, $oldFilename = null) {
-        if (!isset($file) || $file['error'] === UPLOAD_ERR_NO_FILE) {
-            return ['success' => true, 'filename' => $oldFilename, 'message' => 'No file uploaded'];
-        }
-        
+    public static function uploadFile($file, $oldFile = null) {
+        // Validasi error
         if ($file['error'] !== UPLOAD_ERR_OK) {
-            return ['success' => false, 'message' => 'Error saat upload file'];
+            return ['success' => false, 'message' => 'Upload error code: ' . $file['error']];
         }
-        
-        // Validasi ukuran (max 2MB untuk logo/favicon)
-        $maxSize = 2 * 1024 * 1024; // 2MB
-        if ($file['size'] > $maxSize) {
-            return ['success' => false, 'message' => 'Ukuran file maksimal 2MB'];
+
+        // Validasi tipe file
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/x-icon'];
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            return ['success' => false, 'message' => 'Tipe file tidak diizinkan. Hanya JPG, PNG, SVG, dan ICO.'];
         }
-        
-        // Validasi ekstensi
-        $allowedExt = ['png', 'jpg', 'jpeg', 'ico', 'svg'];
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        
-        if (!in_array($ext, $allowedExt)) {
-            return ['success' => false, 'message' => 'Format file harus: ' . implode(', ', $allowedExt)];
+
+        // Validasi ukuran (max 2MB)
+        if ($file['size'] > 2 * 1024 * 1024) {
+            return ['success' => false, 'message' => 'Ukuran file terlalu besar (Max 2MB).'];
         }
-        
-        // Buat direktori jika belum ada
+
+        // Buat nama file unik
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = 'setting_' . uniqid() . '_' . time() . '.' . $extension;
+        $destination = SETTINGS_UPLOAD_DIR . $filename;
+
+        // Pastikan folder ada
         if (!is_dir(SETTINGS_UPLOAD_DIR)) {
             mkdir(SETTINGS_UPLOAD_DIR, 0755, true);
         }
-        
-        // Generate nama file unik
-        $filename = uniqid('setting_') . '_' . time() . '.' . $ext;
-        $destination = SETTINGS_UPLOAD_DIR . $filename;
-        
-        // Hapus file lama jika ada
-        if ($oldFilename && file_exists(SETTINGS_UPLOAD_DIR . $oldFilename)) {
-            unlink(SETTINGS_UPLOAD_DIR . $oldFilename);
-        }
-        
-        // Upload file baru
+
+        // Pindahkan file
         if (move_uploaded_file($file['tmp_name'], $destination)) {
-            return ['success' => true, 'filename' => $filename, 'message' => 'File berhasil diupload'];
+            // Hapus file lama jika ada dan bukan default
+            if ($oldFile && file_exists(SETTINGS_UPLOAD_DIR . $oldFile)) {
+                // Opsional: jangan hapus jika default.png atau sejenisnya
+                if (!in_array($oldFile, ['default.png', 'logo.png', 'favicon.ico'])) {
+                    unlink(SETTINGS_UPLOAD_DIR . $oldFile);
+                }
+            }
+            
+            return ['success' => true, 'filename' => $filename];
         }
-        
-        return ['success' => false, 'message' => 'Gagal menyimpan file'];
-    }
-    
-    /**
-     * Delete uploaded file
-     * @param string $filename
-     * @return bool
-     */
-    public static function deleteFile($filename) {
-        if (empty($filename)) {
-            return false;
-        }
-        
-        $filepath = SETTINGS_UPLOAD_DIR . $filename;
-        if (file_exists($filepath)) {
-            return unlink($filepath);
-        }
-        
-        return false;
-    }
-    
-    /**
-     * Initialize default settings if not exists
-     * @return bool
-     */
-    public static function initializeDefaults() {
-        $existing = self::getSettings();
-        
-        if ($existing) {
-            return true;
-        }
-        
-        $query = "INSERT INTO settings (
-                    id,
-                    app_name,
-                    app_description,
-                    instansi_nama,
-                    ttd_jabatan,
-                    ttd_kota
-                  ) VALUES (1, ?, ?, ?, ?, ?)";
-        
-        $params = [
-            'Tracking Disposisi',
-            'Aplikasi Pelacakan Surat dan Disposisi',
-            'DINAS KOMUNIKASI DAN INFORMATIKA',
-            'Kepala Dinas',
-            'Banjarmasin'
-        ];
-        
-        $types = 'sssss';
-        
-        try {
-            dbExecute($query, $params, $types);
-            return true;
-        } catch (Exception $e) {
-            error_log("Error initializing settings: " . $e->getMessage());
-            return false;
-        }
+
+        return ['success' => false, 'message' => 'Gagal memindahkan file upload.'];
     }
 }
+?>

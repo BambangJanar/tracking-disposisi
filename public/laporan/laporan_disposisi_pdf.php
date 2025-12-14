@@ -1,6 +1,5 @@
 <?php
 // public/laporan/laporan_disposisi_pdf.php
-
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/database.php';
@@ -13,16 +12,40 @@ use Dompdf\Options;
 requireLogin();
 
 $user = getCurrentUser();
-
-// --- PERBAIKAN ERROR DATABASE DI SINI ---
-// Kita harus memanggil fungsi getConnection() untuk mendapatkan objek koneksi
 $conn = getConnection(); 
-
-// Ambil filter tanggal
 $tanggalDari = $_GET['tanggal_dari'] ?? date('Y-m-01');
 $tanggalSampai = $_GET['tanggal_sampai'] ?? date('Y-m-d');
 
-// Query Data Disposisi
+// Load settings dinamis
+$settings = getAllSettings();
+
+// ============================================================================
+// 1. LOGIKA LOGO INSTANSI (Base64)
+// ============================================================================
+$logoBase64 = '';
+if (!empty($settings['instansi_logo'])) {
+    $path = SETTINGS_UPLOAD_DIR . $settings['instansi_logo'];
+    if (file_exists($path)) {
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        $data = file_get_contents($path);
+        $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+    }
+}
+
+// ============================================================================
+// 2. LOGIKA GAMBAR TTD (Base64)
+// ============================================================================
+$ttdBase64 = '';
+if (!empty($settings['ttd_image'])) {
+    $pathTtd = SETTINGS_UPLOAD_DIR . $settings['ttd_image'];
+    if (file_exists($pathTtd)) {
+        $typeTtd = pathinfo($pathTtd, PATHINFO_EXTENSION);
+        $dataTtd = file_get_contents($pathTtd);
+        $ttdBase64 = 'data:image/' . $typeTtd . ';base64,' . base64_encode($dataTtd);
+    }
+}
+// ============================================================================
+
 $query = "SELECT d.*, 
                  s.nomor_agenda, s.nomor_surat, s.perihal,
                  js.nama_jenis,
@@ -36,13 +59,11 @@ $query = "SELECT d.*,
           WHERE DATE(d.tanggal_disposisi) BETWEEN ? AND ?
           ORDER BY d.tanggal_disposisi ASC";
 
-// Menggunakan Prepared Statement agar lebih aman
 $stmt = $conn->prepare($query);
 $stmt->bind_param("ss", $tanggalDari, $tanggalSampai);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Mulai buffering HTML untuk PDF
 ob_start();
 ?>
 <!DOCTYPE html>
@@ -53,22 +74,24 @@ ob_start();
     <style>
         body { font-family: Arial, sans-serif; font-size: 11pt; }
         
-        /* Layout Kop Surat */
         .kop-surat {
             text-align: center;
             border-bottom: 3px double #000;
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
-        .kop-surat h2 { margin: 0; font-size: 16pt; text-transform: uppercase; }
+        .kop-surat table { width: 100%; border-collapse: collapse; border: none; }
+        .kop-surat td { border: none; }
+        .kop-surat .logo-cell { width: 100px; text-align: center; vertical-align: middle; }
+        .kop-surat .text-cell { text-align: center; vertical-align: middle; }
+        .kop-surat img { max-height: 80px; max-width: 80px; }
+        .kop-surat h2 { margin: 0; font-size: 16pt; text-transform: uppercase; font-weight: bold; }
         .kop-surat p { margin: 2px 0; font-size: 10pt; }
 
-        /* Judul Laporan */
         .judul { text-align: center; margin-bottom: 20px; }
-        .judul h3 { margin: 0; text-decoration: underline; font-size: 12pt; }
+        .judul h3 { margin: 0; text-decoration: underline; font-size: 12pt; font-weight: bold; }
         .judul p { margin: 5px 0; font-size: 10pt; }
 
-        /* Tabel Sederhana */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -80,24 +103,31 @@ ob_start();
             vertical-align: top;
         }
         table th {
-            background-color: #eee; /* Sedikit abu-abu biar header jelas, tapi tetap BW */
+            background-color: #eee;
             text-align: center;
             font-weight: bold;
         }
 
-        /* Tanda Tangan */
         .ttd-wrapper {
             width: 100%;
             margin-top: 40px;
-            display: table; /* Hack layout untuk dompdf */
+            display: table;
         }
         .ttd-box {
             float: right;
             width: 40%;
             text-align: center;
         }
+        /* Style Tambahan untuk Gambar TTD */
+        .ttd-image {
+            height: 80px;
+            margin: 10px auto;
+            display: block;
+        }
+        .ttd-spacer {
+            height: 80px;
+        }
         .ttd-nama {
-            margin-top: 70px;
             font-weight: bold;
             text-decoration: underline;
         }
@@ -106,15 +136,38 @@ ob_start();
 <body>
 
     <div class="kop-surat">
-        <h2>PEMERINTAH KABUPATEN CONTOH</h2>
-        <h2>DINAS CONTOH APLIKASI SURAT</h2>
-        <p>Jl. Contoh Alamat No. 123, Kota Contoh, Provinsi Contoh</p>
-        <p>Telp: (021) 555-5555 | Email: admin@instansi.gov.id</p>
+        <table>
+            <tr>
+                <td class="logo-cell">
+                    <?php if (!empty($logoBase64)): ?>
+                        <img src="<?= $logoBase64 ?>" alt="Logo">
+                    <?php endif; ?>
+                </td>
+                <td class="text-cell">
+                    <h2><?= nl2br(htmlspecialchars($settings['instansi_nama'])) ?></h2>
+                    <?php if (!empty($settings['instansi_alamat'])): ?>
+                    <p><?= nl2br(htmlspecialchars($settings['instansi_alamat'])) ?></p>
+                    <?php endif; ?>
+                    <?php if (!empty($settings['instansi_telepon']) || !empty($settings['instansi_email'])): ?>
+                    <p>
+                        <?php if (!empty($settings['instansi_telepon'])): ?>
+                        Telp: <?= htmlspecialchars($settings['instansi_telepon']) ?>
+                        <?php endif; ?>
+                        <?php if (!empty($settings['instansi_telepon']) && !empty($settings['instansi_email'])): ?> | <?php endif; ?>
+                        <?php if (!empty($settings['instansi_email'])): ?>
+                        Email: <?= htmlspecialchars($settings['instansi_email']) ?>
+                        <?php endif; ?>
+                    </p>
+                    <?php endif; ?>
+                </td>
+                <td class="logo-cell"></td>
+            </tr>
+        </table>
     </div>
 
     <div class="judul">
         <h3>LAPORAN DISPOSISI SURAT</h3>
-        <p>Periode: <?= date('d-m-Y', strtotime($tanggalDari)) ?> s/d <?= date('d-m-Y', strtotime($tanggalSampai)) ?></p>
+        <p>Periode: <?= date('d/m/Y', strtotime($tanggalDari)) ?> s/d <?= date('d/m/Y', strtotime($tanggalSampai)) ?></p>
     </div>
 
     <table>
@@ -155,7 +208,7 @@ ob_start();
             else: 
             ?>
                 <tr>
-                    <td colspan="5" style="text-align: center;">Tidak ada data disposisi pada periode ini.</td>
+                    <td colspan="5" style="text-align: center; padding: 20px;">Tidak ada data disposisi pada periode ini.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
@@ -163,20 +216,29 @@ ob_start();
 
     <div class="ttd-wrapper">
         <div class="ttd-box">
-            <p>Kota Contoh, <?= date('d F Y') ?></p>
-            <p>Mengetahui,</p>
-            <p>Kepala Dinas / Pimpinan</p> 
+            <p>
+                <?= htmlspecialchars($settings['ttd_kota']) ?>, 
+                <?= date('d F Y') ?>
+            </p>
+            <p><?= htmlspecialchars($settings['ttd_jabatan']) ?></p> 
+            
+            <?php if (!empty($ttdBase64)): ?>
+                <img src="<?= $ttdBase64 ?>" class="ttd-image" alt="TTD">
+            <?php else: ?>
+                <div class="ttd-spacer"></div>
+            <?php endif; ?>
             
             <div class="ttd-nama">
-                <?= htmlspecialchars($user['nama_lengkap']) ?>
+                <?= htmlspecialchars($settings['ttd_nama_penandatangan']) ?>
             </div>
-            <div>NIP. 19xxxxxxxxxxxxxx</div>
+            <?php if (!empty($settings['ttd_nip'])): ?>
+            <div>NIP. <?= htmlspecialchars($settings['ttd_nip']) ?></div>
+            <?php endif; ?>
         </div>
     </div>
 
 </body>
 </html>
-
 <?php
 $html = ob_get_clean();
 
@@ -187,10 +249,7 @@ $options->set('defaultFont', 'Arial');
 
 $dompdf = new Dompdf($options);
 $dompdf->loadHtml($html);
-
-// Set Kertas Portrait A4
 $dompdf->setPaper('A4', 'portrait');
-
 $dompdf->render();
-$dompdf->stream("Laporan_Disposisi_Simple.pdf", array("Attachment" => false));
+$dompdf->stream("Laporan_Disposisi_" . date('Ymd_His') . ".pdf", array("Attachment" => false));
 ?>

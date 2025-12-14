@@ -33,10 +33,9 @@ if (!$settings) {
                 <p class="text-gray-600">Kelola pengaturan aplikasi, instansi, dan tanda tangan</p>
             </div>
             
-            <form method="POST" action="../modules/settings/settings_handler.php" enctype="multipart/form-data" id="settingsForm">
+            <form id="settingsForm" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="update">
                 
-                <!-- Tabs -->
                 <div class="bg-white rounded-lg shadow mb-6">
                     <div class="border-b border-gray-200">
                         <nav class="flex -mb-px" aria-label="Tabs">
@@ -52,7 +51,6 @@ if (!$settings) {
                         </nav>
                     </div>
                     
-                    <!-- Tab Content: Aplikasi -->
                     <div id="content-aplikasi" class="tab-content p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Pengaturan Aplikasi</h3>
                         
@@ -71,12 +69,13 @@ if (!$settings) {
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Logo Aplikasi</label>
-                                <?php if ($settings['app_logo']): ?>
-                                <div class="mb-2">
-                                    <img src="<?= SETTINGS_UPLOAD_URL . $settings['app_logo'] ?>" alt="Logo" class="h-16 border rounded">
-                                    <p class="text-xs text-gray-500 mt-1">File saat ini: <?= $settings['app_logo'] ?></p>
+                                <div id="current_app_logo_container">
+                                    <?php if ($settings['app_logo']): ?>
+                                    <div class="mb-2">
+                                        <img src="<?= SETTINGS_UPLOAD_URL . $settings['app_logo'] ?>" alt="Logo" class="h-16 border rounded" id="preview_app_logo_img">
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
-                                <?php endif; ?>
                                 <input type="file" name="app_logo" accept=".png,.jpg,.jpeg,.svg" id="app_logo_input"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                 <p class="text-xs text-gray-500 mt-1">Format: PNG, JPG, SVG (Max 2MB)</p>
@@ -85,12 +84,13 @@ if (!$settings) {
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Favicon</label>
-                                <?php if ($settings['app_favicon']): ?>
-                                <div class="mb-2">
-                                    <img src="<?= SETTINGS_UPLOAD_URL . $settings['app_favicon'] ?>" alt="Favicon" class="h-8 border rounded">
-                                    <p class="text-xs text-gray-500 mt-1">File saat ini: <?= $settings['app_favicon'] ?></p>
+                                <div id="current_favicon_container">
+                                    <?php if ($settings['app_favicon']): ?>
+                                    <div class="mb-2">
+                                        <img src="<?= SETTINGS_UPLOAD_URL . $settings['app_favicon'] ?>" alt="Favicon" class="h-8 border rounded" id="preview_favicon_img">
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
-                                <?php endif; ?>
                                 <input type="file" name="app_favicon" accept=".ico,.png" id="app_favicon_input"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                 <p class="text-xs text-gray-500 mt-1">Format: ICO, PNG (Max 2MB)</p>
@@ -99,7 +99,6 @@ if (!$settings) {
                         </div>
                     </div>
                     
-                    <!-- Tab Content: Instansi -->
                     <div id="content-instansi" class="tab-content p-6 hidden">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Pengaturan Instansi</h3>
                         
@@ -133,12 +132,13 @@ if (!$settings) {
                             
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Logo Instansi (untuk KOP Surat)</label>
-                                <?php if ($settings['instansi_logo']): ?>
-                                <div class="mb-2">
-                                    <img src="<?= SETTINGS_UPLOAD_URL . $settings['instansi_logo'] ?>" alt="Logo Instansi" class="h-20 border rounded">
-                                    <p class="text-xs text-gray-500 mt-1">File saat ini: <?= $settings['instansi_logo'] ?></p>
+                                <div id="current_instansi_logo_container">
+                                    <?php if ($settings['instansi_logo']): ?>
+                                    <div class="mb-2">
+                                        <img src="<?= SETTINGS_UPLOAD_URL . $settings['instansi_logo'] ?>" alt="Logo Instansi" class="h-20 border rounded" id="preview_instansi_logo_img">
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
-                                <?php endif; ?>
                                 <input type="file" name="instansi_logo" accept=".png,.jpg,.jpeg,.svg" id="instansi_logo_input"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                 <p class="text-xs text-gray-500 mt-1">Format: PNG, JPG, SVG (Max 2MB) - Logo ini akan muncul di laporan PDF</p>
@@ -147,7 +147,6 @@ if (!$settings) {
                         </div>
                     </div>
                     
-                    <!-- Tab Content: TTD -->
                     <div id="content-ttd" class="tab-content p-6 hidden">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Pengaturan Tanda Tangan</h3>
                         
@@ -179,23 +178,31 @@ if (!$settings) {
                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                        placeholder="Banjarmasin">
                             </div>
-                            
-                            <div class="md:col-span-2 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-                                <p class="text-sm text-blue-800">
-                                    <i class="fas fa-info-circle mr-2"></i>
-                                    <strong>Info:</strong> Data tanda tangan ini akan muncul di bagian bawah semua laporan PDF yang dicetak dari sistem.
-                                </p>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Scan Tanda Tangan (Gambar)</label>
+                                <div id="current_ttd_image_container">
+                                    <?php if (!empty($settings['ttd_image'])): ?>
+                                    <div class="mb-2">
+                                        <img src="<?= SETTINGS_UPLOAD_URL . $settings['ttd_image'] ?>" alt="TTD" class="h-24 border rounded" id="preview_ttd_image_img">
+                                        <p class="text-xs text-gray-500 mt-1">File saat ini: <?= $settings['ttd_image'] ?></p>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                                <input type="file" name="ttd_image" accept=".png,.jpg,.jpeg,.svg" id="ttd_image_input"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Format: PNG, JPG (Disarankan background transparan/PNG). Kosongkan jika ingin menggunakan TTD manual/teks saja.</p>
+                                <div id="ttd_image_preview" class="mt-2"></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Submit Button -->
                 <div class="flex justify-end space-x-2">
                     <a href="<?= BASE_URL ?>/index.php" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
                         Batal
                     </a>
-                    <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+                    <button type="submit" id="btnSave" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
                         <i class="fas fa-save mr-2"></i>Simpan Perubahan
                     </button>
                 </div>
@@ -206,24 +213,21 @@ if (!$settings) {
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 // Tab switching
 function showTab(tabName) {
-    // Hide all contents
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.add('hidden');
     });
     
-    // Remove active state from all buttons
     document.querySelectorAll('.tab-button').forEach(button => {
         button.classList.remove('border-blue-600', 'text-blue-600');
         button.classList.add('border-transparent', 'text-gray-500');
     });
     
-    // Show selected content
     document.getElementById('content-' + tabName).classList.remove('hidden');
     
-    // Activate selected button
     const activeButton = document.getElementById('tab-' + tabName);
     activeButton.classList.remove('border-transparent', 'text-gray-500');
     activeButton.classList.add('border-blue-600', 'text-blue-600');
@@ -253,27 +257,90 @@ function setupImagePreview(inputId, previewId) {
 setupImagePreview('app_logo_input', 'app_logo_preview');
 setupImagePreview('app_favicon_input', 'app_favicon_preview');
 setupImagePreview('instansi_logo_input', 'instansi_logo_preview');
+setupImagePreview('ttd_image_input', 'ttd_image_preview'); // Tambahan untuk TTD
 
-// Form validation
-document.getElementById('settingsForm').addEventListener('submit', function(e) {
-    const appName = document.querySelector('[name="app_name"]').value.trim();
-    const instansiNama = document.querySelector('[name="instansi_nama"]').value.trim();
-    
-    if (!appName) {
-        e.preventDefault();
-        showError('Nama aplikasi harus diisi');
-        showTab('aplikasi');
-        return false;
-    }
-    
-    if (!instansiNama) {
-        e.preventDefault();
-        showError('Nama instansi harus diisi');
-        showTab('instansi');
-        return false;
-    }
-    
-    showLoading('Menyimpan pengaturan...');
+// AJAX Submission
+$(document).ready(function() {
+    $('#settingsForm').on('submit', function(e) {
+        e.preventDefault(); // Mencegah reload halaman
+        
+        const btn = $('#btnSave');
+        const originalText = btn.html();
+        
+        // Basic Validation
+        const appName = document.querySelector('[name="app_name"]').value.trim();
+        const instansiNama = document.querySelector('[name="instansi_nama"]').value.trim();
+        
+        if (!appName) {
+            Swal.fire('Error', 'Nama aplikasi harus diisi', 'error');
+            showTab('aplikasi');
+            return false;
+        }
+        
+        if (!instansiNama) {
+            Swal.fire('Error', 'Nama instansi harus diisi', 'error');
+            showTab('instansi');
+            return false;
+        }
+
+        // Prepare AJAX
+        const formData = new FormData(this);
+        
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...');
+        
+        $.ajax({
+            url: '<?= BASE_URL ?>/../modules/settings/settings_handler.php',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            success: function(response) {
+                btn.prop('disabled', false).html(originalText);
+                
+                if (response.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: response.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    // Update gambar jika ada yang diupload
+                    if (response.updated_images) {
+                        if (response.updated_images.app_logo_url) {
+                            $('#preview_app_logo_img').attr('src', response.updated_images.app_logo_url);
+                            $('#app_logo_preview').html('');
+                            $('#app_logo_input').val('');
+                        }
+                        if (response.updated_images.app_favicon_url) {
+                            $('#preview_favicon_img').attr('src', response.updated_images.app_favicon_url);
+                            $('#app_favicon_preview').html('');
+                            $('#app_favicon_input').val('');
+                        }
+                        if (response.updated_images.instansi_logo_url) {
+                            $('#preview_instansi_logo_img').attr('src', response.updated_images.instansi_logo_url);
+                            $('#instansi_logo_preview').html('');
+                            $('#instansi_logo_input').val('');
+                        }
+                        if (response.updated_images.ttd_image_url) {
+                            $('#preview_ttd_image_img').attr('src', response.updated_images.ttd_image_url);
+                            $('#ttd_image_preview').html('');
+                            $('#ttd_image_input').val('');
+                        }
+                    }
+                } else {
+                    Swal.fire('Gagal', response.message, 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                btn.prop('disabled', false).html(originalText);
+                console.error(xhr.responseText);
+                Swal.fire('Error', 'Terjadi kesalahan sistem. Cek console log.', 'error');
+            }
+        });
+    });
 });
 </script>
 

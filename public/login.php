@@ -58,19 +58,15 @@ $pageTitle = 'Login';
     <link rel="icon" href="<?= SETTINGS_UPLOAD_URL . htmlspecialchars($appFavicon) ?>" type="image/x-icon">
     <?php endif; ?>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body class="bg-gradient-to-br from-blue-500 to-blue-700 min-h-screen flex items-center justify-center p-4">
     
     <div class="w-full max-w-md">
-        <!-- Logo/Header -->
         <div class="text-center mb-8">
             <div class="inline-block p-4 bg-white rounded-full shadow-lg mb-4">
                 <?php if ($appLogo): ?>
@@ -83,7 +79,6 @@ $pageTitle = 'Login';
             <p class="text-blue-100"><?= htmlspecialchars($appDescription) ?></p>
         </div>
         
-        <!-- Login Card -->
         <div class="bg-white rounded-lg shadow-2xl p-8">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Login ke Sistem</h2>
             
@@ -106,7 +101,6 @@ $pageTitle = 'Login';
             <?php endif; ?>
             
             <form method="POST" action="" id="loginForm">
-                <!-- Email -->
                 <div class="mb-4">
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-envelope mr-1 text-gray-400"></i>
@@ -121,7 +115,6 @@ $pageTitle = 'Login';
                            placeholder="nama@email.com">
                 </div>
                 
-                <!-- Password -->
                 <div class="mb-6">
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-lock mr-1 text-gray-400"></i>
@@ -142,15 +135,20 @@ $pageTitle = 'Login';
                     </div>
                 </div>
                 
-                <!-- Submit Button -->
                 <button type="submit" 
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
                     <i class="fas fa-sign-in-alt mr-2"></i>
                     Login
                 </button>
+
+                <div class="mt-4 text-center border-t pt-4">
+                    <p class="text-sm text-gray-600">Belum punya akun?</p>
+                    <a href="register.php" class="text-blue-600 hover:text-blue-800 font-semibold text-sm">
+                        Daftar Akun Baru
+                    </a>
+                </div>
             </form>
             
-            <!-- Demo Accounts Info -->
             <div class="mt-6 p-4 bg-gray-50 rounded-lg">
                 <p class="text-xs font-semibold text-gray-600 mb-2">Akun Demo:</p>
                 <div class="text-xs text-gray-600 space-y-1">
@@ -161,7 +159,6 @@ $pageTitle = 'Login';
             </div>
         </div>
         
-        <!-- Footer -->
         <div class="text-center mt-6 text-white text-sm">
             <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($appName) ?>. All rights reserved.</p>
         </div>
