@@ -166,7 +166,7 @@ class NotificationService {
     }
     
     /**
-     * Get notifikasi user dengan filter surat aktif
+     * ========== METHOD BARU: Get notifikasi dengan filter surat aktif ==========
      * Notifikasi hanya muncul jika surat masih aktif (belum selesai/ditolak/arsip)
      */
     public static function getRecent($userId, $limit = 5) {
@@ -186,7 +186,7 @@ class NotificationService {
     }
     
     /**
-     * Count unread notifications (hanya surat yang masih aktif)
+     * ========== METHOD BARU: Count unread (hanya surat aktif) ==========
      */
     public static function countUnread($userId) {
         $query = "SELECT COUNT(*) as total 
@@ -205,7 +205,7 @@ class NotificationService {
     }
     
     /**
-     * Count total notifikasi aktif (untuk badge sidebar)
+     * ========== METHOD BARU: Count active notifications (untuk badge sidebar) ==========
      * Menghitung surat yang user terlibat dan masih aktif
      */
     public static function countActiveNotifications($userId) {
@@ -244,8 +244,9 @@ class NotificationService {
     }
     
     /**
-     * Clear/hapus notifikasi berdasarkan surat_id
+     * ========== METHOD BARU: Clear/hapus notifikasi by surat_id ==========
      * Dipanggil saat surat selesai/ditolak/diarsipkan
+     * LOGIC: Mark semua notifikasi related ke surat ini jadi "read"
      */
     public static function clearBySurat($suratId) {
         // Mark all notifications related to this surat as read
@@ -257,7 +258,8 @@ class NotificationService {
     }
     
     /**
-     * Deactivate stakeholders when surat is completed
+     * ========== METHOD BARU: Deactivate stakeholders ==========
+     * Dipanggil saat surat selesai, set is_active = 0
      */
     public static function deactivateStakeholders($suratId) {
         $query = "UPDATE surat_stakeholders 

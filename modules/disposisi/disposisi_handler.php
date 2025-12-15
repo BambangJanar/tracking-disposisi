@@ -203,6 +203,54 @@ try {
                 'new_status' => $status
             ]);
             exit;
+        
+        // ========== ACTION BARU: SEND REMINDER ==========
+        case 'send_reminder':
+            $disposisiId = (int)$_POST['disposisi_id'];
+            $targetUserId = (int)$_POST['user_id'];
+            
+            // Validasi disposisi
+            $disposisi = DisposisiService::getById($disposisiId);
+            if (!$disposisi) throw new Exception('Disposisi tidak ditemukan');
+            
+            // Pastikan user adalah pengirim disposisi atau admin
+            $userRole = $user['id_role'] ?? 3;
+            $isAdmin = in_array($userRole, [1, 2]);
+            
+            if ($disposisi['dari_user_id'] != $user['id'] && !$isAdmin) {
+                throw new Exception('Anda tidak memiliki akses untuk mengirim peringatan ini');
+            }
+            
+            // Pastikan status disposisi belum selesai
+            if (in_array($disposisi['status_disposisi'], ['selesai', 'ditolak'])) {
+                throw new Exception('Tidak dapat mengirim peringatan untuk disposisi yang sudah selesai');
+            }
+            
+            // Send notification reminder
+            if (file_exists(__DIR__ . '/../notifications/notification_service.php')) {
+                require_once __DIR__ . '/../notifications/notification_service.php';
+                
+                // Buat notifikasi peringatan
+                NotificationService::create([
+                    'user_id' => $targetUserId,
+                    'type' => 'surat_reminder',
+                    'title' => '⚠️ Peringatan: Disposisi Menunggu Respon',
+                    'message' => "Surat {$disposisi['nomor_agenda']} menunggu tindakan Anda. Mohon segera diproses.",
+                    'surat_id' => $disposisi['id_surat'],
+                    'disposisi_id' => $disposisiId,
+                    'url' => '/surat_detail.php?id=' . $disposisi['id_surat']
+                ]);
+            }
+            
+            logActivity($user['id'], 'send_reminder', "Mengirim peringatan disposisi ID {$disposisiId}");
+            
+            ob_end_clean();
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Peringatan berhasil dikirim ke ' . $disposisi['ke_user_nama']
+            ]);
+            exit;
             
         default:
             throw new Exception('Action tidak valid');

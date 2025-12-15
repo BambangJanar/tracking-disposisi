@@ -14,22 +14,22 @@ $userId = $user['id'];
 $userRole = $user['id_role'] ?? 3;
 $pageTitle = 'Disposisi Masuk';
 
-// Filter disposisi berdasarkan stakeholder (surat tetap muncul meskipun sudah didelegasikan)
+// ========== PERUBAHAN: Gunakan getUniqueInboxByStakeholder untuk deduplikasi ==========
 $filters = [
+    'ke_user_id' => $userId,
     'status_disposisi' => $_GET['status'] ?? '',
-    'search' => $_GET['search'] ?? '',
-    'include_completed' => isset($_GET['show_completed']) ? true : false
+    'search' => $_GET['search'] ?? ''
 ];
 
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $perPage = 10;
 $offset = ($page - 1) * $perPage;
 
-// Gunakan method baru yang filter berdasarkan stakeholder
-$totalDisposisi = DisposisiService::countInboxByStakeholder($userId, $filters);
+// Hitung dan ambil data dengan query unique (GROUP BY surat_id)
+$totalDisposisi = DisposisiService::countUniqueInbox($filters);
 $pagination = new Pagination($totalDisposisi, $perPage, $page);
 
-$disposisiList = DisposisiService::getInboxByStakeholder($userId, $filters, $perPage, $offset);
+$disposisiList = DisposisiService::getUniqueInboxByStakeholder($filters, $perPage, $offset);
 ?>
 
 <?php include 'partials/header.php'; ?>
@@ -41,12 +41,12 @@ $disposisiList = DisposisiService::getInboxByStakeholder($userId, $filters, $per
         <main class="p-4 sm:p-6 lg:p-8">
             <div class="mb-4 sm:mb-6">
                 <h1 class="text-xl sm:text-2xl font-bold text-gray-800 mb-1 sm:mb-2">Disposisi Masuk</h1>
-                <p class="text-sm sm:text-base text-gray-600">Surat yang menjadi tanggung jawab Anda</p>
+                <p class="text-sm sm:text-base text-gray-600">Disposisi surat yang ditujukan kepada Anda</p>
             </div>
             
             <!-- Filter Form -->
             <div class="bg-white rounded-lg shadow p-4 mb-4 sm:mb-6">
-                <form method="GET" class="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-2">
+                <form method="GET" class="space-y-3 sm:space-y-0 sm:flex sm:gap-2">
                     <input type="text" name="search" value="<?= htmlspecialchars($filters['search']) ?>"
                            placeholder="Cari nomor surat, perihal..." 
                            class="w-full sm:flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500">
@@ -56,21 +56,16 @@ $disposisiList = DisposisiService::getInboxByStakeholder($userId, $filters, $per
                         <option value="dikirim" <?= $filters['status_disposisi'] == 'dikirim' ? 'selected' : '' ?>>Dikirim</option>
                         <option value="diterima" <?= $filters['status_disposisi'] == 'diterima' ? 'selected' : '' ?>>Diterima</option>
                         <option value="diproses" <?= $filters['status_disposisi'] == 'diproses' ? 'selected' : '' ?>>Diproses</option>
-                        <option value="selesai" <?= $filters['status_disposisi'] == 'selesai' ? 'selected' : '' ?>>Selesai</option>
+                        <option value="disetujui" <?= $filters['status_disposisi'] == 'disetujui' ? 'selected' : '' ?>>Disetujui</option>
                         <option value="ditolak" <?= $filters['status_disposisi'] == 'ditolak' ? 'selected' : '' ?>>Ditolak</option>
                     </select>
-                    
-                    <label class="flex items-center px-3 py-2 text-sm text-gray-600">
-                        <input type="checkbox" name="show_completed" value="1" <?= $filters['include_completed'] ? 'checked' : '' ?> class="mr-2 rounded">
-                        Tampilkan selesai
-                    </label>
                     
                     <div class="flex gap-2">
                         <button type="submit" class="flex-1 sm:flex-none bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                             <i class="fas fa-search"></i><span class="ml-2 sm:hidden">Cari</span>
                         </button>
                         
-                        <?php if (!empty($filters['search']) || !empty($filters['status_disposisi']) || $filters['include_completed']): ?>
+                        <?php if (!empty($filters['search']) || !empty($filters['status_disposisi'])): ?>
                         <a href="disposisi_inbox.php" class="flex-1 sm:flex-none bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium text-center transition-colors">
                             <i class="fas fa-times"></i><span class="ml-2 sm:hidden">Reset</span>
                         </a>
@@ -103,25 +98,16 @@ $disposisiList = DisposisiService::getInboxByStakeholder($userId, $filters, $per
                             </tr>
                             <?php else: ?>
                                 <?php foreach ($disposisiList as $disp): 
-                                    // Background color untuk row
                                     $rowBgClass = '';
                                     if ($disp['status_disposisi'] === 'ditolak') {
                                         $rowBgClass = 'bg-red-50';
-                                    } elseif ($disp['status_disposisi'] === 'selesai') {
+                                    } elseif ($disp['status_disposisi'] === 'disetujui') {
                                         $rowBgClass = 'bg-green-50';
                                     }
-                                    
-                                    // Check if this is a delegated surat (user is stakeholder but not direct recipient)
-                                    $isDelegated = isset($disp['stakeholder_role']) && $disp['stakeholder_role'] === 'penerima_delegasi';
                                 ?>
                                 <tr class="hover:bg-gray-50 transition-colors <?= $rowBgClass ?>" id="row-<?= $disp['id'] ?>">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($disp['dari_user_nama']) ?></div>
-                                        <?php if ($disp['ke_user_id'] != $userId): ?>
-                                        <div class="text-xs text-blue-600">
-                                            <i class="fas fa-share mr-1"></i>Didelegasikan ke <?= htmlspecialchars($disp['ke_user_nama']) ?>
-                                        </div>
-                                        <?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($disp['nomor_agenda']) ?></div>
@@ -146,7 +132,7 @@ $disposisiList = DisposisiService::getInboxByStakeholder($userId, $filters, $per
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             
-                                            <?php if ($disp['ke_user_id'] == $userId && in_array($disp['status_disposisi'], ['dikirim', 'diterima', 'diproses'])): ?>
+                                            <?php if (in_array($disp['status_disposisi'], ['dikirim', 'diterima', 'diproses'])): ?>
                                             <button onclick='openUpdateModal(<?= json_encode($disp) ?>)' class="text-green-600 hover:text-green-800 transition-colors" title="Update Status">
                                                 <i class="fas fa-check-circle"></i>
                                             </button>
@@ -162,13 +148,13 @@ $disposisiList = DisposisiService::getInboxByStakeholder($userId, $filters, $per
                 
                 <?php if ($pagination->hasPages()): ?>
                 <div class="border-t border-gray-200 px-4 py-3">
-                    <?= $pagination->render('disposisi_inbox.php', ['status' => $filters['status_disposisi'], 'search' => $filters['search'], 'show_completed' => $filters['include_completed'] ? '1' : '']) ?>
+                    <?= $pagination->render('disposisi_inbox.php', ['status' => $filters['status_disposisi'], 'search' => $filters['search']]) ?>
                 </div>
                 <?php endif; ?>
             </div>
 
-            <!-- Mobile Cards -->
-            <div class="lg:hidden space-y-4">
+            <!-- Mobile Card View -->
+            <div class="lg:hidden space-y-4" id="disposisiMobileContainer">
                 <?php if (empty($disposisiList)): ?>
                 <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
                     <i class="fas fa-inbox text-5xl mb-3 text-gray-300"></i>
@@ -177,35 +163,26 @@ $disposisiList = DisposisiService::getInboxByStakeholder($userId, $filters, $per
                 <?php else: ?>
                     <?php foreach ($disposisiList as $disp): 
                         $cardBgClass = '';
-                        $borderClass = '';
                         if ($disp['status_disposisi'] === 'ditolak') {
-                            $cardBgClass = 'bg-red-50';
-                            $borderClass = 'border-l-4 border-red-500';
-                        } elseif ($disp['status_disposisi'] === 'selesai') {
-                            $cardBgClass = 'bg-green-50';
-                            $borderClass = 'border-l-4 border-green-500';
+                            $cardBgClass = 'border-l-4 border-red-500 bg-red-50';
+                        } elseif ($disp['status_disposisi'] === 'disetujui') {
+                            $cardBgClass = 'border-l-4 border-green-500 bg-green-50';
                         }
                     ?>
-                    <div class="bg-white rounded-lg shadow overflow-hidden <?= $cardBgClass ?> <?= $borderClass ?>" id="card-<?= $disp['id'] ?>">
+                    <div class="bg-white rounded-lg shadow overflow-hidden <?= $cardBgClass ?>" id="card-<?= $disp['id'] ?>">
                         <div class="p-4">
                             <div class="flex items-center justify-between mb-3">
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full status-badge-<?= $disp['id'] ?> <?= getDisposisiStatusBadge($disp['status_disposisi']) ?>">
                                     <span class="status-text-<?= $disp['id'] ?>"><?= ucfirst($disp['status_disposisi']) ?></span>
                                 </span>
-                                <div class="text-xs text-gray-500">
+                                <span class="text-xs text-gray-500">
                                     <i class="fas fa-user mr-1"></i><?= htmlspecialchars($disp['dari_user_nama']) ?>
-                                </div>
+                                </span>
                             </div>
-                            
-                            <?php if ($disp['ke_user_id'] != $userId): ?>
-                            <div class="mb-2 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                                <i class="fas fa-share mr-1"></i>Didelegasikan ke <?= htmlspecialchars($disp['ke_user_nama']) ?>
-                            </div>
-                            <?php endif; ?>
                             
                             <div class="mb-3">
                                 <p class="text-sm font-semibold text-gray-900"><?= htmlspecialchars($disp['nomor_agenda']) ?></p>
-                                <p class="text-xs text-gray-500 line-clamp-2"><?= $disp['perihal'] ?></p>
+                                <p class="text-xs text-gray-500 line-clamp-2"><?= htmlspecialchars($disp['perihal']) ?></p>
                             </div>
                             
                             <?php if ($disp['catatan']): ?>
@@ -221,14 +198,12 @@ $disposisiList = DisposisiService::getInboxByStakeholder($userId, $filters, $per
                             </div>
                             
                             <div class="flex gap-2">
-                                <a href="surat_detail.php?id=<?= $disp['id_surat'] ?>" 
-                                   class="flex-1 bg-primary-50 text-primary-600 hover:bg-primary-100 text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors">
-                                    <i class="fas fa-eye mr-1"></i>Detail
+                                <a href="surat_detail.php?id=<?= $disp['id_surat'] ?>" class="flex-1 bg-primary-50 text-primary-600 hover:bg-primary-100 text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                                    <i class="fas fa-eye mr-1"></i>Lihat
                                 </a>
                                 
-                                <?php if ($disp['ke_user_id'] == $userId && in_array($disp['status_disposisi'], ['dikirim', 'diterima', 'diproses'])): ?>
-                                <button onclick='openUpdateModal(<?= json_encode($disp) ?>)' 
-                                        class="flex-1 bg-green-50 text-green-600 hover:bg-green-100 text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                                <?php if (in_array($disp['status_disposisi'], ['dikirim', 'diterima', 'diproses'])): ?>
+                                <button onclick='openUpdateModal(<?= json_encode($disp) ?>)' class="flex-1 bg-green-50 text-green-600 hover:bg-green-100 text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors">
                                     <i class="fas fa-check-circle mr-1"></i>Update
                                 </button>
                                 <?php endif; ?>
@@ -239,7 +214,7 @@ $disposisiList = DisposisiService::getInboxByStakeholder($userId, $filters, $per
                     
                     <?php if ($pagination->hasPages()): ?>
                     <div class="bg-white rounded-lg shadow p-4">
-                        <?= $pagination->render('disposisi_inbox.php', ['status' => $filters['status_disposisi'], 'search' => $filters['search'], 'show_completed' => $filters['include_completed'] ? '1' : '']) ?>
+                        <?= $pagination->render('disposisi_inbox.php', ['status' => $filters['status_disposisi'], 'search' => $filters['search']]) ?>
                     </div>
                     <?php endif; ?>
                 <?php endif; ?>
@@ -251,45 +226,50 @@ $disposisiList = DisposisiService::getInboxByStakeholder($userId, $filters, $per
 </div>
 
 <!-- Modal Update Status -->
-<div id="updateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
-        <div class="p-4 sm:p-6 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-800">Update Status Disposisi</h3>
-            <p class="text-xs text-gray-500 mt-1">
-                <span id="modalNomorAgenda"></span> - <span id="modalPerihal"></span>
-            </p>
-        </div>
-        
-        <form id="updateDisposisiForm">
-            <input type="hidden" name="action" value="update_status">
-            <input type="hidden" name="id" id="disposisiId">
+<div id="updateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+                <h3 class="text-base sm:text-lg font-semibold text-gray-800">Update Status Disposisi</h3>
+            </div>
             
-            <div class="p-4 sm:p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Status Baru</label>
-                    <select name="status" id="statusSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
-                        <option value="diterima">Diterima</option>
-                        <option value="diproses">Diproses</option>
-                        <option value="selesai">Selesai</option>
-                        <option value="ditolak">Ditolak</option>
-                    </select>
+            <form id="updateDisposisiForm">
+                <input type="hidden" name="action" value="update_status">
+                <input type="hidden" name="id" id="disposisiId">
+                
+                <div class="px-4 sm:px-6 py-4 space-y-4">
+                    <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                        <p class="text-xs sm:text-sm text-gray-600 mb-1">Nomor Agenda:</p>
+                        <p class="text-sm sm:text-base font-semibold text-gray-800" id="modalNomorAgenda"></p>
+                        <p class="text-xs sm:text-sm text-gray-600 mt-2 mb-1">Perihal:</p>
+                        <p class="text-xs sm:text-sm text-gray-800" id="modalPerihal"></p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
+                        <select name="status" id="statusSelect" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                            <option value="diproses">Diproses</option>
+                            <option value="disetujui">Disetujui (Selesai)</option>
+                            <option value="ditolak">Ditolak</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Catatan Tambahan</label>
+                        <textarea name="catatan" rows="3" placeholder="Tambahkan catatan untuk update status ini..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"></textarea>
+                    </div>
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (opsional)</label>
-                    <textarea name="catatan" rows="3" placeholder="Tambahkan catatan untuk update status ini..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"></textarea>
+                <div class="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-0 sm:space-x-2">
+                    <button type="button" onclick="closeUpdateModal()" class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" id="btnUpdate" class="w-full sm:w-auto px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                        Update Status
+                    </button>
                 </div>
-            </div>
-            
-            <div class="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-0 sm:space-x-2">
-                <button type="button" onclick="closeUpdateModal()" class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                    Batal
-                </button>
-                <button type="submit" id="btnUpdate" class="w-full sm:w-auto px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
-                    Update Status
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -302,7 +282,7 @@ function getStatusBadgeClass(status) {
         'dikirim': 'bg-blue-100 text-blue-800',
         'diterima': 'bg-indigo-100 text-indigo-800',
         'diproses': 'bg-yellow-100 text-yellow-800',
-        'selesai': 'bg-green-100 text-green-800',
+        'disetujui': 'bg-green-100 text-green-800',
         'ditolak': 'bg-red-100 text-red-800'
     };
     return badges[status] || 'bg-gray-100 text-gray-800';
@@ -317,7 +297,7 @@ function openUpdateModal(disposisi) {
     if (disposisi.status_disposisi === 'dikirim' || disposisi.status_disposisi === 'diterima') {
         statusSelect.value = 'diproses';
     } else {
-        statusSelect.value = 'selesai';
+        statusSelect.value = 'disetujui';
     }
     
     document.getElementById('updateModal').classList.remove('hidden');
@@ -356,25 +336,22 @@ $('#updateDisposisiForm').on('submit', function(e) {
                 const row = $('#row-' + disposisiId);
                 const card = $('#card-' + disposisiId);
                 
-                // Update badge
                 statusBadge.removeClass('bg-blue-100 text-blue-800 bg-indigo-100 text-indigo-800 bg-yellow-100 text-yellow-800 bg-green-100 text-green-800 bg-red-100 text-red-800');
                 statusBadge.addClass(getStatusBadgeClass(newStatus));
                 statusText.text(newStatus.charAt(0).toUpperCase() + newStatus.slice(1));
                 
-                // Update row background
                 row.removeClass('bg-red-50 bg-green-50');
                 card.removeClass('border-l-4 border-red-500 bg-red-50 border-l-4 border-green-500 bg-green-50');
                 
                 if (newStatus === 'ditolak') {
                     row.addClass('bg-red-50');
                     card.addClass('border-l-4 border-red-500 bg-red-50');
-                } else if (newStatus === 'selesai') {
+                } else if (newStatus === 'disetujui') {
                     row.addClass('bg-green-50');
                     card.addClass('border-l-4 border-green-500 bg-green-50');
                 }
                 
-                // Hide update button
-                if (newStatus === 'selesai' || newStatus === 'ditolak') {
+                if (newStatus === 'disetujui' || newStatus === 'ditolak') {
                     $('#row-' + disposisiId + ' button[onclick*="openUpdateModal"]').fadeOut();
                     $('#card-' + disposisiId + ' button[onclick*="openUpdateModal"]').fadeOut();
                 }

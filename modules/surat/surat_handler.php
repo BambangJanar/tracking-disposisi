@@ -128,6 +128,7 @@ try {
             }
             break;
             
+        // ========== UPDATE STATUS (dengan auto-clear notifications) ==========
         case 'update_status':
             $id = $_POST['id'] ?? 0;
             $status = $_POST['status'] ?? '';
@@ -137,6 +138,7 @@ try {
                 throw new Exception("Status tidak valid");
             }
             
+            // updateStatus() sudah otomatis clear notifications jika status final
             if (SuratService::updateStatus($id, $status)) {
                 logActivity($user['id'], 'update_status_surat', "Mengubah status surat ID: $id menjadi $status");
                 echo json_encode(['status' => 'success', 'message' => 'Status surat berhasil diubah']);
@@ -152,4 +154,3 @@ try {
 } catch (Exception $e) {
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
-?>

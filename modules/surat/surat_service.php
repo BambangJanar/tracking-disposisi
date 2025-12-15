@@ -228,7 +228,7 @@ class SuratService {
         return $stmt->execute();
     }
 
-    // Arsipkan Surat (dengan clear notifications)
+    // ========== Arsipkan Surat (dengan clear notifications) ==========
     public static function arsipkan($id) {
         $conn = getConnection();
         $stmt = $conn->prepare("UPDATE surat SET status_surat = 'arsip' WHERE id = ?");
@@ -308,13 +308,14 @@ class SuratService {
         return ['success' => false, 'message' => 'Gagal mengupload file ke server'];
     }
 
-    // Update status surat (dengan notifikasi handling)
+    // ========== Update status surat (dengan auto-clear notifications) ==========
     public static function updateStatus($id, $status) {
         $conn = getConnection();
         $stmt = $conn->prepare("UPDATE surat SET status_surat = ? WHERE id = ?");
         $stmt->bind_param("si", $status, $id);
         $result = $stmt->execute();
         
+        // LOGIC BARU: Auto-clear notifications jika status jadi final (disetujui, ditolak, arsip)
         if ($result && in_array($status, ['disetujui', 'ditolak', 'arsip'])) {
             // Clear notifications dan deactivate stakeholders
             if (file_exists(__DIR__ . '/../notifications/notification_service.php')) {
@@ -327,4 +328,3 @@ class SuratService {
         return $result;
     }
 }
-?>

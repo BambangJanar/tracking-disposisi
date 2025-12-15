@@ -20,6 +20,7 @@ $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
 try {
     switch ($action) {
+        // ========== Get recent notifications (filter surat aktif) ==========
         case 'get_recent':
             $notifications = NotificationService::getRecent($user['id']);
             $unreadCount = NotificationService::countUnread($user['id']);
@@ -31,6 +32,7 @@ try {
             ]);
             break;
             
+        // ========== Mark as read ==========
         case 'mark_read':
             $notifId = (int)$_POST['id'];
             NotificationService::markAsRead($notifId, $user['id']);
@@ -41,6 +43,7 @@ try {
             ]);
             break;
             
+        // ========== Mark all as read ==========
         case 'mark_all_read':
             NotificationService::markAllAsRead($user['id']);
             
@@ -50,6 +53,7 @@ try {
             ]);
             break;
             
+        // ========== Count unread (untuk badge bell) ==========
         case 'count_unread':
             $count = NotificationService::countUnread($user['id']);
             
@@ -59,6 +63,7 @@ try {
             ]);
             break;
             
+        // ========== ACTION BARU: Count active (untuk badge sidebar) ==========
         case 'count_active':
             // Count active surat yang user terlibat (untuk badge sidebar)
             $count = NotificationService::countActiveNotifications($user['id']);

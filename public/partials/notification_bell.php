@@ -7,6 +7,8 @@
  * - Icon lonceng dengan badge unread count
  * - Modal notifikasi di tengah layar
  * - Max 5 notifikasi dengan scroll
+ * - AUTO-RELOAD setiap 30 detik
+ * - AUTO-CLEAR saat surat selesai
  */
 
 // Load notification service
@@ -97,7 +99,7 @@ function closeNotificationModal() {
     isNotificationModalOpen = false;
 }
 
-// Load notifications via AJAX
+// ========== Load notifications via AJAX (filter surat aktif) ==========
 function loadNotifications() {
     const loadingEl = document.getElementById('notif-loading');
     const emptyEl = document.getElementById('notif-empty');
@@ -123,7 +125,7 @@ function loadNotifications() {
                     return;
                 }
                 
-                // Render notifications
+                // Render notifications (hanya yang suratnya masih aktif)
                 notifications.forEach(notif => {
                     const notifEl = createNotificationElement(notif);
                     listEl.appendChild(notifEl);
@@ -156,7 +158,8 @@ function createNotificationElement(notif) {
         'disposisi_baru': 'fa-paper-plane text-blue-500',
         'surat_masuk': 'fa-envelope text-green-500',
         'surat_update': 'fa-sync text-yellow-500',
-        'surat_selesai': 'fa-check-circle text-emerald-500'
+        'surat_selesai': 'fa-check-circle text-emerald-500',
+        'surat_reminder': 'fa-bell text-orange-500'
     };
     
     const iconClass = iconMap[notif.type] || 'fa-bell text-gray-500';
@@ -233,12 +236,12 @@ function updateNotificationBadge(count) {
     }
 }
 
-// Check for new notifications periodically
+// ========== AUTO-RELOAD: Check for new notifications every 30 seconds ==========
 function startNotificationPolling() {
     // Check every 30 seconds
     notificationCheckInterval = setInterval(() => {
         updateNotificationCount();
-    }, 30000);
+    }, 30000); // 30 detik
 }
 
 function updateNotificationCount() {
@@ -253,6 +256,9 @@ function updateNotificationCount() {
                     loadNotifications();
                 }
             }
+        })
+        .catch(error => {
+            console.error('Error updating count:', error);
         });
 }
 
@@ -293,8 +299,9 @@ document.getElementById('notification-modal')?.addEventListener('click', (e) => 
     }
 });
 
-// Start polling on page load
+// ========== Start polling on page load (AUTO-RELOAD) ==========
 document.addEventListener('DOMContentLoaded', () => {
     startNotificationPolling();
+    console.log('✅ Notification polling started (30s interval)');
 });
 </script>

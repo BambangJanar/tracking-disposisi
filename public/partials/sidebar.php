@@ -10,14 +10,9 @@ if (file_exists(__DIR__ . '/../../modules/users/users_service.php')) {
     require_once __DIR__ . '/../../modules/users/users_service.php';
 }
 
-// Load NotificationService untuk badge
+// ========== PERUBAHAN: Load NotificationService untuk badge inbox ==========
 if (file_exists(__DIR__ . '/../../modules/notifications/notification_service.php')) {
     require_once __DIR__ . '/../../modules/notifications/notification_service.php';
-}
-
-// Load DisposisiService untuk badge inbox
-if (file_exists(__DIR__ . '/../../modules/disposisi/disposisi_service.php')) {
-    require_once __DIR__ . '/../../modules/disposisi/disposisi_service.php';
 }
 
 $currentPage = basename($_SERVER['PHP_SELF']);
@@ -35,10 +30,10 @@ if (hasRole('superadmin') && class_exists('UsersService')) {
     $pendingCount = UsersService::countPending();
 }
 
-// Hitung notifikasi aktif untuk badge Disposisi Masuk
-$inboxBadgeCount = 0;
-if (class_exists('DisposisiService')) {
-    $inboxBadgeCount = DisposisiService::getActiveInboxCount($user['id']);
+// ========== PERUBAHAN: Hitung badge inbox dari surat aktif ==========
+$inboxBadge = 0;
+if (class_exists('NotificationService')) {
+    $inboxBadge = NotificationService::countActiveNotifications($user['id']);
 }
 
 function isActive($page) {
@@ -134,16 +129,18 @@ function isGroupActive($pages) {
                     Semua Surat
                 </a>
                 
-                <!-- Disposisi Masuk - Semua Role dengan Badge -->
+                <!-- ========== PERUBAHAN: Badge Inbox auto-update ========== -->
                 <a href="<?= BASE_URL ?>/disposisi_inbox.php" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors <?= isActive('disposisi_inbox.php') ?>">
                     <div class="flex items-center">
                         <i class="fas fa-inbox w-6 text-center mr-2"></i>
                         Disposisi Masuk
                     </div>
-                    <?php if ($inboxBadgeCount > 0): ?>
-                    <span id="sidebar-inbox-badge" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
-                        <?= $inboxBadgeCount > 99 ? '99+' : $inboxBadgeCount ?>
+                    <?php if ($inboxBadge > 0): ?>
+                    <span id="inbox-badge" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
+                        <?= $inboxBadge ?>
                     </span>
+                    <?php else: ?>
+                    <span id="inbox-badge" class="hidden bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm"></span>
                     <?php endif; ?>
                 </a>
                 
@@ -155,11 +152,13 @@ function isGroupActive($pages) {
                 </a>
                 <?php endif; ?>
                 
-                <!-- Monitoring Disposisi - Semua Role bisa akses, tapi filter berbeda -->
+                <!-- Monitoring Disposisi - HIDE untuk Anak Magang -->
+                <?php if ($userRole != 3): ?>
                 <a href="<?= BASE_URL ?>/disposisi.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors <?= isActive('disposisi.php') ?>">
                     <i class="fas fa-exchange-alt w-6 text-center mr-2"></i>
                     Monitoring Disposisi
                 </a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -306,6 +305,33 @@ function confirmLogout() {
         }
     });
 }
+
+// ========== AUTO-UPDATE BADGE INBOX ==========
+function updateInboxBadge() {
+    fetch('<?= BASE_URL ?>/../modules/notifications/notification_handler.php?action=count_active')
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const badge = document.getElementById('inbox-badge');
+                if (badge) {
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error updating inbox badge:', error);
+        });
+}
+
+// Update badge setiap 30 detik (sinkron dengan notification bell)
+setInterval(updateInboxBadge, 30000);
+
+console.log('✅ Sidebar inbox badge auto-update enabled (30s interval)');
 </script>
 
 <style>
