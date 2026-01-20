@@ -145,6 +145,55 @@ try {
             }
             break;
 
+        case 'unarsip':
+            // Mengeluarkan surat dari arsip (kembali ke status 'baru')
+            $id = $_POST['id'] ?? 0;
+            if (!$id) throw new Exception("ID Surat tidak valid");
+            
+            $surat = SuratService::getById($id);
+            if (!$surat) throw new Exception("Surat tidak ditemukan");
+            if ($surat['status_surat'] !== 'arsip') throw new Exception("Surat ini tidak sedang diarsipkan");
+            
+            // Hanya Admin (role 1) dan Karyawan (role 2) yang bisa unarsip
+            $userRole = $user['id_role'] ?? 3;
+            if ($userRole == 3) {
+                throw new Exception("Anda tidak memiliki akses untuk mengeluarkan surat dari arsip");
+            }
+            
+            if (SuratService::updateStatus($id, 'baru')) {
+                logActivity($user['id'], 'unarsip_surat', "Mengeluarkan surat ID: $id dari arsip");
+                echo json_encode(['status' => 'success', 'message' => 'Surat berhasil dikeluarkan dari arsip']);
+            } else {
+                throw new Exception("Gagal mengeluarkan surat dari arsip");
+            }
+            break;
+
+        case 'delete_permanent':
+            // Hapus surat secara permanen (dari arsip)
+            $id = $_POST['id'] ?? 0;
+            if (!$id) throw new Exception("ID Surat tidak valid");
+            
+            $surat = SuratService::getById($id);
+            if (!$surat) throw new Exception("Surat tidak ditemukan");
+            
+            // Hanya Admin (role 1) dan Karyawan (role 2) yang bisa hapus permanen
+            $userRole = $user['id_role'] ?? 3;
+            if ($userRole == 3) {
+                throw new Exception("Anda tidak memiliki akses untuk menghapus surat secara permanen");
+            }
+            
+            if (SuratService::delete($id)) {
+                // Hapus file lampiran jika ada
+                if ($surat['lampiran_file'] && file_exists(UPLOAD_PATH . $surat['lampiran_file'])) {
+                    unlink(UPLOAD_PATH . $surat['lampiran_file']);
+                }
+                logActivity($user['id'], 'hapus_permanen_surat', "Menghapus permanen surat ID: $id dari arsip");
+                echo json_encode(['status' => 'success', 'message' => 'Surat berhasil dihapus secara permanen']);
+            } else {
+                throw new Exception("Gagal menghapus surat");
+            }
+            break;
+
         default:
             throw new Exception("Aksi tidak valid");
     }

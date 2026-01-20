@@ -83,7 +83,7 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                             <i class="fas fa-print mr-2 text-gray-500"></i> Cetak
                         </button>
 
-                        <?php if (!$isSuratSelesai): ?>
+                        <?php if (!$isSuratSelesai && $userRole != 3): // Hanya Super Admin (1) dan Karyawan (2) yang bisa setujui/tolak ?>
                         <div class="flex gap-2">
                             <button onclick="updateStatusSurat(<?= $suratId ?>, 'disetujui')" 
                                     class="inline-flex items-center px-4 py-2.5 bg-green-600 border border-transparent rounded-lg font-medium text-sm text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all shadow-green-200">

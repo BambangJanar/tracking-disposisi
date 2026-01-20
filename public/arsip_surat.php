@@ -196,6 +196,19 @@ $arsipList = dbSelect($query, $params, $types);
                                                 <i class="fas fa-file-pdf"></i>
                                             </a>
                                             <?php endif; ?>
+                                            
+                                            <?php if ($userRole != 3): // Hanya Admin dan Karyawan ?>
+                                            <button onclick="unarsipSurat(<?= $surat['id'] ?>)" 
+                                                    class="text-yellow-600 hover:text-yellow-800 transition-colors" 
+                                                    title="Keluarkan dari Arsip">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                            <button onclick="hapusPermanen(<?= $surat['id'] ?>)" 
+                                                    class="text-red-600 hover:text-red-800 transition-colors" 
+                                                    title="Hapus Permanen">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -269,6 +282,19 @@ $arsipList = dbSelect($query, $params, $types);
                                 </a>
                                 <?php endif; ?>
                             </div>
+                            
+                            <?php if ($userRole != 3): // Hanya Admin dan Karyawan ?>
+                            <div class="flex space-x-2 mt-2">
+                                <button onclick="unarsipSurat(<?= $surat['id'] ?>)" 
+                                        class="flex-1 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                                    <i class="fas fa-undo mr-1"></i>Keluarkan
+                                </button>
+                                <button onclick="hapusPermanen(<?= $surat['id'] ?>)" 
+                                        class="flex-1 bg-red-50 text-red-600 hover:bg-red-100 text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                                    <i class="fas fa-trash mr-1"></i>Hapus
+                                </button>
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -285,5 +311,89 @@ $arsipList = dbSelect($query, $params, $types);
         <?php include 'partials/footer.php'; ?>
     </div>
 </div>
+
+<!-- JavaScript untuk Arsip -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+const handlerUrl = '../modules/surat/surat_handler.php';
+
+// Keluarkan Surat dari Arsip
+function unarsipSurat(id) {
+    Swal.fire({
+        title: 'Keluarkan dari Arsip?',
+        text: 'Surat ini akan dikeluarkan dari arsip dan statusnya akan kembali ke "Baru".',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#EAB308',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Ya, Keluarkan',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post(handlerUrl, { action: 'unarsip', id: id }, function(response) {
+                if (response.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Gagal', response.message, 'error');
+                }
+            }, 'json').fail(function(xhr) {
+                let msg = 'Terjadi kesalahan sistem';
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    if(res.message) msg = res.message;
+                } catch(e) {}
+                Swal.fire('Error', msg, 'error');
+            });
+        }
+    });
+}
+
+// Hapus Surat Secara Permanen
+function hapusPermanen(id) {
+    Swal.fire({
+        title: 'Hapus Permanen?',
+        text: 'PERINGATAN: Surat ini akan dihapus secara permanen dan tidak dapat dikembalikan!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Ya, Hapus Permanen',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post(handlerUrl, { action: 'delete_permanent', id: id }, function(response) {
+                if (response.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Terhapus!',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Gagal', response.message, 'error');
+                }
+            }, 'json').fail(function(xhr) {
+                let msg = 'Terjadi kesalahan sistem';
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    if(res.message) msg = res.message;
+                } catch(e) {}
+                Swal.fire('Error', msg, 'error');
+            });
+        }
+    });
+}
+</script>
 
 <?php include 'partials/footer.php'; ?>
