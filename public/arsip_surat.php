@@ -25,9 +25,15 @@ $offset = ($page - 1) * $perPage;
 $params = [];
 $types = '';
 
+// Query dengan status final dari disposisi terakhir
 $query = "SELECT s.*, 
           js.nama_jenis,
-          u.nama_lengkap as dibuat_oleh_nama
+          u.nama_lengkap as dibuat_oleh_nama,
+          (SELECT d.status_disposisi 
+           FROM disposisi d 
+           WHERE d.id_surat = s.id 
+           ORDER BY d.tanggal_disposisi DESC 
+           LIMIT 1) as status_disposisi_terakhir
           FROM surat s
           LEFT JOIN jenis_surat js ON s.id_jenis = js.id
           LEFT JOIN users u ON s.dibuat_oleh = u.id
@@ -117,6 +123,7 @@ $arsipList = dbSelect($query, $params, $types);
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Agenda</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jenis</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Perihal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal Surat</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diarsipkan</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
@@ -125,7 +132,7 @@ $arsipList = dbSelect($query, $params, $types);
                         <tbody class="bg-white divide-y divide-gray-200">
                             <?php if (empty($arsipList)): ?>
                             <tr>
-                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                                <td colspan="7" class="px-6 py-8 text-center text-gray-500">
                                     <i class="fas fa-archive text-5xl mb-3 text-gray-300"></i>
                                     <p>
                                         <?php if (!empty($_GET['search'])): ?>
@@ -137,7 +144,23 @@ $arsipList = dbSelect($query, $params, $types);
                                 </td>
                             </tr>
                             <?php else: ?>
-                                <?php foreach ($arsipList as $surat): ?>
+                                <?php foreach ($arsipList as $surat): 
+                                    // Tentukan status final berdasarkan disposisi terakhir
+                                    $statusFinal = $surat['status_disposisi_terakhir'] ?? null;
+                                    $statusLabel = 'Diarsipkan';
+                                    $statusClass = 'bg-blue-100 text-blue-800';
+                                    $statusIcon = 'fa-archive';
+                                    
+                                    if ($statusFinal === 'selesai') {
+                                        $statusLabel = 'Disetujui';
+                                        $statusClass = 'bg-green-100 text-green-800';
+                                        $statusIcon = 'fa-check-circle';
+                                    } elseif ($statusFinal === 'ditolak') {
+                                        $statusLabel = 'Ditolak';
+                                        $statusClass = 'bg-red-100 text-red-800';
+                                        $statusIcon = 'fa-times-circle';
+                                    }
+                                ?>
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($surat['nomor_agenda']) ?></div>
@@ -147,10 +170,16 @@ $arsipList = dbSelect($query, $params, $types);
                                         <?= htmlspecialchars($surat['nama_jenis']) ?>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900"><?= truncate($surat['perihal'], 60) ?></div>
+                                        <div class="text-sm text-gray-900"><?= truncate($surat['perihal'], 50) ?></div>
                                         <?php if ($surat['dari_instansi']): ?>
-                                        <div class="text-xs text-gray-500">Dari: <?= truncate($surat['dari_instansi'], 30) ?></div>
+                                        <div class="text-xs text-gray-500">Dari: <?= truncate($surat['dari_instansi'], 25) ?></div>
                                         <?php endif; ?>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $statusClass ?>">
+                                            <i class="fas <?= $statusIcon ?> mr-1"></i>
+                                            <?= $statusLabel ?>
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                         <?= formatTanggal($surat['tanggal_surat']) ?>
@@ -217,7 +246,23 @@ $arsipList = dbSelect($query, $params, $types);
                     </p>
                 </div>
                 <?php else: ?>
-                    <?php foreach ($arsipList as $surat): ?>
+                    <?php foreach ($arsipList as $surat): 
+                        // Tentukan status final berdasarkan disposisi terakhir (untuk mobile)
+                        $statusFinalMobile = $surat['status_disposisi_terakhir'] ?? null;
+                        $statusLabelMobile = 'Diarsipkan';
+                        $statusClassMobile = 'bg-blue-100 text-blue-800';
+                        $statusIconMobile = 'fa-archive';
+                        
+                        if ($statusFinalMobile === 'selesai') {
+                            $statusLabelMobile = 'Disetujui';
+                            $statusClassMobile = 'bg-green-100 text-green-800';
+                            $statusIconMobile = 'fa-check-circle';
+                        } elseif ($statusFinalMobile === 'ditolak') {
+                            $statusLabelMobile = 'Ditolak';
+                            $statusClassMobile = 'bg-red-100 text-red-800';
+                            $statusIconMobile = 'fa-times-circle';
+                        }
+                    ?>
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <div class="p-4">
                             <div class="flex items-start justify-between mb-3">
@@ -225,9 +270,15 @@ $arsipList = dbSelect($query, $params, $types);
                                     <h3 class="text-sm font-semibold text-gray-900 truncate"><?= htmlspecialchars($surat['nomor_agenda']) ?></h3>
                                     <p class="text-xs text-gray-500"><?= htmlspecialchars($surat['nomor_surat']) ?></p>
                                 </div>
-                                <span class="ml-2 px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full whitespace-nowrap">
-                                    <?= htmlspecialchars($surat['nama_jenis']) ?>
-                                </span>
+                                <div class="flex flex-col items-end gap-1">
+                                    <span class="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full whitespace-nowrap">
+                                        <?= htmlspecialchars($surat['nama_jenis']) ?>
+                                    </span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <?= $statusClassMobile ?>">
+                                        <i class="fas <?= $statusIconMobile ?> mr-1"></i>
+                                        <?= $statusLabelMobile ?>
+                                    </span>
+                                </div>
                             </div>
                             
                             <p class="text-sm text-gray-700 mb-2 line-clamp-2"><?= htmlspecialchars($surat['perihal']) ?></p>
