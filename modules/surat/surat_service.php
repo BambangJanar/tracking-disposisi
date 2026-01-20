@@ -231,8 +231,18 @@ class SuratService {
     // Arsipkan Surat (dengan clear notifications)
     public static function arsipkan($id) {
         $conn = getConnection();
-        $stmt = $conn->prepare("UPDATE surat SET status_surat = 'arsip' WHERE id = ?");
-        $stmt->bind_param("i", $id);
+        
+        // Ambil status saat ini sebelum diarsipkan
+        $stmtGet = $conn->prepare("SELECT status_surat FROM surat WHERE id = ?");
+        $stmtGet->bind_param("i", $id);
+        $stmtGet->execute();
+        $result = $stmtGet->get_result();
+        $currentData = $result->fetch_assoc();
+        $statusSebelum = $currentData['status_surat'] ?? 'baru';
+        
+        // Update status menjadi arsip dan simpan status sebelumnya
+        $stmt = $conn->prepare("UPDATE surat SET status_surat = 'arsip', status_sebelum_arsip = ? WHERE id = ?");
+        $stmt->bind_param("si", $statusSebelum, $id);
         $result = $stmt->execute();
         
         if ($result) {

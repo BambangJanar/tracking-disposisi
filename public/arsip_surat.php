@@ -25,15 +25,10 @@ $offset = ($page - 1) * $perPage;
 $params = [];
 $types = '';
 
-// Query dengan status final dari disposisi terakhir
+// Query dengan status sebelum diarsipkan
 $query = "SELECT s.*, 
           js.nama_jenis,
-          u.nama_lengkap as dibuat_oleh_nama,
-          (SELECT d.status_disposisi 
-           FROM disposisi d 
-           WHERE d.id_surat = s.id 
-           ORDER BY d.tanggal_disposisi DESC 
-           LIMIT 1) as status_disposisi_terakhir
+          u.nama_lengkap as dibuat_oleh_nama
           FROM surat s
           LEFT JOIN jenis_surat js ON s.id_jenis = js.id
           LEFT JOIN users u ON s.dibuat_oleh = u.id
@@ -145,20 +140,28 @@ $arsipList = dbSelect($query, $params, $types);
                             </tr>
                             <?php else: ?>
                                 <?php foreach ($arsipList as $surat): 
-                                    // Tentukan status final berdasarkan disposisi terakhir
-                                    $statusFinal = $surat['status_disposisi_terakhir'] ?? null;
-                                    $statusLabel = 'Diarsipkan';
-                                    $statusClass = 'bg-blue-100 text-blue-800';
-                                    $statusIcon = 'fa-archive';
+                                    // Tentukan status berdasarkan status_sebelum_arsip
+                                    $statusSebelum = $surat['status_sebelum_arsip'] ?? 'baru';
+                                    $statusLabel = ucfirst($statusSebelum);
+                                    $statusClass = 'bg-gray-100 text-gray-800';
+                                    $statusIcon = 'fa-file';
                                     
-                                    if ($statusFinal === 'selesai') {
+                                    if ($statusSebelum === 'disetujui') {
                                         $statusLabel = 'Disetujui';
                                         $statusClass = 'bg-green-100 text-green-800';
                                         $statusIcon = 'fa-check-circle';
-                                    } elseif ($statusFinal === 'ditolak') {
+                                    } elseif ($statusSebelum === 'ditolak') {
                                         $statusLabel = 'Ditolak';
                                         $statusClass = 'bg-red-100 text-red-800';
                                         $statusIcon = 'fa-times-circle';
+                                    } elseif ($statusSebelum === 'proses') {
+                                        $statusLabel = 'Proses';
+                                        $statusClass = 'bg-yellow-100 text-yellow-800';
+                                        $statusIcon = 'fa-spinner';
+                                    } elseif ($statusSebelum === 'baru') {
+                                        $statusLabel = 'Baru';
+                                        $statusClass = 'bg-blue-100 text-blue-800';
+                                        $statusIcon = 'fa-envelope';
                                     }
                                 ?>
                                 <tr class="hover:bg-gray-50 transition-colors">
@@ -247,20 +250,28 @@ $arsipList = dbSelect($query, $params, $types);
                 </div>
                 <?php else: ?>
                     <?php foreach ($arsipList as $surat): 
-                        // Tentukan status final berdasarkan disposisi terakhir (untuk mobile)
-                        $statusFinalMobile = $surat['status_disposisi_terakhir'] ?? null;
-                        $statusLabelMobile = 'Diarsipkan';
-                        $statusClassMobile = 'bg-blue-100 text-blue-800';
-                        $statusIconMobile = 'fa-archive';
+                        // Tentukan status berdasarkan status_sebelum_arsip (untuk mobile)
+                        $statusSebelumMobile = $surat['status_sebelum_arsip'] ?? 'baru';
+                        $statusLabelMobile = ucfirst($statusSebelumMobile);
+                        $statusClassMobile = 'bg-gray-100 text-gray-800';
+                        $statusIconMobile = 'fa-file';
                         
-                        if ($statusFinalMobile === 'selesai') {
+                        if ($statusSebelumMobile === 'disetujui') {
                             $statusLabelMobile = 'Disetujui';
                             $statusClassMobile = 'bg-green-100 text-green-800';
                             $statusIconMobile = 'fa-check-circle';
-                        } elseif ($statusFinalMobile === 'ditolak') {
+                        } elseif ($statusSebelumMobile === 'ditolak') {
                             $statusLabelMobile = 'Ditolak';
                             $statusClassMobile = 'bg-red-100 text-red-800';
                             $statusIconMobile = 'fa-times-circle';
+                        } elseif ($statusSebelumMobile === 'proses') {
+                            $statusLabelMobile = 'Proses';
+                            $statusClassMobile = 'bg-yellow-100 text-yellow-800';
+                            $statusIconMobile = 'fa-spinner';
+                        } elseif ($statusSebelumMobile === 'baru') {
+                            $statusLabelMobile = 'Baru';
+                            $statusClassMobile = 'bg-blue-100 text-blue-800';
+                            $statusIconMobile = 'fa-envelope';
                         }
                     ?>
                     <div class="bg-white rounded-lg shadow overflow-hidden">
