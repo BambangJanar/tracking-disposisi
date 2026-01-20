@@ -19,9 +19,8 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $perPage = 10;
 $offset = ($page - 1) * $perPage;
 
-// ===== FILTER BERDASARKAN ROLE =====
-// - Superadmin & Admin: Lihat semua arsip
-// - Anak Magang: Lihat hanya arsip surat yang pernah ditugaskan ke dia
+// ===== ARSIP BERSAMA =====
+// Semua user bisa melihat semua surat yang diarsipkan (arsip bersama)
 
 $params = [];
 $types = '';
@@ -33,15 +32,6 @@ $query = "SELECT s.*,
           LEFT JOIN jenis_surat js ON s.id_jenis = js.id
           LEFT JOIN users u ON s.dibuat_oleh = u.id
           WHERE s.status_surat = 'arsip'";
-
-// Filter untuk anak magang (role 3)
-if ($userRole == 3) {
-    $query .= " AND s.id IN (
-                    SELECT id_surat FROM disposisi WHERE ke_user_id = ?
-                )";
-    $params[] = $userId;
-    $types .= 'i';
-}
 
 // Filter search jika ada
 if (!empty($_GET['search'])) {
@@ -55,14 +45,8 @@ if (!empty($_GET['search'])) {
 
 // Count total untuk pagination
 $countQuery = "SELECT COUNT(*) as total FROM surat s WHERE s.status_surat = 'arsip'";
-if ($userRole == 3) {
-    $countQuery .= " AND s.id IN (SELECT id_surat FROM disposisi WHERE ke_user_id = ?)";
-    $countParams = [$userId];
-    $countTypes = 'i';
-} else {
-    $countParams = [];
-    $countTypes = '';
-}
+$countParams = [];
+$countTypes = '';
 
 if (!empty($_GET['search'])) {
     $search = '%' . $_GET['search'] . '%';
@@ -97,11 +81,7 @@ $arsipList = dbSelect($query, $params, $types);
             <div class="mb-4 sm:mb-6">
                 <h1 class="text-xl sm:text-2xl font-bold text-gray-800 mb-1 sm:mb-2">Arsip Surat</h1>
                 <p class="text-sm sm:text-base text-gray-600">
-                    <?php if ($userRole == 3): ?>
-                        Daftar surat yang telah diarsipkan dan pernah Anda tangani
-                    <?php else: ?>
-                        Daftar surat yang telah diarsipkan
-                    <?php endif; ?>
+                    Daftar surat yang telah diarsipkan
                 </p>
             </div>
             
@@ -150,8 +130,6 @@ $arsipList = dbSelect($query, $params, $types);
                                     <p>
                                         <?php if (!empty($_GET['search'])): ?>
                                             Tidak ditemukan arsip dengan kata kunci "<?= htmlspecialchars($_GET['search']) ?>"
-                                        <?php elseif ($userRole == 3): ?>
-                                            Belum ada surat yang diarsipkan yang pernah Anda tangani
                                         <?php else: ?>
                                             Belum ada surat yang diarsipkan
                                         <?php endif; ?>
@@ -233,8 +211,6 @@ $arsipList = dbSelect($query, $params, $types);
                     <p>
                         <?php if (!empty($_GET['search'])): ?>
                             Tidak ditemukan arsip dengan kata kunci "<?= htmlspecialchars($_GET['search']) ?>"
-                        <?php elseif ($userRole == 3): ?>
-                            Belum ada surat yang diarsipkan yang pernah Anda tangani
                         <?php else: ?>
                             Belum ada surat yang diarsipkan
                         <?php endif; ?>
