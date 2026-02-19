@@ -30,7 +30,7 @@ DisposisiService::autoAcceptDisposisi($suratId, $userId);
 $disposisiHistory = DisposisiService::getHistoryBySurat($suratId);
 
 // Ambil user aktif selain diri sendiri (untuk modal disposisi)
-$availableUsers = UsersService::getAll('active', $user['id']); 
+$availableUsers = UsersService::getAll('active', $user['id']);
 
 // Check apakah surat bisa didisposisi (Cek teknis: apakah ada disposisi gantung?)
 $canDisposeCheck = DisposisiService::checkSuratAvailability($suratId);
@@ -45,10 +45,10 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
 
 <div class="flex min-h-screen bg-gray-50/50">
     <?php include 'partials/sidebar.php'; ?>
-    
+
     <div class="flex-1 lg:ml-64 transition-all duration-300">
         <main class="p-4 sm:p-6 lg:p-8">
-            
+
             <div class="mb-8">
                 <nav class="flex mb-3" aria-label="Breadcrumb">
                     <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -65,88 +65,86 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                         <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 tracking-tight">Detail Surat</h1>
                         <p class="mt-1 text-sm text-gray-500">Informasi lengkap dan riwayat disposisi surat.</p>
                     </div>
-                    
+
                     <div class="flex items-center gap-3 flex-wrap">
                         <?php if ($surat['lampiran_file']): ?>
-                        <a href="<?= UPLOAD_URL . $surat['lampiran_file'] ?>" target="_blank" 
-                           class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all"
-                           title="Buka file surat di tab baru">
-                            <i class="fas fa-external-link-alt mr-2 text-blue-500"></i> Lihat Surat
-                        </a>
+                            <a href="<?= UPLOAD_URL . $surat['lampiran_file'] ?>" target="_blank"
+                                class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all"
+                                title="Buka file surat di tab baru">
+                                <i class="fas fa-external-link-alt mr-2 text-blue-500"></i> Lihat Surat
+                            </a>
                         <?php else: ?>
-                        <button disabled class="inline-flex items-center px-4 py-2.5 bg-gray-100 border border-gray-300 rounded-lg font-medium text-sm text-gray-400 cursor-not-allowed">
-                            <i class="fas fa-file-slash mr-2"></i> Tidak Ada File
-                        </button>
+                            <button disabled class="inline-flex items-center px-4 py-2.5 bg-gray-100 border border-gray-300 rounded-lg font-medium text-sm text-gray-400 cursor-not-allowed">
+                                <i class="fas fa-file-slash mr-2"></i> Tidak Ada File
+                            </button>
                         <?php endif; ?>
 
                         <button onclick="window.print()" class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all">
                             <i class="fas fa-print mr-2 text-gray-500"></i> Cetak
                         </button>
 
-                        <?php if (!$isSuratSelesai && $userRole != 3): // Hanya Super Admin (1) dan Karyawan (2) yang bisa setujui/tolak ?>
-                        <div class="flex gap-2">
-                            <button onclick="updateStatusSurat(<?= $suratId ?>, 'disetujui')" 
+                        <?php if (!$isSuratSelesai && $userRole != 3): // Hanya Super Admin (1) dan Karyawan (2) yang bisa setujui/tolak 
+                        ?>
+                            <div class="flex gap-2">
+                                <button onclick="updateStatusSurat(<?= $suratId ?>, 'disetujui')"
                                     class="inline-flex items-center px-4 py-2.5 bg-green-600 border border-transparent rounded-lg font-medium text-sm text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all shadow-green-200">
-                                <i class="fas fa-check-circle mr-2"></i> Setujui
-                            </button>
-                            <button onclick="updateStatusSurat(<?= $suratId ?>, 'ditolak')" 
+                                    <i class="fas fa-check-circle mr-2"></i> Setujui
+                                </button>
+                                <button onclick="updateStatusSurat(<?= $suratId ?>, 'ditolak')"
                                     class="inline-flex items-center px-4 py-2.5 bg-red-600 border border-transparent rounded-lg font-medium text-sm text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all shadow-red-200">
-                                <i class="fas fa-times-circle mr-2"></i> Tolak
-                            </button>
-                        </div>
+                                    <i class="fas fa-times-circle mr-2"></i> Tolak
+                                </button>
+                            </div>
                         <?php endif; ?>
-                        
-                        <?php if ($userRole != 3): // Hide untuk Anak Magang ?>
-                            <?php 
-                                $disableDisposisi = false;
-                                $disposisiBtnText = "Disposisi";
-                                $disposisiTooltip = "Kirim disposisi surat ini";
-                                $btnColorClass = "bg-primary-600 hover:bg-primary-700 text-white";
 
-                                // LOGIKA 1: Jika Role Karyawan & Surat Selesai => DISABLE
-                                if ($userRole == 2 && $isSuratSelesai) {
-                                    $disableDisposisi = true;
-                                    $disposisiBtnText = "Surat Selesai";
-                                    $disposisiTooltip = "Surat ini sudah selesai, tidak dapat didisposisi lagi.";
-                                    $btnColorClass = "bg-gray-400 cursor-not-allowed opacity-60 text-white";
-                                }
-                                // LOGIKA 2: Jika Role Admin & Surat Selesai => ENABLE ("Kuasa Admin")
-                                elseif ($userRole == 1 && $isSuratSelesai) {
-                                    $disableDisposisi = false; // Admin boleh override
-                                    $disposisiTooltip = "Mode Admin: Disposisi ulang surat selesai";
-                                }
-                                
-                                // LOGIKA 3: Cek Teknis (Apakah ada disposisi gantung?)
-                                // Jika ada disposisi yang statusnya masih 'dikirim'/'diterima'/'diproses' -> jangan tumpuk
-                                if (!$canDisposeCheck['can_dispose']) {
-                                    $disableDisposisi = true;
-                                    $disposisiBtnText = "Sedang Diproses";
-                                    $disposisiTooltip = htmlspecialchars($canDisposeCheck['message']);
-                                    $btnColorClass = "bg-yellow-500 hover:bg-yellow-600 text-white cursor-not-allowed opacity-80";
-                                }
-                            ?>
+                        <?php
+                        $disableDisposisi = false;
+                        $disposisiBtnText = "Disposisi";
+                        $disposisiTooltip = "Kirim disposisi surat ini";
+                        $btnColorClass = "bg-primary-600 hover:bg-primary-700 text-white";
 
-                            <?php if (!$disableDisposisi): ?>
-                            <button onclick="openDisposisiModal()" 
-                                    title="<?= $disposisiTooltip ?>"
-                                    class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-lg font-medium text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all transform active:scale-95 <?= $btnColorClass ?>">
+                        // LOGIKA 1: Jika Role Karyawan/Magang & Surat Selesai => DISABLE
+                        if (($userRole == 2 || $userRole == 3) && $isSuratSelesai) {
+                            $disableDisposisi = true;
+                            $disposisiBtnText = "Surat Selesai";
+                            $disposisiTooltip = "Surat ini sudah selesai, tidak dapat didisposisi lagi.";
+                            $btnColorClass = "bg-gray-400 cursor-not-allowed opacity-60 text-white";
+                        }
+                        // LOGIKA 2: Jika Role Admin & Surat Selesai => ENABLE ("Kuasa Admin")
+                        elseif ($userRole == 1 && $isSuratSelesai) {
+                            $disableDisposisi = false; // Admin boleh override
+                            $disposisiTooltip = "Mode Admin: Disposisi ulang surat selesai";
+                        }
+
+                        // LOGIKA 3: Cek Teknis (Apakah ada disposisi gantung?)
+                        if (!$canDisposeCheck['can_dispose']) {
+                            $disableDisposisi = true;
+                            $disposisiBtnText = "Sedang Diproses";
+                            $disposisiTooltip = htmlspecialchars($canDisposeCheck['message']);
+                            $btnColorClass = "bg-yellow-500 hover:bg-yellow-600 text-white cursor-not-allowed opacity-80";
+                        }
+                        ?>
+
+                        <?php if (!$disableDisposisi): ?>
+                            <button onclick="openDisposisiModal()"
+                                title="<?= $disposisiTooltip ?>"
+                                class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-lg font-medium text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all transform active:scale-95 <?= $btnColorClass ?>">
                                 <i class="fas fa-paper-plane mr-2"></i> <?= $disposisiBtnText ?>
                             </button>
-                            <?php else: ?>
-                            <button disabled 
-                                    title="<?= $disposisiTooltip ?>"
-                                    class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-lg font-medium text-sm shadow-sm <?= $btnColorClass ?>">
+                        <?php else: ?>
+                            <button disabled
+                                title="<?= $disposisiTooltip ?>"
+                                class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-lg font-medium text-sm shadow-sm <?= $btnColorClass ?>">
                                 <i class="fas fa-lock mr-2"></i> <?= $disposisiBtnText ?>
                             </button>
-                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 </div>
             </div>
-            
+
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <div class="xl:col-span-2 space-y-6">
-                    
+
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                             <h2 class="text-base font-semibold text-gray-800">
@@ -156,7 +154,7 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                                 <?= ucfirst($surat['status_surat']) ?>
                             </span>
                         </div>
-                        
+
                         <div class="p-6">
                             <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                                 <div class="sm:col-span-1">
@@ -181,10 +179,10 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                                     </dd>
                                 </div>
                                 <?php if ($surat['dari_instansi']): ?>
-                                <div class="sm:col-span-2">
-                                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Dari Instansi</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 font-medium"><?= htmlspecialchars($surat['dari_instansi']) ?></dd>
-                                </div>
+                                    <div class="sm:col-span-2">
+                                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Dari Instansi</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 font-medium"><?= htmlspecialchars($surat['dari_instansi']) ?></dd>
+                                    </div>
                                 <?php endif; ?>
                                 <div class="sm:col-span-2">
                                     <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Perihal</dt>
@@ -195,7 +193,7 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                             </dl>
                         </div>
                     </div>
-                    
+
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
                             <h2 class="text-base font-semibold text-gray-800">
@@ -205,7 +203,7 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                                 <?= count($disposisiHistory) ?> Aktivitas
                             </span>
                         </div>
-                        
+
                         <div class="p-6" id="disposisi-timeline-container">
                             <?php if (empty($disposisiHistory)): ?>
                                 <div class="flex flex-col items-center justify-center py-10 text-gray-400">
@@ -217,89 +215,89 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                             <?php else: ?>
                                 <div class="flow-root">
                                     <ul role="list" class="-mb-8">
-                                        <?php foreach ($disposisiHistory as $index => $disp): 
+                                        <?php foreach ($disposisiHistory as $index => $disp):
                                             $isLast = $index === array_key_last($disposisiHistory);
-                                            
+
                                             // Warna Icon & Badge berdasarkan Status Disposisi
-                                            $iconBg = 'bg-primary-500'; 
+                                            $iconBg = 'bg-primary-500';
                                             $iconSymbol = 'fa-paper-plane';
                                             $rowBgClass = '';
-                                            
-                                            if ($disp['status_disposisi'] === 'selesai') { 
-                                                $iconBg = 'bg-green-500'; 
-                                                $iconSymbol = 'fa-check'; 
+
+                                            if ($disp['status_disposisi'] === 'selesai') {
+                                                $iconBg = 'bg-green-500';
+                                                $iconSymbol = 'fa-check';
                                                 $rowBgClass = 'bg-green-50 border-green-200';
-                                            } elseif ($disp['status_disposisi'] === 'ditolak') { 
-                                                $iconBg = 'bg-red-500'; 
-                                                $iconSymbol = 'fa-times'; 
+                                            } elseif ($disp['status_disposisi'] === 'ditolak') {
+                                                $iconBg = 'bg-red-500';
+                                                $iconSymbol = 'fa-times';
                                                 $rowBgClass = 'bg-red-50 border-red-200';
-                                            } elseif ($disp['status_disposisi'] === 'diproses') { 
-                                                $iconBg = 'bg-yellow-500'; 
-                                                $iconSymbol = 'fa-spinner'; 
-                                            } elseif ($disp['status_disposisi'] === 'diterima') { 
-                                                $iconBg = 'bg-blue-500'; 
-                                                $iconSymbol = 'fa-envelope-open'; 
+                                            } elseif ($disp['status_disposisi'] === 'diproses') {
+                                                $iconBg = 'bg-yellow-500';
+                                                $iconSymbol = 'fa-spinner';
+                                            } elseif ($disp['status_disposisi'] === 'diterima') {
+                                                $iconBg = 'bg-blue-500';
+                                                $iconSymbol = 'fa-envelope-open';
                                             }
                                         ?>
-                                        <li>
-                                            <div class="relative pb-8">
-                                                <?php if (!$isLast || $isSuratSelesai): ?>
-                                                <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-                                                <?php endif; ?>
-                                                
-                                                <div class="relative flex space-x-3">
-                                                    <div>
-                                                        <span class="h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white <?= $iconBg ?>">
-                                                            <i class="fas <?= $iconSymbol ?> text-white text-xs"></i>
-                                                        </span>
-                                                    </div>
-                                                    <div class="min-w-0 flex-1 pt-1.5">
-                                                        <div class="w-full p-3 rounded-lg border <?= $rowBgClass ? $rowBgClass : 'border-gray-100 bg-white' ?>">
-                                                            <div class="flex justify-between items-start mb-1">
-                                                                <p class="text-sm text-gray-500">
-                                                                    <span class="font-bold text-gray-900"><?= htmlspecialchars($disp['dari_user_nama']) ?></span>
-                                                                    <i class="fas fa-long-arrow-alt-right mx-1 text-gray-400"></i>
-                                                                    <span class="font-bold text-gray-900"><?= htmlspecialchars($disp['ke_user_nama']) ?></span>
-                                                                </p>
-                                                                <time class="whitespace-nowrap text-xs text-gray-400">
-                                                                    <?= formatDateTime($disp['tanggal_disposisi']) ?>
-                                                                </time>
-                                                            </div>
-                                                            
-                                                            <div class="flex items-center gap-2 mb-2">
-                                                                <span class="px-2 py-0.5 text-[10px] uppercase font-bold rounded bg-gray-100 text-gray-600">
-                                                                    <?= getRoleLabel($disp['dari_user_role']) ?> &rarr; <?= getRoleLabel($disp['ke_user_role']) ?>
-                                                                </span>
-                                                                <span class="px-2 py-0.5 text-[10px] uppercase font-bold rounded border <?= getDisposisiStatusBadge($disp['status_disposisi']) ?>">
-                                                                    <?= htmlspecialchars($disp['status_disposisi']) ?>
-                                                                </span>
-                                                            </div>
+                                            <li>
+                                                <div class="relative pb-8">
+                                                    <?php if (!$isLast || $isSuratSelesai): ?>
+                                                        <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                                                    <?php endif; ?>
 
-                                                            <?php if ($disp['catatan']): ?>
-                                                            <div class="bg-white rounded-lg p-3 border border-gray-200 text-sm text-gray-700 italic">
-                                                                <i class="fas fa-comment-dots mr-1 text-gray-400"></i>
-                                                                "<?= nl2br(htmlspecialchars($disp['catatan'])) ?>"
+                                                    <div class="relative flex space-x-3">
+                                                        <div>
+                                                            <span class="h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white <?= $iconBg ?>">
+                                                                <i class="fas <?= $iconSymbol ?> text-white text-xs"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div class="min-w-0 flex-1 pt-1.5">
+                                                            <div class="w-full p-3 rounded-lg border <?= $rowBgClass ? $rowBgClass : 'border-gray-100 bg-white' ?>">
+                                                                <div class="flex justify-between items-start mb-1">
+                                                                    <p class="text-sm text-gray-500">
+                                                                        <span class="font-bold text-gray-900"><?= htmlspecialchars($disp['dari_user_nama']) ?></span>
+                                                                        <i class="fas fa-long-arrow-alt-right mx-1 text-gray-400"></i>
+                                                                        <span class="font-bold text-gray-900"><?= htmlspecialchars($disp['ke_user_nama']) ?></span>
+                                                                    </p>
+                                                                    <time class="whitespace-nowrap text-xs text-gray-400">
+                                                                        <?= formatDateTime($disp['tanggal_disposisi']) ?>
+                                                                    </time>
+                                                                </div>
+
+                                                                <div class="flex items-center gap-2 mb-2">
+                                                                    <span class="px-2 py-0.5 text-[10px] uppercase font-bold rounded bg-gray-100 text-gray-600">
+                                                                        <?= getRoleLabel($disp['dari_user_role']) ?> &rarr; <?= getRoleLabel($disp['ke_user_role']) ?>
+                                                                    </span>
+                                                                    <span class="px-2 py-0.5 text-[10px] uppercase font-bold rounded border <?= getDisposisiStatusBadge($disp['status_disposisi']) ?>">
+                                                                        <?= htmlspecialchars($disp['status_disposisi']) ?>
+                                                                    </span>
+                                                                </div>
+
+                                                                <?php if ($disp['catatan']): ?>
+                                                                    <div class="bg-white rounded-lg p-3 border border-gray-200 text-sm text-gray-700 italic">
+                                                                        <i class="fas fa-comment-dots mr-1 text-gray-400"></i>
+                                                                        "<?= nl2br(htmlspecialchars($disp['catatan'])) ?>"
+                                                                    </div>
+                                                                <?php endif; ?>
+
+                                                                <?php if ($disp['tanggal_respon']): ?>
+                                                                    <div class="mt-2 flex items-center text-xs text-green-600 font-medium">
+                                                                        <i class="fas fa-check-double mr-1"></i>
+                                                                        Direspon pada: <?= formatDateTime($disp['tanggal_respon']) ?>
+                                                                    </div>
+                                                                <?php endif; ?>
                                                             </div>
-                                                            <?php endif; ?>
-                                                            
-                                                            <?php if ($disp['tanggal_respon']): ?>
-                                                            <div class="mt-2 flex items-center text-xs text-green-600 font-medium">
-                                                                <i class="fas fa-check-double mr-1"></i>
-                                                                Direspon pada: <?= formatDateTime($disp['tanggal_respon']) ?>
-                                                            </div>
-                                                            <?php endif; ?>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </li>
+                                            </li>
                                         <?php endforeach; ?>
 
                                         <?php if ($isSuratSelesai): ?>
-                                        <li>
-                                            <div class="relative pb-8">
-                                                <div class="relative flex space-x-3">
-                                                    <?php
+                                            <li>
+                                                <div class="relative pb-8">
+                                                    <div class="relative flex space-x-3">
+                                                        <?php
                                                         $finalIcon = 'fa-check';
                                                         $finalBg = 'bg-gray-500';
                                                         $finalTitle = 'Surat Selesai';
@@ -321,26 +319,38 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                                                             $finalTitle = 'Surat Diarsipkan';
                                                             $finalDesc = 'Surat telah masuk ke arsip.';
                                                         }
-                                                    ?>
-                                                    <div>
-                                                        <span class="h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white <?= $finalBg ?>">
-                                                            <i class="fas <?= $finalIcon ?> text-white text-xs"></i>
-                                                        </span>
-                                                    </div>
-                                                    <div class="min-w-0 flex-1 pt-1.5">
-                                                        <div class="w-full p-3 rounded-lg border border-gray-200 bg-gray-50 opacity-90">
-                                                            <div class="flex items-center">
-                                                                <p class="text-sm font-bold text-gray-900 mr-2"><?= $finalTitle ?></p>
-                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                                                    Selesai
-                                                                </span>
-                                                            </div>
-                                                            <p class="text-xs text-gray-500 mt-1"><?= $finalDesc ?></p>
+                                                        ?>
+                                                        <div>
+                                                            <span class="h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white <?= $finalBg ?>">
+                                                                <i class="fas <?= $finalIcon ?> text-white text-xs"></i>
+                                                            </span>
                                                         </div>
+                                                        <div class="min-w-0 flex-1 pt-1.5">
+                                                            <div class="w-full p-3 rounded-lg border border-gray-200 bg-gray-50 opacity-90">
+                                                                <div class="flex items-center">
+                                                                    <p class="text-sm font-bold text-gray-900 mr-2"><?= $finalTitle ?></p>
+                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                                        Selesai
+                                                                    </span>
+                                                                </div>
+                                                                <p class="text-xs text-gray-500 mt-1"><?= $finalDesc ?></p>
+
+                                                                <?php if ($surat['status_surat'] == 'ditolak' && !empty($surat['alasan_penolakan'])): ?>
+                                                                    <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                                                        <p class="text-xs font-semibold text-red-700 mb-1">
+                                                                            <i class="fas fa-exclamation-triangle mr-1"></i> Alasan Penolakan:
+                                                                        </p>
+                                                                        <p class="text-sm text-red-800 italic">
+                                                                            "<?= nl2br(htmlspecialchars($surat['alasan_penolakan'])) ?>"
+                                                                        </p>
+                                                                    </div>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        </div>
+
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </li>
+                                            </li>
                                         <?php endif; ?>
 
                                     </ul>
@@ -349,11 +359,11 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="space-y-6">
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Ringkasan</h3>
-                        
+
                         <div class="flex items-center p-4 bg-primary-50 rounded-xl mb-4 border border-primary-100">
                             <div class="p-3 rounded-full bg-primary-100 text-primary-600 mr-4">
                                 <i class="fas fa-share-alt text-lg"></i>
@@ -377,12 +387,12 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                 </div>
             </div>
         </main>
-        
+
         <?php include 'partials/footer.php'; ?>
     </div>
 </div>
 
-<?php if ($userRole != 3): ?>
+
 <div id="disposisiModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 overflow-y-auto backdrop-blur-sm transition-all">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 transform transition-all scale-100">
@@ -395,11 +405,11 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            
+
             <form id="disposisiForm">
                 <input type="hidden" name="action" value="create">
                 <input type="hidden" name="id_surat" value="<?= $suratId ?>">
-                
+
                 <div class="px-6 py-6 space-y-5">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Tujuan Disposisi <span class="text-red-500">*</span></label>
@@ -407,9 +417,9 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                             <select name="ke_user_id" required class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow appearance-none bg-white">
                                 <option value="">-- Pilih Penerima --</option>
                                 <?php foreach ($availableUsers as $availUser): ?>
-                                <option value="<?= $availUser['id'] ?>">
-                                    <?= htmlspecialchars($availUser['nama_lengkap']) ?> &mdash; <?= getRoleLabel($availUser['nama_role']) ?>
-                                </option>
+                                    <option value="<?= $availUser['id'] ?>">
+                                        <?= htmlspecialchars($availUser['nama_lengkap']) ?> &mdash; <?= getRoleLabel($availUser['nama_role']) ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -419,18 +429,18 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                                 <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
                             </div>
                         </div>
-                        <?php if(empty($availableUsers)): ?>
+                        <?php if (empty($availableUsers)): ?>
                             <p class="text-xs text-red-500 mt-1.5 flex items-center"><i class="fas fa-exclamation-circle mr-1"></i> Tidak ada user aktif lain.</p>
                         <?php endif; ?>
                     </div>
-                    
+
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Catatan / Instruksi</label>
                         <textarea name="catatan" rows="4" placeholder="Tuliskan instruksi atau catatan untuk penerima..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow resize-none"></textarea>
                         <p class="text-xs text-gray-400 mt-1 text-right">Opsional</p>
                     </div>
                 </div>
-                
+
                 <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex flex-col-reverse sm:flex-row justify-end gap-3">
                     <button type="button" onclick="closeDisposisiModal()" class="w-full sm:w-auto px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all shadow-sm">
                         Batal
@@ -443,157 +453,217 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
         </div>
     </div>
 </div>
-<?php endif; ?>
+
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script>
-const disposisiHandlerUrl = '../modules/disposisi/disposisi_handler.php';
-const suratHandlerUrl = '../modules/surat/surat_handler.php';
+    const disposisiHandlerUrl = '../modules/disposisi/disposisi_handler.php';
+    const suratHandlerUrl = '../modules/surat/surat_handler.php';
 
-// ===== UPDATE STATUS SURAT (Acc/Tolak) - Global Function =====
-function updateStatusSurat(suratId, newStatus) {
-    const statusText = newStatus === 'disetujui' ? 'menyetujui' : 'menolak';
-    const statusColor = newStatus === 'disetujui' ? '#10B981' : '#EF4444';
-    const iconType = newStatus === 'disetujui' ? 'success' : 'warning';
-    
-    Swal.fire({
-        title: `Konfirmasi ${newStatus === 'disetujui' ? 'Persetujuan' : 'Penolakan'}`,
-        text: `Anda yakin ingin ${statusText} surat ini? Tindakan ini tidak dapat dibatalkan.`,
-        icon: iconType,
-        showCancelButton: true,
-        confirmButtonColor: statusColor,
-        cancelButtonColor: '#6B7280',
-        confirmButtonText: `Ya, ${newStatus === 'disetujui' ? 'Setujui' : 'Tolak'}`,
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: suratHandlerUrl,
-                type: 'POST',
-                data: {
-                    action: 'update_status',
-                    id: suratId,
-                    status: newStatus
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: response.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire('Gagal', response.message, 'error');
+    // ===== UPDATE STATUS SURAT (Acc/Tolak) - Global Function =====
+    function updateStatusSurat(suratId, newStatus) {
+        if (newStatus === 'ditolak') {
+            // Tampilkan dialog dengan textarea untuk alasan penolakan
+            Swal.fire({
+                title: 'Tolak Surat',
+                html: `
+                <p class="text-sm text-gray-600 mb-3">Anda yakin ingin menolak surat ini? Tindakan ini tidak dapat dibatalkan.</p>
+                <label class="block text-left text-sm font-semibold text-gray-700 mb-2">Alasan Penolakan <span class="text-red-500">*</span></label>
+                <textarea id="swal-alasan" class="swal2-textarea" placeholder="Tuliskan alasan mengapa surat ini ditolak..." style="font-size: 14px; min-height: 100px;"></textarea>
+            `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Tolak Surat',
+                cancelButtonText: 'Batal',
+                focusCancel: true,
+                preConfirm: () => {
+                    const alasan = document.getElementById('swal-alasan').value.trim();
+                    if (!alasan) {
+                        Swal.showValidationMessage('Alasan penolakan wajib diisi!');
+                        return false;
                     }
-                },
-                error: function(xhr) {
-                    let msg = 'Terjadi kesalahan sistem';
-                    try {
-                        const res = JSON.parse(xhr.responseText);
-                        if(res.message) msg = res.message;
-                    } catch(e) {}
-                    Swal.fire('Error', msg, 'error');
+                    return alasan;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: suratHandlerUrl,
+                        type: 'POST',
+                        data: {
+                            action: 'update_status',
+                            id: suratId,
+                            status: 'ditolak',
+                            alasan_penolakan: result.value
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Surat Ditolak',
+                                    text: 'Surat berhasil ditolak dengan alasan yang tercatat.',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => location.reload());
+                            } else {
+                                Swal.fire('Gagal', response.message, 'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            let msg = 'Terjadi kesalahan sistem';
+                            try {
+                                const res = JSON.parse(xhr.responseText);
+                                if (res.message) msg = res.message;
+                            } catch (e) {}
+                            Swal.fire('Error', msg, 'error');
+                        }
+                    });
+                }
+            });
+        } else {
+            // Flow biasa untuk persetujuan
+            const statusText = 'menyetujui';
+            const statusColor = '#10B981';
+
+            Swal.fire({
+                title: 'Konfirmasi Persetujuan',
+                text: `Anda yakin ingin ${statusText} surat ini? Tindakan ini tidak dapat dibatalkan.`,
+                icon: 'success', // For approval, icon is success
+                showCancelButton: true,
+                confirmButtonColor: statusColor,
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Setujui',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: suratHandlerUrl,
+                        type: 'POST',
+                        data: {
+                            action: 'update_status',
+                            id: suratId,
+                            status: newStatus
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: response.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire('Gagal', response.message, 'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            let msg = 'Terjadi kesalahan sistem';
+                            try {
+                                const res = JSON.parse(xhr.responseText);
+                                if (res.message) msg = res.message;
+                            } catch (e) {}
+                            Swal.fire('Error', msg, 'error');
+                        }
+                    });
                 }
             });
         }
-    });
-}
-
-// ===== DISPOSISI MODAL LOGIC (Only for Non-Magang) =====
-<?php if ($userRole != 3): ?>
-function openDisposisiModal() {
-    document.getElementById('disposisiModal').classList.remove('hidden');
-}
-
-function closeDisposisiModal() {
-    document.getElementById('disposisiModal').classList.add('hidden');
-    document.getElementById('disposisiForm').reset();
-}
-
-// Handle Form Submit (AJAX) - Disposisi
-$('#disposisiForm').on('submit', function(e) {
-    e.preventDefault();
-    
-    // Validasi
-    const keUserId = document.querySelector('[name="ke_user_id"]').value;
-    if (!keUserId) {
-        Swal.fire({ 
-            icon: 'warning', 
-            title: 'Peringatan', 
-            text: 'Silakan pilih tujuan disposisi terlebih dahulu.',
-            confirmButtonColor: '#d33'
-        });
-        return false;
     }
-    
-    // UI Loading State
-    const btn = $('#btnSubmitDisposisi');
-    const originalText = btn.html();
-    btn.prop('disabled', true).addClass('opacity-75 cursor-not-allowed').html('<i class="fas fa-spinner fa-spin mr-2"></i> Mengirim...');
-    
-    $.ajax({
-        url: disposisiHandlerUrl,
-        type: 'POST',
-        data: $(this).serialize(),
-        dataType: 'json',
-        success: function(response) {
-            btn.prop('disabled', false).removeClass('opacity-75 cursor-not-allowed').html(originalText);
-            
-            if (response.status === 'success') {
-                closeDisposisiModal();
-                Swal.fire({ 
-                    icon: 'success', 
-                    title: 'Terkirim!', 
-                    text: response.message, 
-                    timer: 1500, 
-                    showConfirmButton: false 
-                }).then(() => {
-                    location.reload(); 
-                });
-            } else {
+
+    // ===== DISPOSISI MODAL LOGIC =====
+    function openDisposisiModal() {
+        document.getElementById('disposisiModal').classList.remove('hidden');
+    }
+
+    function closeDisposisiModal() {
+        document.getElementById('disposisiModal').classList.add('hidden');
+        document.getElementById('disposisiForm').reset();
+    }
+
+    // Handle Form Submit (AJAX) - Disposisi
+    $('#disposisiForm').on('submit', function(e) {
+        e.preventDefault();
+
+        // Validasi
+        const keUserId = document.querySelector('[name="ke_user_id"]').value;
+        if (!keUserId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Peringatan',
+                text: 'Silakan pilih tujuan disposisi terlebih dahulu.',
+                confirmButtonColor: '#d33'
+            });
+            return false;
+        }
+
+        // UI Loading State
+        const btn = $('#btnSubmitDisposisi');
+        const originalText = btn.html();
+        btn.prop('disabled', true).addClass('opacity-75 cursor-not-allowed').html('<i class="fas fa-spinner fa-spin mr-2"></i> Mengirim...');
+
+        $.ajax({
+            url: disposisiHandlerUrl,
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(response) {
+                btn.prop('disabled', false).removeClass('opacity-75 cursor-not-allowed').html(originalText);
+
+                if (response.status === 'success') {
+                    closeDisposisiModal();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Terkirim!',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: response.message,
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            },
+            error: function(xhr) {
+                btn.prop('disabled', false).removeClass('opacity-75 cursor-not-allowed').html(originalText);
+                let msg = 'Terjadi kesalahan sistem';
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    if (res.message) msg = res.message;
+                } catch (e) {}
                 Swal.fire({
                     icon: 'error',
-                    title: 'Gagal',
-                    text: response.message,
+                    title: 'Error Sistem',
+                    text: msg,
                     confirmButtonColor: '#d33'
                 });
             }
-        },
-        error: function(xhr) {
-            btn.prop('disabled', false).removeClass('opacity-75 cursor-not-allowed').html(originalText);
-            let msg = 'Terjadi kesalahan sistem';
-            try {
-                const res = JSON.parse(xhr.responseText);
-                if(res.message) msg = res.message;
-            } catch(e) {}
-            Swal.fire({
-                icon: 'error',
-                title: 'Error Sistem',
-                text: msg,
-                confirmButtonColor: '#d33'
-            });
-        }
+        });
     });
-});
 
-// Close modal on Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeDisposisiModal();
-});
-
-// Close modal on click outside
-const modal = document.getElementById('disposisiModal');
-if(modal){
-    modal.addEventListener('click', function(e) {
-        if (e.target === this) closeDisposisiModal();
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeDisposisiModal();
     });
-}
-<?php endif; ?>
+
+    // Close modal on click outside
+    const modal = document.getElementById('disposisiModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) closeDisposisiModal();
+        });
+    }
 </script>
 
 <?php include 'partials/footer.php'; ?>

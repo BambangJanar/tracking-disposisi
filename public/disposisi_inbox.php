@@ -124,7 +124,7 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
 
 <div class="flex min-h-screen bg-gray-50">
     <?php include 'partials/sidebar.php'; ?>
-    
+
     <div class="flex-1 lg:ml-64 p-4 lg:p-8 transition-all duration-300 w-full min-w-0">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div>
@@ -139,11 +139,11 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                     <?php endif; ?>
                 </p>
             </div>
-            
+
             <?php if ($userRole == 1): ?>
-            <div class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                <i class="fas fa-shield-alt mr-1.5"></i> Mode Admin
-            </div>
+                <div class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                    <i class="fas fa-shield-alt mr-1.5"></i> Mode Admin
+                </div>
             <?php endif; ?>
         </div>
 
@@ -153,9 +153,9 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                     <label class="block text-xs font-medium text-gray-500 mb-1.5">Pencarian</label>
                     <div class="relative">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" name="search" value="<?= htmlspecialchars($filters['search']) ?>" 
-                               class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition-shadow" 
-                               placeholder="No. Agenda / Perihal...">
+                        <input type="text" name="search" value="<?= htmlspecialchars($filters['search']) ?>"
+                            class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition-shadow"
+                            placeholder="No. Agenda / Perihal...">
                     </div>
                 </div>
 
@@ -173,11 +173,11 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                     <button type="submit" class="flex-1 lg:flex-none bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition text-sm flex justify-center items-center gap-2 font-medium">
                         <i class="fas fa-filter"></i> <span class="hidden sm:inline">Terapkan</span>
                     </button>
-                    
+
                     <?php if (!empty($filters['search']) || !empty($filters['status_disposisi'])): ?>
-                    <a href="disposisi_inbox.php" class="flex-1 lg:flex-none bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium text-center transition-colors flex justify-center items-center gap-2">
-                        <i class="fas fa-times"></i> <span class="hidden sm:inline">Reset</span>
-                    </a>
+                        <a href="disposisi_inbox.php" class="flex-1 lg:flex-none bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium text-center transition-colors flex justify-center items-center gap-2">
+                            <i class="fas fa-times"></i> <span class="hidden sm:inline">Reset</span>
+                        </a>
                     <?php endif; ?>
                 </div>
             </form>
@@ -208,7 +208,7 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                                 </td>
                             </tr>
                         <?php else: ?>
-                            <?php foreach ($suratList as $surat): 
+                            <?php foreach ($suratList as $surat):
                                 // Data untuk Modal Update
                                 $disposisiData = [
                                     'id' => $surat['id_disposisi'],
@@ -218,50 +218,50 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                                     'catatan' => $surat['catatan_disposisi'] ?? ''
                                 ];
                             ?>
-                            <tr class="hover:bg-gray-50 transition-colors" id="row-<?= $surat['id_disposisi'] ?>">
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-bold text-gray-900"><?= htmlspecialchars($surat['nomor_agenda']) ?></div>
-                                    <div class="text-xs text-gray-500 mt-0.5"><?= htmlspecialchars($surat['nomor_surat']) ?></div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900 font-medium"><?= truncate($surat['perihal'], 60) ?></div>
-                                    <div class="text-xs text-gray-500 mt-1">
-                                        Jenis: <?= htmlspecialchars($surat['nama_jenis']) ?>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-700">
-                                        <?= htmlspecialchars($surat['dari_user_nama'] ?? '-') ?>
-                                    </div>
-                                    <?php if($surat['catatan_disposisi']): ?>
-                                        <div class="text-xs text-gray-500 italic mt-1">"<?= truncate($surat['catatan_disposisi'], 30) ?>"</div>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                                    <?= formatDateTime($surat['tanggal_disposisi_terakhir']) ?>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase border status-badge-<?= $surat['id_disposisi'] ?> <?= getDisposisiStatusBadge($surat['status_disposisi']) ?>">
-                                        <span class="status-text-<?= $surat['id_disposisi'] ?>"><?= $surat['status_disposisi'] ?></span>
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                    <div class="flex justify-center items-center gap-2">
-                                        <a href="surat_detail.php?id=<?= $surat['id'] ?>" 
-                                           class="text-primary-600 hover:text-primary-800 font-medium" title="Lihat Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        
-                                        <?php if (in_array($surat['status_disposisi'], ['dikirim', 'diterima', 'diproses'])): ?>
-                                        <button onclick='openUpdateModal(<?= json_encode($disposisiData) ?>)' 
-                                                class="text-green-600 hover:text-green-800 font-medium btn-update-<?= $surat['id_disposisi'] ?>" 
-                                                title="Update Status Disposisi">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
+                                <tr class="hover:bg-gray-50 transition-colors" id="row-<?= $surat['id_disposisi'] ?>">
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm font-bold text-gray-900"><?= htmlspecialchars($surat['nomor_agenda']) ?></div>
+                                        <div class="text-xs text-gray-500 mt-0.5"><?= htmlspecialchars($surat['nomor_surat']) ?></div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-900 font-medium"><?= truncate($surat['perihal'], 60) ?></div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            Jenis: <?= htmlspecialchars($surat['nama_jenis']) ?>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-700">
+                                            <?= htmlspecialchars($surat['dari_user_nama'] ?? '-') ?>
+                                        </div>
+                                        <?php if ($surat['catatan_disposisi']): ?>
+                                            <div class="text-xs text-gray-500 italic mt-1">"<?= truncate($surat['catatan_disposisi'], 30) ?>"</div>
                                         <?php endif; ?>
-                                    </div>
-                                </td>
-                            </tr>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                                        <?= formatDateTime($surat['tanggal_disposisi_terakhir']) ?>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase border status-badge-<?= $surat['id_disposisi'] ?> <?= getDisposisiStatusBadge($surat['status_disposisi']) ?>">
+                                            <span class="status-text-<?= $surat['id_disposisi'] ?>"><?= $surat['status_disposisi'] ?></span>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                        <div class="flex justify-center items-center gap-2">
+                                            <a href="surat_detail.php?id=<?= $surat['id'] ?>"
+                                                class="text-primary-600 hover:text-primary-800 font-medium" title="Lihat Detail">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+
+                                            <?php if (in_array($surat['status_disposisi'], ['dikirim', 'diterima', 'diproses'])): ?>
+                                                <button onclick='openUpdateModal(<?= json_encode($disposisiData) ?>)'
+                                                    class="text-green-600 hover:text-green-800 font-medium btn-update-<?= $surat['id_disposisi'] ?>"
+                                                    title="Update Status Disposisi">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
@@ -276,8 +276,8 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                     <p class="text-sm">Tidak ada surat disposisi masuk</p>
                 </div>
             <?php else: ?>
-                <?php foreach ($suratList as $surat): 
-                     $disposisiData = [
+                <?php foreach ($suratList as $surat):
+                    $disposisiData = [
                         'id' => $surat['id_disposisi'],
                         'nomor_agenda' => $surat['nomor_agenda'],
                         'perihal' => $surat['perihal'],
@@ -285,57 +285,57 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                         'catatan' => $surat['catatan_disposisi'] ?? ''
                     ];
                 ?>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4" id="card-<?= $surat['id_disposisi'] ?>">
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <p class="text-xs font-bold text-gray-900"><?= htmlspecialchars($surat['nomor_agenda']) ?></p>
-                            <p class="text-xs text-gray-500"><?= htmlspecialchars($surat['nomor_surat']) ?></p>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4" id="card-<?= $surat['id_disposisi'] ?>">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <p class="text-xs font-bold text-gray-900"><?= htmlspecialchars($surat['nomor_agenda']) ?></p>
+                                <p class="text-xs text-gray-500"><?= htmlspecialchars($surat['nomor_surat']) ?></p>
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-block px-2 py-0.5 text-[10px] uppercase font-bold rounded border status-badge-<?= $surat['id_disposisi'] ?> <?= getDisposisiStatusBadge($surat['status_disposisi']) ?>">
+                                    <span class="status-text-<?= $surat['id_disposisi'] ?>"><?= $surat['status_disposisi'] ?></span>
+                                </span>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <span class="inline-block px-2 py-0.5 text-[10px] uppercase font-bold rounded border status-badge-<?= $surat['id_disposisi'] ?> <?= getDisposisiStatusBadge($surat['status_disposisi']) ?>">
-                                <span class="status-text-<?= $surat['id_disposisi'] ?>"><?= $surat['status_disposisi'] ?></span>
-                            </span>
+
+                        <p class="text-sm text-gray-800 mt-2 line-clamp-2"><?= htmlspecialchars($surat['perihal']) ?></p>
+
+                        <div class="mt-2 text-xs text-gray-500">
+                            <span class="font-medium text-gray-700">Dari:</span> <?= htmlspecialchars($surat['dari_user_nama'] ?? '?') ?>
+                        </div>
+
+                        <div class="text-xs text-gray-500 mt-3 flex items-center border-t border-gray-100 pt-2">
+                            <i class="far fa-clock mr-1"></i>
+                            <?= formatDateTime($surat['tanggal_disposisi_terakhir']) ?>
+                        </div>
+
+                        <div class="mt-3 flex gap-2">
+                            <a href="surat_detail.php?id=<?= $surat['id'] ?>"
+                                class="flex-1 text-center py-2 text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg text-xs font-medium">
+                                <i class="fas fa-eye mr-1"></i> Detail
+                            </a>
+
+                            <?php if (in_array($surat['status_disposisi'], ['dikirim', 'diterima', 'diproses'])): ?>
+                                <button onclick='openUpdateModal(<?= json_encode($disposisiData) ?>)'
+                                    class="flex-1 text-center py-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg text-xs font-medium btn-update-<?= $surat['id_disposisi'] ?>">
+                                    <i class="fas fa-edit mr-1"></i> Update
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
-
-                    <p class="text-sm text-gray-800 mt-2 line-clamp-2"><?= htmlspecialchars($surat['perihal']) ?></p>
-                    
-                    <div class="mt-2 text-xs text-gray-500">
-                        <span class="font-medium text-gray-700">Dari:</span> <?= htmlspecialchars($surat['dari_user_nama'] ?? '?') ?>
-                    </div>
-
-                    <div class="text-xs text-gray-500 mt-3 flex items-center border-t border-gray-100 pt-2">
-                        <i class="far fa-clock mr-1"></i>
-                        <?= formatDateTime($surat['tanggal_disposisi_terakhir']) ?>
-                    </div>
-
-                    <div class="mt-3 flex gap-2">
-                        <a href="surat_detail.php?id=<?= $surat['id'] ?>" 
-                           class="flex-1 text-center py-2 text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg text-xs font-medium">
-                            <i class="fas fa-eye mr-1"></i> Detail
-                        </a>
-                        
-                        <?php if (in_array($surat['status_disposisi'], ['dikirim', 'diterima', 'diproses'])): ?>
-                        <button onclick='openUpdateModal(<?= json_encode($disposisiData) ?>)' 
-                                class="flex-1 text-center py-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg text-xs font-medium btn-update-<?= $surat['id_disposisi'] ?>">
-                            <i class="fas fa-edit mr-1"></i> Update
-                        </button>
-                        <?php endif; ?>
-                    </div>
-                </div>
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
-        
+
         <?php if ($pagination->hasPages()): ?>
-        <div class="mt-6 px-4 py-3 bg-white rounded-lg shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="text-sm text-gray-600">
-                Halaman <?= $page ?> dari <?= ceil($totalSurat / $perPage) ?>
+            <div class="mt-6 px-4 py-3 bg-white rounded-lg shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="text-sm text-gray-600">
+                    Halaman <?= $page ?> dari <?= ceil($totalSurat / $perPage) ?>
+                </div>
+                <div>
+                    <?= $pagination->render('disposisi_inbox.php', $filters) ?>
+                </div>
             </div>
-            <div>
-                <?= $pagination->render('disposisi_inbox.php', $filters) ?>
-            </div>
-        </div>
         <?php endif; ?>
     </div>
 </div>
@@ -347,18 +347,18 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                 <h3 class="text-lg font-bold text-gray-800">Update Status Disposisi</h3>
                 <p class="text-xs text-gray-500 mt-0.5">Ubah status pengerjaan disposisi ini</p>
             </div>
-            
+
             <form id="updateDisposisiForm">
                 <input type="hidden" name="action" value="update_status">
                 <input type="hidden" name="id" id="disposisiId">
-                
+
                 <div class="px-6 py-6 space-y-5">
                     <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
                         <p class="text-xs text-blue-600 uppercase font-bold mb-1">Surat Terkait</p>
                         <p class="text-sm font-semibold text-gray-900" id="modalNomorAgenda"></p>
                         <p class="text-sm text-gray-700 mt-1 line-clamp-2" id="modalPerihal"></p>
                     </div>
-                    
+
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Status Baru <span class="text-red-500">*</span></label>
                         <div class="relative">
@@ -372,13 +372,13 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                             </div>
                         </div>
                     </div>
-                    
+
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Catatan Tambahan</label>
                         <textarea name="catatan" rows="3" placeholder="Tambahkan catatan untuk update status ini (opsional)..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow resize-none"></textarea>
                     </div>
                 </div>
-                
+
                 <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex flex-col-reverse sm:flex-row justify-end gap-3">
                     <button type="button" onclick="closeUpdateModal()" class="w-full sm:w-auto px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-white transition-all">
                         Batal
@@ -395,125 +395,129 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-const disposisiHandlerPath = '../modules/disposisi/disposisi_handler.php';
+    const disposisiHandlerPath = '../modules/disposisi/disposisi_handler.php';
 
-// Helper: Get Tailwind classes for status badge
-function getStatusBadgeClass(status) {
-    const badges = {
-        'dikirim': 'bg-blue-100 text-blue-800 border-blue-200',
-        'diterima': 'bg-indigo-100 text-indigo-800 border-indigo-200',
-        'diproses': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-        'disetujui': 'bg-green-100 text-green-800 border-green-200',
-        'selesai': 'bg-green-100 text-green-800 border-green-200',
-        'ditolak': 'bg-red-100 text-red-800 border-red-200'
-    };
-    return badges[status] || 'bg-gray-100 text-gray-800 border-gray-200';
-}
-
-function openUpdateModal(disposisi) {
-    // Populate Data
-    document.getElementById('disposisiId').value = disposisi.id;
-    document.getElementById('modalNomorAgenda').textContent = disposisi.nomor_agenda;
-    document.getElementById('modalPerihal').textContent = disposisi.perihal;
-    
-    // Set default select value based on current status
-    const statusSelect = document.getElementById('statusSelect');
-    if (disposisi.status_disposisi === 'dikirim' || disposisi.status_disposisi === 'diterima') {
-        statusSelect.value = 'diproses';
-    } else {
-        statusSelect.value = 'disetujui';
+    // Helper: Get Tailwind classes for status badge
+    function getStatusBadgeClass(status) {
+        const badges = {
+            'dikirim': 'bg-blue-100 text-blue-800 border-blue-200',
+            'diterima': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+            'diproses': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            'disetujui': 'bg-green-100 text-green-800 border-green-200',
+            'selesai': 'bg-green-100 text-green-800 border-green-200',
+            'ditolak': 'bg-red-100 text-red-800 border-red-200'
+        };
+        return badges[status] || 'bg-gray-100 text-gray-800 border-gray-200';
     }
-    
-    // Show Modal
-    document.getElementById('updateModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden'; // Prevent scrolling
-}
 
-function closeUpdateModal() {
-    document.getElementById('updateModal').classList.add('hidden');
-    document.body.style.overflow = '';
-    document.getElementById('updateDisposisiForm').reset();
-}
+    function openUpdateModal(disposisi) {
+        // Populate Data
+        document.getElementById('disposisiId').value = disposisi.id;
+        document.getElementById('modalNomorAgenda').textContent = disposisi.nomor_agenda;
+        document.getElementById('modalPerihal').textContent = disposisi.perihal;
 
-// Handle Form Submit via AJAX
-$('#updateDisposisiForm').on('submit', function(e) {
-    e.preventDefault();
-    
-    const btn = $('#btnUpdate');
-    const originalText = btn.html();
-    btn.prop('disabled', true).addClass('opacity-75 cursor-not-allowed').html('<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...');
-
-    const disposisiId = $('#disposisiId').val();
-    const newStatus = $('#statusSelect').val();
-
-    $.ajax({
-        url: disposisiHandlerPath,
-        type: 'POST',
-        data: $(this).serialize(),
-        dataType: 'json',
-        success: function(response) {
-            btn.prop('disabled', false).removeClass('opacity-75 cursor-not-allowed').html(originalText);
-            
-            if (response.status === 'success') {
-                closeUpdateModal();
-                
-                // Update UI Real-time (Badge Status)
-                const statusBadge = $('.status-badge-' + disposisiId);
-                const statusText = $('.status-text-' + disposisiId);
-                
-                // Reset classes & Add new ones
-                statusBadge.attr('class', 'px-2.5 py-0.5 rounded-full text-xs font-bold uppercase border status-badge-' + disposisiId + ' ' + getStatusBadgeClass(newStatus));
-                statusText.text(newStatus);
-                
-                // Jika status final (disetujui/ditolak), sembunyikan tombol update
-                // DAN hilangkan baris tersebut karena ini halaman Inbox Aktif
-                if (newStatus === 'disetujui' || newStatus === 'ditolak' || newStatus === 'selesai') {
-                    $('#row-' + disposisiId).fadeOut(500, function() { $(this).remove(); });
-                    $('#card-' + disposisiId).fadeOut(500, function() { $(this).remove(); });
-                }
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: response.message,
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            } else {
-                Swal.fire('Gagal', response.message, 'error');
-            }
-        },
-        error: function(xhr) {
-            btn.prop('disabled', false).removeClass('opacity-75 cursor-not-allowed').html(originalText);
-            let msg = 'Terjadi kesalahan sistem';
-            try {
-                const res = JSON.parse(xhr.responseText);
-                if(res.message) msg = res.message;
-            } catch(e) {}
-            
-            // Handle Session Timeout
-            if (xhr.status === 401) {
-                 Swal.fire({
-                    icon: 'warning',
-                    title: 'Sesi Habis',
-                    text: 'Silakan login kembali.'
-                }).then(() => location.reload());
-            } else {
-                Swal.fire('Error', msg, 'error');
-            }
+        // Set default select value based on current status
+        const statusSelect = document.getElementById('statusSelect');
+        if (disposisi.status_disposisi === 'dikirim' || disposisi.status_disposisi === 'diterima') {
+            statusSelect.value = 'diproses';
+        } else {
+            statusSelect.value = 'disetujui';
         }
+
+        // Show Modal
+        document.getElementById('updateModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
+    }
+
+    function closeUpdateModal() {
+        document.getElementById('updateModal').classList.add('hidden');
+        document.body.style.overflow = '';
+        document.getElementById('updateDisposisiForm').reset();
+    }
+
+    // Handle Form Submit via AJAX
+    $('#updateDisposisiForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const btn = $('#btnUpdate');
+        const originalText = btn.html();
+        btn.prop('disabled', true).addClass('opacity-75 cursor-not-allowed').html('<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...');
+
+        const disposisiId = $('#disposisiId').val();
+        const newStatus = $('#statusSelect').val();
+
+        $.ajax({
+            url: disposisiHandlerPath,
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(response) {
+                btn.prop('disabled', false).removeClass('opacity-75 cursor-not-allowed').html(originalText);
+
+                if (response.status === 'success') {
+                    closeUpdateModal();
+
+                    // Update UI Real-time (Badge Status)
+                    const statusBadge = $('.status-badge-' + disposisiId);
+                    const statusText = $('.status-text-' + disposisiId);
+
+                    // Reset classes & Add new ones
+                    statusBadge.attr('class', 'px-2.5 py-0.5 rounded-full text-xs font-bold uppercase border status-badge-' + disposisiId + ' ' + getStatusBadgeClass(newStatus));
+                    statusText.text(newStatus);
+
+                    // Jika status final (disetujui/ditolak), sembunyikan tombol update
+                    // DAN hilangkan baris tersebut karena ini halaman Inbox Aktif
+                    if (newStatus === 'disetujui' || newStatus === 'ditolak' || newStatus === 'selesai') {
+                        $('#row-' + disposisiId).fadeOut(500, function() {
+                            $(this).remove();
+                        });
+                        $('#card-' + disposisiId).fadeOut(500, function() {
+                            $(this).remove();
+                        });
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire('Gagal', response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                btn.prop('disabled', false).removeClass('opacity-75 cursor-not-allowed').html(originalText);
+                let msg = 'Terjadi kesalahan sistem';
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    if (res.message) msg = res.message;
+                } catch (e) {}
+
+                // Handle Session Timeout
+                if (xhr.status === 401) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Sesi Habis',
+                        text: 'Silakan login kembali.'
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire('Error', msg, 'error');
+                }
+            }
+        });
     });
-});
 
-// Close modal on Escape
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeUpdateModal();
-});
+    // Close modal on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeUpdateModal();
+    });
 
-// Close modal on click outside
-document.getElementById('updateModal').addEventListener('click', function(e) {
-    if (e.target === this) closeUpdateModal();
-});
+    // Close modal on click outside
+    document.getElementById('updateModal').addEventListener('click', function(e) {
+        if (e.target === this) closeUpdateModal();
+    });
 </script>
 
 <?php include 'partials/footer.php'; ?>

@@ -78,10 +78,10 @@ foreach ($statusOrder as $st) {
 
 <div class="flex min-h-screen bg-gray-50">
     <?php include 'partials/sidebar.php'; ?>
-    
+
     <div class="flex-1 lg:ml-64 transition-all duration-300">
         <main class="p-4 sm:p-6 lg:p-8">
-            
+
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-800">
@@ -92,7 +92,7 @@ foreach ($statusOrder as $st) {
                     </p>
                 </div>
                 <div class="flex gap-3">
-                    <a href="surat_tambah.php" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-all shadow-sm hover:shadow-md">
+                    <a href="surat.php?action=tambah" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-all shadow-sm hover:shadow-md">
                         <i class="fas fa-plus mr-2"></i> Buat Surat
                     </a>
                     <a href="disposisi_inbox.php" class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-all shadow-sm">
@@ -100,9 +100,9 @@ foreach ($statusOrder as $st) {
                     </a>
                 </div>
             </div>
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                
+
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group">
                     <div class="absolute top-0 right-0 w-24 h-24 bg-primary-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                     <div class="relative z-10 flex justify-between items-start">
@@ -167,9 +167,9 @@ foreach ($statusOrder as $st) {
                     </div>
                 </div>
             </div>
-            
+
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                
+
                 <div class="xl:col-span-2 space-y-8">
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
@@ -181,7 +181,7 @@ foreach ($statusOrder as $st) {
                                 Lihat Semua
                             </a>
                         </div>
-                        
+
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-100">
                                 <thead class="bg-gray-50/50">
@@ -205,47 +205,47 @@ foreach ($statusOrder as $st) {
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($recentSurat as $surat): ?>
-                                        <tr class="hover:bg-gray-50/80 transition-colors group">
-                                            <td class="px-6 py-4">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
-                                                        <i class="fas fa-file-alt"></i>
-                                                    </div>
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-bold text-gray-900"><?= htmlspecialchars($surat['nomor_agenda']) ?></div>
-                                                        <div class="text-xs text-gray-500 max-w-[200px] truncate" title="<?= htmlspecialchars($surat['perihal']) ?>">
-                                                            <?= htmlspecialchars($surat['perihal']) ?>
+                                            <tr class="hover:bg-gray-50/80 transition-colors group">
+                                                <td class="px-6 py-4">
+                                                    <div class="flex items-center">
+                                                        <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
+                                                            <i class="fas fa-file-alt"></i>
+                                                        </div>
+                                                        <div class="ml-4">
+                                                            <div class="text-sm font-bold text-gray-900"><?= htmlspecialchars($surat['nomor_agenda']) ?></div>
+                                                            <div class="text-xs text-gray-500 max-w-[200px] truncate" title="<?= htmlspecialchars($surat['perihal']) ?>">
+                                                                <?= htmlspecialchars($surat['perihal']) ?>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-600"><?= htmlspecialchars($surat['nama_jenis']) ?></div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-600"><?= date('d M Y', strtotime($surat['tanggal_surat'])) ?></div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <?php
-                                                $badgeClass = match($surat['status_surat']) {
-                                                    'baru' => 'bg-primary-50 text-primary-700 border border-primary-100',
-                                                    'proses' => 'bg-yellow-50 text-yellow-700 border border-yellow-100',
-                                                    'disetujui' => 'bg-green-50 text-green-700 border border-green-100',
-                                                    'ditolak' => 'bg-red-50 text-red-700 border border-red-100',
-                                                    'arsip' => 'bg-gray-50 text-gray-700 border border-gray-200',
-                                                    default => 'bg-gray-50 text-gray-700'
-                                                };
-                                                ?>
-                                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full <?= $badgeClass ?>">
-                                                    <?= ucfirst($surat['status_surat']) ?>
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <a href="surat_detail.php?id=<?= $surat['id'] ?>" class="text-gray-400 hover:text-primary-600 transition-colors">
-                                                    <i class="fas fa-eye text-lg"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="text-sm text-gray-600"><?= htmlspecialchars($surat['nama_jenis']) ?></div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="text-sm text-gray-600"><?= date('d M Y', strtotime($surat['tanggal_surat'])) ?></div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                    <?php
+                                                    $badgeClass = match ($surat['status_surat']) {
+                                                        'baru' => 'bg-primary-50 text-primary-700 border border-primary-100',
+                                                        'proses' => 'bg-yellow-50 text-yellow-700 border border-yellow-100',
+                                                        'disetujui' => 'bg-green-50 text-green-700 border border-green-100',
+                                                        'ditolak' => 'bg-red-50 text-red-700 border border-red-100',
+                                                        'arsip' => 'bg-gray-50 text-gray-700 border border-gray-200',
+                                                        default => 'bg-gray-50 text-gray-700'
+                                                    };
+                                                    ?>
+                                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full <?= $badgeClass ?>">
+                                                        <?= ucfirst($surat['status_surat']) ?>
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                    <a href="surat_detail.php?id=<?= $surat['id'] ?>" class="text-gray-400 hover:text-primary-600 transition-colors">
+                                                        <i class="fas fa-eye text-lg"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </tbody>
@@ -253,9 +253,9 @@ foreach ($statusOrder as $st) {
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="xl:col-span-1 space-y-6">
-                    
+
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">Status Surat</h3>
                         <div class="relative h-48">
@@ -272,78 +272,94 @@ foreach ($statusOrder as $st) {
                             <canvas id="jenisChart"></canvas>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
-            
+
         </main>
-        
+
         <?php include 'partials/footer.php'; ?>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Chart 1: Donut Chart Status
-    const ctxStatus = document.getElementById('statusChart').getContext('2d');
-    new Chart(ctxStatus, {
-        type: 'doughnut',
-        data: {
-            labels: <?= json_encode($statusLabels) ?>,
-            datasets: [{
-                data: <?= json_encode($statusData) ?>,
-                backgroundColor: [
-                    '#3b82f6', // Baru
-                    '#eab308', // Proses
-                    '#22c55e', // Disetujui
-                    '#ef4444'  // Ditolak
-                ],
-                borderWidth: 0,
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: { boxWidth: 12, usePointStyle: true, font: { size: 11 } }
-                }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Chart 1: Donut Chart Status
+        const ctxStatus = document.getElementById('statusChart').getContext('2d');
+        new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: <?= json_encode($statusLabels) ?>,
+                datasets: [{
+                    data: <?= json_encode($statusData) ?>,
+                    backgroundColor: [
+                        '#3b82f6', // Baru
+                        '#eab308', // Proses
+                        '#22c55e', // Disetujui
+                        '#ef4444' // Ditolak
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
             },
-            cutout: '70%'
-        }
-    });
-
-    // Chart 2: Bar Chart Jenis
-    const ctxJenis = document.getElementById('jenisChart').getContext('2d');
-    new Chart(ctxJenis, {
-        type: 'bar',
-        data: {
-            labels: <?= json_encode($jenisLabels) ?>,
-            datasets: [{
-                label: 'Jumlah',
-                data: <?= json_encode($jenisData) ?>,
-                backgroundColor: '#6366f1',
-                borderRadius: 4,
-                barThickness: 20
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { display: false },
-                    ticks: { display: false }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 12,
+                            usePointStyle: true,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
                 },
-                x: {
-                    grid: { display: false }
+                cutout: '70%'
+            }
+        });
+
+        // Chart 2: Bar Chart Jenis
+        const ctxJenis = document.getElementById('jenisChart').getContext('2d');
+        new Chart(ctxJenis, {
+            type: 'bar',
+            data: {
+                labels: <?= json_encode($jenisLabels) ?>,
+                datasets: [{
+                    label: 'Jumlah',
+                    data: <?= json_encode($jenisData) ?>,
+                    backgroundColor: '#6366f1',
+                    borderRadius: 4,
+                    barThickness: 20
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            display: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
                 }
             }
-        }
+        });
     });
-});
 </script>

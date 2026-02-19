@@ -127,18 +127,28 @@ try {
                 throw new Exception("Gagal mengarsipkan surat");
             }
             break;
-            
+
         case 'update_status':
             $id = $_POST['id'] ?? 0;
             $status = $_POST['status'] ?? '';
-            
+            $alasanPenolakan = isset($_POST['alasan_penolakan']) ? trim($_POST['alasan_penolakan']) : null;
+
             if (!$id) throw new Exception("ID Surat tidak valid");
             if (!in_array($status, ['baru', 'proses', 'disetujui', 'ditolak', 'arsip'])) {
                 throw new Exception("Status tidak valid");
             }
-            
-            if (SuratService::updateStatus($id, $status)) {
-                logActivity($user['id'], 'update_status_surat', "Mengubah status surat ID: $id menjadi $status");
+
+            // Validasi: jika ditolak, alasan wajib diisi
+            if ($status === 'ditolak' && empty($alasanPenolakan)) {
+                throw new Exception("Alasan penolakan wajib diisi");
+            }
+
+            if (SuratService::updateStatus($id, $status, $alasanPenolakan)) {
+                $logMsg = "Mengubah status surat ID: $id menjadi $status";
+                if ($alasanPenolakan) {
+                    $logMsg .= " | Alasan: $alasanPenolakan";
+                }
+                logActivity($user['id'], 'update_status_surat', $logMsg);
                 echo json_encode(['status' => 'success', 'message' => 'Status surat berhasil diubah']);
             } else {
                 throw new Exception("Gagal mengubah status surat");
@@ -149,17 +159,17 @@ try {
             // Mengeluarkan surat dari arsip (kembali ke status 'baru')
             $id = $_POST['id'] ?? 0;
             if (!$id) throw new Exception("ID Surat tidak valid");
-            
+
             $surat = SuratService::getById($id);
             if (!$surat) throw new Exception("Surat tidak ditemukan");
             if ($surat['status_surat'] !== 'arsip') throw new Exception("Surat ini tidak sedang diarsipkan");
-            
+
             // Hanya Admin (role 1) dan Karyawan (role 2) yang bisa unarsip
             $userRole = $user['id_role'] ?? 3;
             if ($userRole == 3) {
                 throw new Exception("Anda tidak memiliki akses untuk mengeluarkan surat dari arsip");
             }
-            
+
             if (SuratService::updateStatus($id, 'baru')) {
                 logActivity($user['id'], 'unarsip_surat', "Mengeluarkan surat ID: $id dari arsip");
                 echo json_encode(['status' => 'success', 'message' => 'Surat berhasil dikeluarkan dari arsip']);
@@ -172,16 +182,16 @@ try {
             // Hapus surat secara permanen (dari arsip)
             $id = $_POST['id'] ?? 0;
             if (!$id) throw new Exception("ID Surat tidak valid");
-            
+
             $surat = SuratService::getById($id);
             if (!$surat) throw new Exception("Surat tidak ditemukan");
-            
+
             // Hanya Admin (role 1) dan Karyawan (role 2) yang bisa hapus permanen
             $userRole = $user['id_role'] ?? 3;
             if ($userRole == 3) {
                 throw new Exception("Anda tidak memiliki akses untuk menghapus surat secara permanen");
             }
-            
+
             if (SuratService::delete($id)) {
                 // Hapus file lampiran jika ada
                 if ($surat['lampiran_file'] && file_exists(UPLOAD_PATH . $surat['lampiran_file'])) {
@@ -197,8 +207,6 @@ try {
         default:
             throw new Exception("Aksi tidak valid");
     }
-
 } catch (Exception $e) {
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
-?>
