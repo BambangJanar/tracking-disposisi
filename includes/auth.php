@@ -21,7 +21,8 @@ function getCurrentUser() {
         'email' => $_SESSION['email'] ?? '',
         'role' => $_SESSION['role'] ?? '',
         'id_role' => $_SESSION['id_role'] ?? 0,
-        'id_bagian' => $_SESSION['id_bagian'] ?? null
+        'id_bagian' => $_SESSION['id_bagian'] ?? null,
+        'nama_bagian' => $_SESSION['nama_bagian'] ?? null
     ];
 }
 
@@ -61,9 +62,10 @@ function requireRole($roles) {
 
 // Login user
 function loginUser($email, $password) {
-    $query = "SELECT u.*, r.nama_role 
+    $query = "SELECT u.*, r.nama_role, b.nama_bagian 
               FROM users u 
               JOIN roles r ON u.id_role = r.id 
+              LEFT JOIN bagian b ON u.id_bagian = b.id 
               WHERE u.email = ? AND u.status_aktif = 1 
               LIMIT 1";
     
@@ -85,6 +87,7 @@ function loginUser($email, $password) {
     $_SESSION['role'] = $user['nama_role'];
     $_SESSION['id_role'] = $user['id_role'];
     $_SESSION['id_bagian'] = $user['id_bagian'];
+    $_SESSION['nama_bagian'] = $user['nama_bagian'] ?? null;
     
     // Log aktivitas
     logActivity($user['id'], 'login', 'User login ke sistem');

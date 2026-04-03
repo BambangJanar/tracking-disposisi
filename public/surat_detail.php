@@ -172,10 +172,10 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                                     <dd class="mt-1 text-sm text-gray-900"><?= htmlspecialchars($surat['nama_jenis']) ?></dd>
                                 </div>
                                 <div class="sm:col-span-1">
-                                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Surat</dt>
+                                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Diterima</dt>
                                     <dd class="mt-1 text-sm text-gray-900">
                                         <i class="far fa-calendar-alt mr-1 text-gray-400"></i>
-                                        <?= formatTanggal($surat['tanggal_surat']) ?>
+                                        <?= formatTanggal($surat['tanggal_diterima']) ?>
                                     </dd>
                                 </div>
                                 <?php if ($surat['dari_instansi']): ?>
@@ -273,10 +273,23 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                                                                     </span>
                                                                 </div>
 
-                                                                <?php if ($disp['catatan']): ?>
+                                                                <?php 
+                                                                // Cek apakah catatan boleh dilihat
+                                                                // Role user (magang) hanya bisa lihat catatan jika disposisi melibatkan dirinya
+                                                                $canViewCatatan = true;
+                                                                if ($userRole == 3) {
+                                                                    $canViewCatatan = ($disp['dari_user_id'] == $userId || $disp['ke_user_id'] == $userId);
+                                                                }
+                                                                ?>
+                                                                <?php if ($disp['catatan'] && $canViewCatatan): ?>
                                                                     <div class="bg-white rounded-lg p-3 border border-gray-200 text-sm text-gray-700 italic">
                                                                         <i class="fas fa-comment-dots mr-1 text-gray-400"></i>
                                                                         "<?= nl2br(htmlspecialchars($disp['catatan'])) ?>"
+                                                                    </div>
+                                                                <?php elseif ($disp['catatan'] && !$canViewCatatan): ?>
+                                                                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-200 text-sm text-gray-400 italic">
+                                                                        <i class="fas fa-lock mr-1 text-gray-300"></i>
+                                                                        Catatan tidak tersedia
                                                                     </div>
                                                                 <?php endif; ?>
 

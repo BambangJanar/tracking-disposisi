@@ -194,7 +194,7 @@ $arsipList = dbSelect($query, $params, $types);
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            <?= formatTanggal($surat['tanggal_surat']) ?>
+                                            <?= formatTanggal($surat['tanggal_diterima']) ?>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                             <?= formatTanggal($surat['updated_at']) ?>
@@ -312,7 +312,7 @@ $arsipList = dbSelect($query, $params, $types);
                                 <?php endif; ?>
 
                                 <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
-                                    <span><i class="far fa-calendar mr-1"></i><?= formatTanggal($surat['tanggal_surat']) ?></span>
+                                    <span><i class="far fa-calendar mr-1"></i><?= formatTanggal($surat['tanggal_diterima']) ?></span>
                                     <span><i class="fas fa-archive mr-1"></i><?= formatTanggal($surat['updated_at']) ?></span>
                                 </div>
 
@@ -449,6 +449,4 @@ $arsipList = dbSelect($query, $params, $types);
             }
         });
     }
-</script>
-
-<?php include 'partials/footer.php'; ?>
+</script>

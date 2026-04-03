@@ -178,7 +178,7 @@ ob_start();
                 <th width="15%">No. Agenda</th>
                 <th width="20%">Ke Instansi</th>
                 <th width="30%">Perihal</th>
-                <th width="15%">Tgl Surat</th>
+                <th width="15%">Tgl Diterima</th>
                 <th width="15%">Status</th>
             </tr>
         </thead>
@@ -192,7 +192,7 @@ ob_start();
                     <td><b><?= htmlspecialchars($row['nomor_agenda']) ?></b></td>
                     <td><?= htmlspecialchars($row['ke_instansi'] ?? '-') ?></td>
                     <td><?= htmlspecialchars(truncate($row['perihal'], 80)) ?></td>
-                    <td style="text-align: center;"><?= date('d/m/Y', strtotime($row['tanggal_surat'])) ?></td>
+                    <td style="text-align: center;"><?= date('d/m/Y', strtotime($row['tanggal_diterima'])) ?></td>
                     <td style="text-align: center;"><?= ucfirst($row['status_surat']) ?></td>
                 </tr>
             <?php 

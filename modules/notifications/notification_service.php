@@ -265,6 +265,16 @@ class NotificationService {
     }
     
     /**
+     * Clear notifications by disposisi
+     */
+    public static function clearByDisposisi($disposisiId) {
+        $query = "DELETE FROM notifications 
+                  WHERE disposisi_id = ?";
+        
+        return dbExecute($query, [$disposisiId], 'i');
+    }
+    
+    /**
      * Cleanup old notifications
      */
     public static function cleanup() {

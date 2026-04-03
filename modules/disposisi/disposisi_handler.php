@@ -240,7 +240,7 @@ try {
          * Get statistik disposisi
          */
         case 'statistics':
-            $stats = DisposisiService::getStatistics($userId, $userRole);
+            $stats = DisposisiService::getStatistics($userId);
 
             echo json_encode([
                 'status' => 'success',

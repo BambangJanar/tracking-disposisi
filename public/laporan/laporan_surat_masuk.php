@@ -18,7 +18,7 @@ $page = $_GET['page'] ?? 1;
 $limit = 10;
 
 // Base Query Condition (Surat Masuk id_jenis = 1)
-$whereClause = "WHERE s.id_jenis = 1 AND DATE(s.tanggal_surat) BETWEEN ? AND ?";
+$whereClause = "WHERE s.id_jenis = 1 AND DATE(s.tanggal_diterima) BETWEEN ? AND ?";
 $params = [$tanggalDari, $tanggalSampai];
 $types = 'ss';
 
@@ -48,7 +48,7 @@ $offset = $pagination->getOffset();
 // --- 3. Ambil Data Tabel ---
 $query = "SELECT s.* FROM surat s 
           $whereClause 
-          ORDER BY s.tanggal_surat DESC, s.created_at DESC 
+          ORDER BY s.tanggal_diterima DESC, s.created_at DESC 
           LIMIT ? OFFSET ?";
 
 $paramsQuery = array_merge($params, [$limit, $offset]);
@@ -140,7 +140,6 @@ $suratList = dbSelect($query, $paramsQuery, $typesQuery);
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Agenda</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dari Instansi</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Perihal</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Surat</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Diterima</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                             </tr>
@@ -148,7 +147,7 @@ $suratList = dbSelect($query, $paramsQuery, $typesQuery);
                         <tbody class="bg-white divide-y divide-gray-200">
                             <?php if (empty($suratList)): ?>
                             <tr>
-                                <td colspan="7" class="px-6 py-10 text-center text-gray-500">
+                                <td colspan="6" class="px-6 py-10 text-center text-gray-500">
                                     <div class="flex flex-col items-center justify-center">
                                         <i class="fas fa-inbox text-4xl mb-3 text-gray-300"></i>
                                         <p>Tidak ada data surat masuk untuk periode ini</p>
@@ -164,7 +163,6 @@ $suratList = dbSelect($query, $paramsQuery, $typesQuery);
                                     <td class="px-6 py-4 text-sm text-gray-700 max-w-xs truncate" title="<?= htmlspecialchars($surat['perihal']) ?>">
                                         <?= htmlspecialchars(truncate($surat['perihal'], 40)) ?>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-700"><?= formatTanggal($surat['tanggal_surat']) ?></td>
                                     <td class="px-6 py-4 text-sm text-gray-700"><?= formatTanggal($surat['tanggal_diterima']) ?></td>
                                     <td class="px-6 py-4">
                                         <span class="px-2.5 py-1 text-xs font-medium rounded-full <?= getStatusBadge($surat['status_surat']) ?>">
@@ -209,10 +207,6 @@ $suratList = dbSelect($query, $paramsQuery, $typesQuery);
                                 <div class="flex">
                                     <span class="text-gray-500 w-28 flex-shrink-0">Dari Instansi:</span>
                                     <span class="text-gray-900 font-medium"><?= htmlspecialchars($surat['dari_instansi'] ?? '-') ?></span>
-                                </div>
-                                <div class="flex">
-                                    <span class="text-gray-500 w-28 flex-shrink-0">Tgl Surat:</span>
-                                    <span class="text-gray-700"><?= formatTanggal($surat['tanggal_surat']) ?></span>
                                 </div>
                                 <div class="flex">
                                     <span class="text-gray-500 w-28 flex-shrink-0">Tgl Diterima:</span>

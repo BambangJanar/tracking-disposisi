@@ -298,7 +298,7 @@ ob_start();
                                 <b>Ke:</b> <?= htmlspecialchars($surat['ke_instansi']) ?>
                             <?php endif; ?>
                         </td>
-                        <td style="text-align: center;"><?= date('d/m/Y', strtotime($surat['tanggal_surat'])) ?></td>
+                        <td style="text-align: center;"><?= date('d/m/Y', strtotime($surat['tanggal_diterima'])) ?></td>
                         <td style="text-align: center;">
                             <span class="status-badge status-<?= $statusSebelum ?>">
                                 <?= ucfirst($statusSebelum) ?>

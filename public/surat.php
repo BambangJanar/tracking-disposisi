@@ -98,7 +98,7 @@ $jenisSuratList = JenisSuratService::getAll();
                         <tr>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Info Surat</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Asal/Tujuan</th>
-                            <th class="px-6 py-3.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Tgl Surat</th>
+                            <th class="px-6 py-3.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Tgl Diterima</th>
                             <th class="px-6 py-3.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
@@ -145,7 +145,7 @@ $jenisSuratList = JenisSuratService::getAll();
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                                        <?= date('d/m/Y', strtotime($surat['tanggal_surat'])) ?>
+                                        <?= date('d/m/Y', strtotime($surat['tanggal_diterima'])) ?>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
                                         <?php
@@ -234,7 +234,7 @@ $jenisSuratList = JenisSuratService::getAll();
                         <div class="mb-3 pl-[3.25rem]">
                             <p class="text-sm font-medium text-gray-800 line-clamp-2 leading-snug"><?= htmlspecialchars($surat['perihal']) ?></p>
                             <p class="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                <i class="far fa-calendar"></i> <?= date('d M Y', strtotime($surat['tanggal_surat'])) ?>
+                                <i class="far fa-calendar"></i> <?= date('d M Y', strtotime($surat['tanggal_diterima'])) ?>
                             </p>
                         </div>
 
@@ -334,17 +334,11 @@ $jenisSuratList = JenisSuratService::getAll();
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Surat <span class="text-red-500">*</span></label>
-                                <input type="date" name="tanggal_surat" id="tanggal_surat" required
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Diterima <span class="text-red-500">*</span></label>
+                                <input type="date" name="tanggal_diterima" id="tanggal_diterima" required
                                     value="<?= date('Y-m-d') ?>"
                                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm">
                             </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Diterima</label>
-                            <input type="date" name="tanggal_diterima" id="tanggal_diterima"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm">
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -434,7 +428,7 @@ $jenisSuratList = JenisSuratService::getAll();
         document.getElementById('suratId').value = '';
         document.getElementById('currentFile').textContent = '-';
         document.getElementById('fileNameDisplay').classList.add('hidden');
-        document.getElementById('tanggal_surat').value = '<?= date('Y-m-d') ?>';
+        document.getElementById('tanggal_diterima').value = '<?= date('Y-m-d') ?>';
         document.getElementById('suratModal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
@@ -445,7 +439,6 @@ $jenisSuratList = JenisSuratService::getAll();
         document.getElementById('suratId').value = surat.id;
         document.getElementById('id_jenis').value = surat.id_jenis;
         document.getElementById('nomor_surat').value = surat.nomor_surat;
-        document.getElementById('tanggal_surat').value = surat.tanggal_surat;
         document.getElementById('tanggal_diterima').value = surat.tanggal_diterima || '';
         document.getElementById('dari_instansi').value = surat.dari_instansi || '';
         document.getElementById('ke_instansi').value = surat.ke_instansi || '';

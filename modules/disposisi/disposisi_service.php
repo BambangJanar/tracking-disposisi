@@ -556,8 +556,8 @@ class DisposisiService {
         
         $result = dbExecute($query, $params, $types);
         
-        if ($result) {
-            $disposisiId = dbLastInsertId();
+        if ($result['affected_rows'] > 0) {
+            $disposisiId = $result['insert_id'];
             
             // Determine role type for stakeholder
             // Check if sender is already a stakeholder
@@ -601,7 +601,7 @@ class DisposisiService {
         
         $result = dbExecute($query, [$status, $catatan, $id], 'ssi');
         
-        if ($result) {
+        if ($result['affected_rows'] > 0) {
             // Get disposisi info for notification
             $disposisi = self::getById($id);
             
@@ -639,7 +639,7 @@ class DisposisiService {
             }
         }
         
-        return $result;
+        return $result['affected_rows'] > 0;
     }
     
     /**
@@ -822,5 +822,61 @@ class DisposisiService {
         }
         
         return false;
+    }
+
+    /**
+     * Cancel disposisi yang masih status 'dikirim'
+     * Hanya pengirim atau superadmin yang bisa cancel
+     */
+    public static function cancel($id, $userId) {
+        // Get disposisi
+        $disposisi = self::getById($id);
+
+        if (!$disposisi) {
+            return ['success' => false, 'message' => 'Disposisi tidak ditemukan'];
+        }
+
+        // Cek apakah user adalah pengirim atau superadmin
+        $user = dbSelectOne("SELECT id_role FROM users WHERE id = ?", [$userId], 'i');
+        $userRole = $user['id_role'] ?? 3;
+
+        if ($disposisi['dari_user_id'] != $userId && $userRole != 1) {
+            return ['success' => false, 'message' => 'Anda tidak memiliki akses untuk membatalkan disposisi ini'];
+        }
+
+        // Hanya bisa cancel jika status masih 'dikirim'
+        if ($disposisi['status_disposisi'] !== 'dikirim') {
+            return ['success' => false, 'message' => 'Disposisi dengan status \'' . $disposisi['status_disposisi'] . '\' tidak dapat dibatalkan. Hanya disposisi dengan status \'dikirim\' yang bisa dibatalkan.'];
+        }
+
+        // Delete disposisi
+        $result = dbExecute("DELETE FROM disposisi WHERE id = ?", [$id], 'i');
+
+        if ($result['affected_rows'] > 0) {
+            // Remove stakeholder jika tidak ada disposisi lain ke user tersebut untuk surat ini
+            $otherDisposisi = dbSelectOne(
+                "SELECT id FROM disposisi WHERE id_surat = ? AND ke_user_id = ?",
+                [$disposisi['id_surat'], $disposisi['ke_user_id']],
+                'ii'
+            );
+
+            if (!$otherDisposisi) {
+                dbExecute(
+                    "DELETE FROM surat_stakeholders WHERE surat_id = ? AND user_id = ?",
+                    [$disposisi['id_surat'], $disposisi['ke_user_id']],
+                    'ii'
+                );
+            }
+
+            // Clear related notifications
+            if (file_exists(__DIR__ . '/../notifications/notification_service.php')) {
+                require_once __DIR__ . '/../notifications/notification_service.php';
+                NotificationService::clearByDisposisi($id);
+            }
+
+            return ['success' => true, 'message' => 'Disposisi berhasil dibatalkan'];
+        }
+
+        return ['success' => false, 'message' => 'Gagal membatalkan disposisi'];
     }
 }

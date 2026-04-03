@@ -223,7 +223,7 @@ foreach ($statusOrder as $st) {
                                                     <div class="text-sm text-gray-600"><?= htmlspecialchars($surat['nama_jenis']) ?></div>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="text-sm text-gray-600"><?= date('d M Y', strtotime($surat['tanggal_surat'])) ?></div>
+                                                    <div class="text-sm text-gray-600"><?= date('d M Y', strtotime($surat['tanggal_diterima'])) ?></div>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                                     <?php

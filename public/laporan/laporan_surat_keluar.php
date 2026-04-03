@@ -18,7 +18,7 @@ $page = $_GET['page'] ?? 1;
 $limit = 10;
 
 // Base Query Condition (Surat Keluar id_jenis = 2)
-$whereClause = "WHERE s.id_jenis = 2 AND DATE(s.tanggal_surat) BETWEEN ? AND ?";
+$whereClause = "WHERE s.id_jenis = 2 AND DATE(s.tanggal_diterima) BETWEEN ? AND ?";
 $params = [$tanggalDari, $tanggalSampai];
 $types = 'ss';
 
@@ -47,7 +47,7 @@ $offset = $pagination->getOffset();
 // --- 3. Fetch Data ---
 $query = "SELECT s.* FROM surat s 
           $whereClause 
-          ORDER BY s.tanggal_surat DESC, s.created_at DESC 
+          ORDER BY s.tanggal_diterima DESC, s.created_at DESC 
           LIMIT ? OFFSET ?";
 
 $paramsQuery = array_merge($params, [$limit, $offset]);
@@ -139,7 +139,7 @@ $suratList = dbSelect($query, $paramsQuery, $typesQuery);
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Agenda</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ke Instansi</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Perihal</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Surat</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Diterima</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                             </tr>
                         </thead>
@@ -162,7 +162,7 @@ $suratList = dbSelect($query, $paramsQuery, $typesQuery);
                                     <td class="px-6 py-4 text-sm text-gray-700 max-w-xs truncate" title="<?= htmlspecialchars($surat['perihal']) ?>">
                                         <?= htmlspecialchars(truncate($surat['perihal'], 40)) ?>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-700"><?= formatTanggal($surat['tanggal_surat']) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-700"><?= formatTanggal($surat['tanggal_diterima']) ?></td>
                                     <td class="px-6 py-4">
                                         <span class="px-2.5 py-1 text-xs font-medium rounded-full <?= getStatusBadge($surat['status_surat']) ?>">
                                             <?= ucfirst($surat['status_surat']) ?>
@@ -208,8 +208,8 @@ $suratList = dbSelect($query, $paramsQuery, $typesQuery);
                                     <span class="text-gray-900 font-medium"><?= htmlspecialchars($surat['ke_instansi'] ?? '-') ?></span>
                                 </div>
                                 <div class="flex">
-                                    <span class="text-gray-500 w-24 flex-shrink-0">Tgl Surat:</span>
-                                    <span class="text-gray-700"><?= formatTanggal($surat['tanggal_surat']) ?></span>
+                                    <span class="text-gray-500 w-24 flex-shrink-0">Tgl Diterima:</span>
+                                    <span class="text-gray-700"><?= formatTanggal($surat['tanggal_diterima']) ?></span>
                                 </div>
                             </div>
                         </div>

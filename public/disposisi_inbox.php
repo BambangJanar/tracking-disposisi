@@ -61,7 +61,7 @@ if ($userRole == 1) {
     $joins .= " JOIN disposisi d ON d.id = (
                     SELECT MAX(d_inner.id) 
                     FROM disposisi d_inner 
-                    WHERE d_inner.id_surat = s.id AND d_inner.ke_user_id = $userId
+                    WHERE d_inner.id_surat = s.id AND d_inner.ke_user_id = ?
                 )";
 }
 
@@ -71,8 +71,13 @@ if ($userRole == 1) {
 $where = "WHERE s.status_surat NOT IN ('arsip', 'disetujui', 'ditolak')
           AND d.status_disposisi IN ('dikirim', 'diterima', 'diproses')";
 
+// Params awal: userId untuk JOIN subquery (hanya untuk non-admin)
 $params = [];
 $types = '';
+if ($userRole != 1) {
+    $params[] = $userId;
+    $types .= 'i';
+}
 
 // Filter Status Disposisi (Dropdown)
 if (!empty($filters['status_disposisi'])) {

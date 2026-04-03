@@ -27,8 +27,7 @@ try {
             $data = [
                 'id_jenis' => $_POST['id_jenis'] ?? '',
                 'nomor_surat' => $_POST['nomor_surat'] ?? '',
-                'tanggal_surat' => $_POST['tanggal_surat'] ?? '',
-                'tanggal_diterima' => !empty($_POST['tanggal_diterima']) ? $_POST['tanggal_diterima'] : null,
+                'tanggal_diterima' => $_POST['tanggal_diterima'] ?? '',
                 'dari_instansi' => $_POST['dari_instansi'] ?? '',
                 'ke_instansi' => $_POST['ke_instansi'] ?? '',
                 'alamat_surat' => $_POST['alamat_surat'] ?? '',
@@ -38,8 +37,8 @@ try {
             ];
 
             // Validasi input wajib
-            if (empty($data['id_jenis']) || empty($data['tanggal_surat']) || empty($data['perihal'])) {
-                throw new Exception("Mohon lengkapi data wajib (Jenis, Tanggal, Perihal)");
+            if (empty($data['id_jenis']) || empty($data['tanggal_diterima']) || empty($data['perihal'])) {
+                throw new Exception("Mohon lengkapi data wajib (Jenis, Tanggal Diterima, Perihal)");
             }
 
             if (isset($_FILES['lampiran_file']) && $_FILES['lampiran_file']['error'] === UPLOAD_ERR_OK) {
@@ -69,8 +68,7 @@ try {
             $data = [
                 'id_jenis' => $_POST['id_jenis'] ?? '',
                 'nomor_surat' => $_POST['nomor_surat'] ?? '',
-                'tanggal_surat' => $_POST['tanggal_surat'] ?? '',
-                'tanggal_diterima' => !empty($_POST['tanggal_diterima']) ? $_POST['tanggal_diterima'] : null,
+                'tanggal_diterima' => $_POST['tanggal_diterima'] ?? '',
                 'dari_instansi' => $_POST['dari_instansi'] ?? '',
                 'ke_instansi' => $_POST['ke_instansi'] ?? '',
                 'alamat_surat' => $_POST['alamat_surat'] ?? '',
