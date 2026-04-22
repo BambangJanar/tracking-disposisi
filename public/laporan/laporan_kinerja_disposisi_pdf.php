@@ -20,8 +20,7 @@ $query = "SELECT u.nama_lengkap, r.nama_role, COUNT(d.id) as total_disposisi,
             SUM(CASE WHEN d.tanggal_respon IS NOT NULL THEN 1 ELSE 0 END) as sudah_respon,
             SUM(CASE WHEN d.tanggal_respon IS NULL AND d.status_disposisi IN ('dikirim','diterima') THEN 1 ELSE 0 END) as belum_respon,
             SUM(CASE WHEN d.status_disposisi = 'selesai' THEN 1 ELSE 0 END) as selesai,
-            SUM(CASE WHEN d.status_disposisi = 'ditolak' THEN 1 ELSE 0 END) as ditolak_count,
-            ROUND(AVG(CASE WHEN d.tanggal_respon IS NOT NULL THEN TIMESTAMPDIFF(HOUR, d.tanggal_disposisi, d.tanggal_respon) END), 1) as avg_respon_jam
+            SUM(CASE WHEN d.status_disposisi = 'ditolak' THEN 1 ELSE 0 END) as ditolak_count
           FROM disposisi d JOIN users u ON d.ke_user_id = u.id JOIN roles r ON u.id_role = r.id
           WHERE DATE(d.tanggal_disposisi) BETWEEN ? AND ?
           GROUP BY u.id ORDER BY total_disposisi DESC";
@@ -55,9 +54,9 @@ ob_start();
     </tr></table></div>
     <div class="judul"><h3>LAPORAN KINERJA DISPOSISI</h3><p>Periode: <?= date('d/m/Y', strtotime($tanggalDari)) ?> s/d <?= date('d/m/Y', strtotime($tanggalSampai)) ?></p></div>
     <table class="data"><thead><tr>
-        <th width="5%">No</th><th width="20%">Nama</th><th width="12%">Role</th>
-        <th width="10%">Total</th><th width="10%">Respon</th><th width="10%">Belum</th>
-        <th width="10%">Selesai</th><th width="10%">Ditolak</th><th width="13%">Avg Respon</th>
+        <th width="5%">No</th><th width="25%">Nama</th><th width="14%">Role</th>
+        <th width="14%">Total</th><th width="14%">Respon</th><th width="14%">Belum</th>
+        <th width="14%">Selesai</th><th width="14%">Ditolak</th>
     </tr></thead><tbody>
         <?php if (!empty($list)): foreach($list as $no => $r): ?>
         <tr>
@@ -69,10 +68,9 @@ ob_start();
             <td style="text-align:center;"><?= $r['belum_respon'] ?></td>
             <td style="text-align:center;"><?= $r['selesai'] ?></td>
             <td style="text-align:center;"><?= $r['ditolak_count'] ?></td>
-            <td style="text-align:center;"><?= $r['avg_respon_jam'] !== null ? $r['avg_respon_jam'] . ' jam' : '-' ?></td>
         </tr>
         <?php endforeach; else: ?>
-        <tr><td colspan="9" style="text-align:center;padding:20px;">Tidak ada data.</td></tr>
+        <tr><td colspan="8" style="text-align:center;padding:20px;">Tidak ada data.</td></tr>
         <?php endif; ?>
     </tbody></table>
     <div class="ttd-wrapper"><div class="ttd-box">

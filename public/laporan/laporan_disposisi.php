@@ -28,23 +28,12 @@ $statsData = dbSelect($statsQuery, $paramsCount, $typesCount);
 
 $totalDisposisi = count($statsData);
 $byStatus = [];
-$totalResponseTime = 0;
-$respondedCount = 0;
 
 foreach ($statsData as $disp) {
     $status = $disp['status_disposisi'];
     if (!isset($byStatus[$status])) $byStatus[$status] = 0;
     $byStatus[$status]++;
-
-    if ($disp['tanggal_respon']) {
-        $sent = strtotime($disp['tanggal_disposisi']);
-        $responded = strtotime($disp['tanggal_respon']);
-        $diff = $responded - $sent;
-        $totalResponseTime += $diff;
-        $respondedCount++;
-    }
 }
-$avgResponseHours = $respondedCount > 0 ? round($totalResponseTime / $respondedCount / 3600, 1) : 0;
 
 // 2. Setup Pagination
 $pagination = new Pagination($totalDisposisi, 10, $page);
@@ -126,7 +115,7 @@ $disposisiList = dbSelect($query, $params, $types);
             </div>
             
             <!-- Statistics Cards -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
                 <div class="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-gray-500">
                     <p class="text-xs sm:text-sm text-gray-600 mb-1">Total Disposisi</p>
                     <p class="text-xl sm:text-2xl font-bold text-gray-800"><?= $totalDisposisi ?></p>
@@ -142,10 +131,6 @@ $disposisiList = dbSelect($query, $params, $types);
                 <div class="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-green-500">
                     <p class="text-xs sm:text-sm text-gray-600 mb-1">Selesai</p>
                     <p class="text-xl sm:text-2xl font-bold text-green-600"><?= $byStatus['selesai'] ?? 0 ?></p>
-                </div>
-                <div class="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-purple-500 col-span-2 sm:col-span-3 lg:col-span-1">
-                    <p class="text-xs sm:text-sm text-gray-600 mb-1">Avg Response</p>
-                    <p class="text-xl sm:text-2xl font-bold text-purple-600"><?= $avgResponseHours ?>h</p>
                 </div>
             </div>
             

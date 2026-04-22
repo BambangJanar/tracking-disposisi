@@ -170,7 +170,6 @@ function isGroupActive($pages)
                             <a href="<?= BASE_URL ?>/laporan/laporan_rekap_surat.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_rekap_surat.php') ?>">Rekap Surat</a>
                             <a href="<?= BASE_URL ?>/laporan/laporan_disposisi.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_disposisi.php') ?>">Disposisi</a>
                             <a href="<?= BASE_URL ?>/laporan/laporan_kinerja_disposisi.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_kinerja_disposisi.php') ?>">Kinerja Disposisi</a>
-                            <a href="<?= BASE_URL ?>/laporan/laporan_per_bagian.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_per_bagian.php') ?>">Per Bagian</a>
                             <a href="<?= BASE_URL ?>/laporan/laporan_statistik_pengguna.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_statistik_pengguna.php') ?>">Statistik Pengguna</a>
                             <?php if ($userRole == 1): ?>
                                 <a href="<?= BASE_URL ?>/laporan/laporan_aktivitas.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_aktivitas.php') ?>">Log Aktivitas</a>

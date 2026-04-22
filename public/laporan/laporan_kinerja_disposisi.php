@@ -20,8 +20,7 @@ $query = "SELECT
             SUM(CASE WHEN d.tanggal_respon IS NOT NULL THEN 1 ELSE 0 END) as sudah_respon,
             SUM(CASE WHEN d.tanggal_respon IS NULL AND d.status_disposisi IN ('dikirim','diterima') THEN 1 ELSE 0 END) as belum_respon,
             SUM(CASE WHEN d.status_disposisi = 'selesai' THEN 1 ELSE 0 END) as selesai,
-            SUM(CASE WHEN d.status_disposisi = 'ditolak' THEN 1 ELSE 0 END) as ditolak_count,
-            ROUND(AVG(CASE WHEN d.tanggal_respon IS NOT NULL THEN TIMESTAMPDIFF(HOUR, d.tanggal_disposisi, d.tanggal_respon) END), 1) as avg_respon_jam
+            SUM(CASE WHEN d.status_disposisi = 'ditolak' THEN 1 ELSE 0 END) as ditolak_count
           FROM disposisi d
           JOIN users u ON d.ke_user_id = u.id
           JOIN roles r ON u.id_role = r.id
@@ -36,11 +35,6 @@ $totalDisposisi = array_sum(array_column($kinerjalist, 'total_disposisi'));
 $totalRespon = array_sum(array_column($kinerjalist, 'sudah_respon'));
 $totalBelum = array_sum(array_column($kinerjalist, 'belum_respon'));
 $totalSelesai = array_sum(array_column($kinerjalist, 'selesai'));
-
-// Avg response time (global)
-$avgGlobal = 0;
-$validAvg = array_filter(array_column($kinerjalist, 'avg_respon_jam'), fn($v) => $v !== null);
-if (count($validAvg) > 0) $avgGlobal = round(array_sum($validAvg) / count($validAvg), 1);
 ?>
 
 <?php include '../partials/header.php'; ?>
@@ -70,7 +64,7 @@ if (count($validAvg) > 0) $avgGlobal = round(array_sum($validAvg) / count($valid
                 </form>
             </div>
             
-            <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
                 <div class="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-gray-700">
                     <p class="text-xs text-gray-600 mb-1">Total Disposisi</p>
                     <p class="text-xl font-bold text-gray-800"><?= $totalDisposisi ?></p>
@@ -87,10 +81,6 @@ if (count($validAvg) > 0) $avgGlobal = round(array_sum($validAvg) / count($valid
                     <p class="text-xs text-gray-600 mb-1">Selesai</p>
                     <p class="text-xl font-bold text-blue-600"><?= $totalSelesai ?></p>
                 </div>
-                <div class="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-purple-500 col-span-2 lg:col-span-1">
-                    <p class="text-xs text-gray-600 mb-1">Rata-rata Respon</p>
-                    <p class="text-xl font-bold text-purple-600"><?= $avgGlobal ?> jam</p>
-                </div>
             </div>
             
             <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -105,11 +95,10 @@ if (count($validAvg) > 0) $avgGlobal = round(array_sum($validAvg) / count($valid
                             <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Belum</th>
                             <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Selesai</th>
                             <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Ditolak</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Avg Respon</th>
                         </tr></thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <?php if (empty($kinerjalist)): ?>
-                            <tr><td colspan="9" class="px-6 py-10 text-center text-gray-500"><i class="fas fa-chart-bar text-4xl mb-3 text-gray-300"></i><p>Tidak ada data disposisi</p></td></tr>
+                            <tr><td colspan="8" class="px-6 py-10 text-center text-gray-500"><i class="fas fa-chart-bar text-4xl mb-3 text-gray-300"></i><p>Tidak ada data disposisi</p></td></tr>
                             <?php else: foreach ($kinerjalist as $i => $k): ?>
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-4 text-sm"><?= $i + 1 ?></td>
@@ -120,15 +109,6 @@ if (count($validAvg) > 0) $avgGlobal = round(array_sum($validAvg) / count($valid
                                 <td class="px-4 py-4 text-sm text-center text-yellow-600 font-medium"><?= $k['belum_respon'] ?></td>
                                 <td class="px-4 py-4 text-sm text-center text-blue-600 font-medium"><?= $k['selesai'] ?></td>
                                 <td class="px-4 py-4 text-sm text-center text-red-600 font-medium"><?= $k['ditolak_count'] ?></td>
-                                <td class="px-4 py-4 text-sm text-center">
-                                    <?php if ($k['avg_respon_jam'] !== null): ?>
-                                        <span class="px-2 py-1 rounded-full text-xs font-medium <?= $k['avg_respon_jam'] <= 24 ? 'bg-green-100 text-green-700' : ($k['avg_respon_jam'] <= 72 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') ?>">
-                                            <?= $k['avg_respon_jam'] ?> jam
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="text-gray-400">-</span>
-                                    <?php endif; ?>
-                                </td>
                             </tr>
                             <?php endforeach; endif; ?>
                         </tbody>
@@ -146,9 +126,6 @@ if (count($validAvg) > 0) $avgGlobal = round(array_sum($validAvg) / count($valid
                             <div class="bg-green-50 p-2 rounded"><div class="font-bold text-lg text-green-600"><?= $k['sudah_respon'] ?></div><div class="text-gray-500">Respon</div></div>
                             <div class="bg-yellow-50 p-2 rounded"><div class="font-bold text-lg text-yellow-600"><?= $k['belum_respon'] ?></div><div class="text-gray-500">Belum</div></div>
                         </div>
-                        <?php if ($k['avg_respon_jam'] !== null): ?>
-                        <div class="mt-2 text-xs text-gray-500">Rata-rata respon: <span class="font-medium text-gray-700"><?= $k['avg_respon_jam'] ?> jam</span></div>
-                        <?php endif; ?>
                     </div>
                     <?php endforeach; endif; ?>
                 </div>
