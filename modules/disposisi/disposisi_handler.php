@@ -73,8 +73,14 @@ try {
             $disposisiId = DisposisiService::create($data);
 
             if ($disposisiId) {
+                // Auto-update status surat dari 'baru' ke 'proses' saat disposisi pertama dikirim
+                $surat = dbSelectOne("SELECT nomor_agenda, status_surat FROM surat WHERE id = ?", [$idSurat], 'i');
+                
+                if ($surat && $surat['status_surat'] === 'baru') {
+                    dbExecute("UPDATE surat SET status_surat = 'proses' WHERE id = ?", [$idSurat], 'i');
+                }
+
                 // Log activity
-                $surat = dbSelectOne("SELECT nomor_agenda FROM surat WHERE id = ?", [$idSurat], 'i');
                 $targetUser = dbSelectOne("SELECT nama_lengkap FROM users WHERE id = ?", [$keUserId], 'i');
 
                 logActivity(

@@ -369,16 +369,19 @@ class DisposisiService {
             // Superadmin: Lihat semua
             $query .= " WHERE 1=1";
         } elseif ($userRole == 2) {
-            // Karyawan: Surat yang dia terlibat sebagai stakeholder (termasuk delegasi ke magang)
-            $query .= " JOIN surat_stakeholders ss ON ss.surat_id = s.id
-                       WHERE ss.user_id = ?";
+            // Karyawan: Disposisi yang dia kirim ATAU terima, termasuk yang terlibat via stakeholder
+            $query .= " LEFT JOIN surat_stakeholders ss ON ss.surat_id = s.id AND ss.user_id = ?
+                       WHERE (d.dari_user_id = ? OR d.ke_user_id = ? OR ss.user_id IS NOT NULL)";
             $params[] = $userId;
-            $types .= 'i';
+            $params[] = $userId;
+            $params[] = $userId;
+            $types .= 'iii';
         } else {
-            // Magang: Hanya surat yang dia tangani langsung
-            $query .= " WHERE d.ke_user_id = ?";
+            // Magang/User: Disposisi yang dia kirim ATAU terima
+            $query .= " WHERE (d.dari_user_id = ? OR d.ke_user_id = ?)";
             $params[] = $userId;
-            $types .= 'i';
+            $params[] = $userId;
+            $types .= 'ii';
         }
         
         // Filter by status
@@ -421,14 +424,17 @@ class DisposisiService {
         if ($userRole == 1) {
             $query .= " WHERE 1=1";
         } elseif ($userRole == 2) {
-            $query .= " JOIN surat_stakeholders ss ON ss.surat_id = s.id
-                       WHERE ss.user_id = ?";
+            $query .= " LEFT JOIN surat_stakeholders ss ON ss.surat_id = s.id AND ss.user_id = ?
+                       WHERE (d.dari_user_id = ? OR d.ke_user_id = ? OR ss.user_id IS NOT NULL)";
             $params[] = $userId;
-            $types .= 'i';
+            $params[] = $userId;
+            $params[] = $userId;
+            $types .= 'iii';
         } else {
-            $query .= " WHERE d.ke_user_id = ?";
+            $query .= " WHERE (d.dari_user_id = ? OR d.ke_user_id = ?)";
             $params[] = $userId;
-            $types .= 'i';
+            $params[] = $userId;
+            $types .= 'ii';
         }
         
         // Filter by status
