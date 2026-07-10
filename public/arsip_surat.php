@@ -14,6 +14,9 @@ $userId = $user['id'];
 $userRole = $user['id_role'] ?? 3;
 $pageTitle = 'Arsip Surat';
 
+// URL handler download
+$downloadHandlerUrl = dirname(BASE_URL) . '/modules/download/download_handler.php';
+
 // Pagination Logic
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $perPage = 10;
@@ -208,11 +211,16 @@ $arsipList = dbSelect($query, $params, $types);
                                                 </a>
 
                                                 <?php if ($surat['lampiran_file']): ?>
-                                                    <a href="<?= UPLOAD_URL . $surat['lampiran_file'] ?>"
+                                                    <a href="<?= $downloadHandlerUrl ?>?action=view&surat_id=<?= $surat['id'] ?>"
                                                         target="_blank"
                                                         class="text-green-600 hover:text-green-800 transition-colors"
                                                         title="Lihat File">
-                                                        <i class="fas fa-file-pdf"></i>
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="<?= $downloadHandlerUrl ?>?action=download&surat_id=<?= $surat['id'] ?>"
+                                                        class="text-blue-600 hover:text-blue-800 transition-colors"
+                                                        title="Unduh File">
+                                                        <i class="fas fa-download"></i>
                                                     </a>
                                                 <?php endif; ?>
 
@@ -323,10 +331,14 @@ $arsipList = dbSelect($query, $params, $types);
                                     </a>
 
                                     <?php if ($surat['lampiran_file']): ?>
-                                        <a href="<?= UPLOAD_URL . $surat['lampiran_file'] ?>"
+                                        <a href="<?= $downloadHandlerUrl ?>?action=view&surat_id=<?= $surat['id'] ?>"
                                             target="_blank"
                                             class="flex-1 bg-green-50 text-green-600 hover:bg-green-100 text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors">
-                                            <i class="fas fa-file-pdf mr-1"></i>File
+                                            <i class="fas fa-eye mr-1"></i>Lihat
+                                        </a>
+                                        <a href="<?= $downloadHandlerUrl ?>?action=download&surat_id=<?= $surat['id'] ?>"
+                                            class="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                                            <i class="fas fa-download mr-1"></i>Unduh
                                         </a>
                                     <?php endif; ?>
                                 </div>

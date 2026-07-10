@@ -7,6 +7,7 @@ require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../modules/surat/surat_service.php';
 require_once __DIR__ . '/../modules/disposisi/disposisi_service.php';
 require_once __DIR__ . '/../modules/users/users_service.php';
+require_once __DIR__ . '/../modules/download/download_service.php';
 
 requireLogin();
 
@@ -39,6 +40,15 @@ $pageTitle = 'Detail Surat - ' . $surat['nomor_agenda'];
 
 // Cek Status Surat Selesai (Final)
 $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'arsip']);
+
+// Ambil log download untuk surat ini (hanya superadmin & admin)
+$downloadLogs = [];
+if ($userRole != 3 && !empty($surat['lampiran_file'])) {
+    $downloadLogs = DownloadService::getLogBySurat($suratId, 10);
+}
+
+// URL handler download
+$downloadHandlerUrl = dirname(BASE_URL) . '/modules/download/download_handler.php';
 ?>
 
 <?php include 'partials/header.php'; ?>
@@ -68,10 +78,15 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
 
                     <div class="flex items-center gap-3 flex-wrap">
                         <?php if ($surat['lampiran_file']): ?>
-                            <a href="<?= UPLOAD_URL . $surat['lampiran_file'] ?>" target="_blank"
+                            <a href="<?= $downloadHandlerUrl ?>?action=view&surat_id=<?= $suratId ?>" target="_blank"
                                 class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all"
                                 title="Buka file surat di tab baru">
                                 <i class="fas fa-external-link-alt mr-2 text-blue-500"></i> Lihat Surat
+                            </a>
+                            <a href="<?= $downloadHandlerUrl ?>?action=download&surat_id=<?= $suratId ?>"
+                                class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all"
+                                title="Unduh file surat">
+                                <i class="fas fa-download mr-2 text-green-500"></i> Unduh File
                             </a>
                         <?php else: ?>
                             <button disabled class="inline-flex items-center px-4 py-2.5 bg-gray-100 border border-gray-300 rounded-lg font-medium text-sm text-gray-400 cursor-not-allowed">
@@ -397,6 +412,60 @@ $isSuratSelesai = in_array($surat['status_surat'], ['disetujui', 'ditolak', 'ars
                             </div>
                         </div>
                     </div>
+
+                    <?php if ($userRole != 3 && !empty($surat['lampiran_file'])): ?>
+                    <!-- Log Akses File -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">
+                                <i class="fas fa-shield-alt mr-1 text-amber-500"></i> Log Akses File
+                            </h3>
+                            <span class="bg-amber-50 text-amber-700 text-xs px-2 py-1 rounded-md font-medium">
+                                Audit Trail
+                            </span>
+                        </div>
+
+                        <?php if (empty($downloadLogs)): ?>
+                            <div class="text-center py-6 text-gray-400">
+                                <i class="fas fa-file-shield text-3xl mb-2"></i>
+                                <p class="text-xs">Belum ada riwayat akses file</p>
+                            </div>
+                        <?php else: ?>
+                            <div class="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
+                                <?php foreach ($downloadLogs as $log): ?>
+                                    <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 <?= $log['aksi'] === 'download' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600' ?>">
+                                            <i class="fas <?= $log['aksi'] === 'download' ? 'fa-download' : 'fa-eye' ?> text-xs"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 truncate">
+                                                <?= htmlspecialchars($log['nama_lengkap']) ?>
+                                            </p>
+                                            <p class="text-xs text-gray-500">
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium <?= $log['aksi'] === 'download' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700' ?>">
+                                                    <?= $log['aksi'] === 'download' ? 'Unduh' : 'Lihat' ?>
+                                                </span>
+                                                <span class="ml-1"><?= formatDateTime($log['created_at']) ?></span>
+                                            </p>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">
+                                                <i class="fas fa-globe mr-1"></i>IP: <?= htmlspecialchars($log['ip_address'] ?? '-') ?>
+                                            </p>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+
+                            <?php if (count($downloadLogs) >= 10): ?>
+                                <div class="mt-3 text-center">
+                                    <a href="<?= BASE_URL ?>/laporan/laporan_log_download.php?search=<?= urlencode($surat['nomor_agenda']) ?>" 
+                                       class="text-xs text-primary-600 hover:text-primary-700 font-medium">
+                                        Lihat Semua Log <i class="fas fa-arrow-right ml-1"></i>
+                                    </a>
+                                </div>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </main>
