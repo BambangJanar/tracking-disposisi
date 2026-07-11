@@ -211,7 +211,7 @@ $arsipList = dbSelect($query, $params, $types);
                                                 </a>
 
                                                 <?php if ($surat['lampiran_file']): ?>
-                                                    <a href="<?= $downloadHandlerUrl ?>?action=view&surat_id=<?= $surat['id'] ?>"
+                                                    <a href="file_viewer.php?surat_id=<?= $surat['id'] ?>"
                                                         target="_blank"
                                                         class="text-green-600 hover:text-green-800 transition-colors"
                                                         title="Lihat File">
@@ -331,7 +331,7 @@ $arsipList = dbSelect($query, $params, $types);
                                     </a>
 
                                     <?php if ($surat['lampiran_file']): ?>
-                                        <a href="<?= $downloadHandlerUrl ?>?action=view&surat_id=<?= $surat['id'] ?>"
+                                        <a href="file_viewer.php?surat_id=<?= $surat['id'] ?>"
                                             target="_blank"
                                             class="flex-1 bg-green-50 text-green-600 hover:bg-green-100 text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors">
                                             <i class="fas fa-eye mr-1"></i>Lihat

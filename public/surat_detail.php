@@ -78,9 +78,9 @@ $downloadHandlerUrl = dirname(BASE_URL) . '/modules/download/download_handler.ph
 
                     <div class="flex items-center gap-3 flex-wrap">
                         <?php if ($surat['lampiran_file']): ?>
-                            <a href="<?= $downloadHandlerUrl ?>?action=view&surat_id=<?= $suratId ?>" target="_blank"
+                            <a href="file_viewer.php?surat_id=<?= $suratId ?>" target="_blank"
                                 class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all"
-                                title="Buka file surat di tab baru">
+                                title="Buka file surat di viewer">
                                 <i class="fas fa-external-link-alt mr-2 text-blue-500"></i> Lihat Surat
                             </a>
                             <a href="<?= $downloadHandlerUrl ?>?action=download&surat_id=<?= $suratId ?>"

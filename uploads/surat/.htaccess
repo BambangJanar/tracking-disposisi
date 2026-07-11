@@ -1,0 +1,8 @@
+# ============================================================================
+# KEAMANAN: Blokir akses langsung ke file lampiran surat
+# Semua akses file HARUS melalui download_handler.php
+# ============================================================================
+
+# Tolak semua akses HTTP langsung
+Order Deny,Allow
+Deny from all

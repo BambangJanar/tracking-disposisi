@@ -13,6 +13,9 @@ requireLogin();
 $user = getCurrentUser();
 $pageTitle = 'Manajemen Surat';
 
+// URL handler download
+$downloadHandlerUrl = dirname(BASE_URL) . '/modules/download/download_handler.php';
+
 $filters = [
     'id_jenis' => $_GET['jenis'] ?? '',
     'status_surat' => $_GET['status'] ?? '',
@@ -184,7 +187,10 @@ $jenisSuratList = JenisSuratService::getAll();
                                             <?php endif; ?>
 
                                             <?php if ($surat['lampiran_file']): ?>
-                                                <a href="<?= UPLOAD_URL . $surat['lampiran_file'] ?>" target="_blank" class="text-gray-400 hover:text-green-600 transition-colors p-1.5 hover:bg-gray-100 rounded-lg" title="Download">
+                                                <a href="file_viewer.php?surat_id=<?= $surat['id'] ?>" target="_blank" class="text-gray-400 hover:text-blue-600 transition-colors p-1.5 hover:bg-gray-100 rounded-lg" title="Lihat File">
+                                                    <i class="fas fa-eye text-lg"></i>
+                                                </a>
+                                                <a href="<?= $downloadHandlerUrl ?>?action=download&surat_id=<?= $surat['id'] ?>" class="text-gray-400 hover:text-green-600 transition-colors p-1.5 hover:bg-gray-100 rounded-lg" title="Unduh File">
                                                     <i class="fas fa-file-download text-lg"></i>
                                                 </a>
                                             <?php endif; ?>
@@ -275,7 +281,10 @@ $jenisSuratList = JenisSuratService::getAll();
                             <?php endif; ?>
 
                             <?php if ($surat['lampiran_file']): ?>
-                                <a href="<?= UPLOAD_URL . $surat['lampiran_file'] ?>" target="_blank" class="p-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+                                <a href="file_viewer.php?surat_id=<?= $surat['id'] ?>" target="_blank" class="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors" title="Lihat File">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="<?= $downloadHandlerUrl ?>?action=download&surat_id=<?= $surat['id'] ?>" class="p-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors" title="Unduh File">
                                     <i class="fas fa-file-download"></i>
                                 </a>
                             <?php endif; ?>
