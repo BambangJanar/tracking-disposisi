@@ -59,6 +59,12 @@ class SuratService
             }
         }
 
+        if (!empty($filters['tingkat_surat'])) {
+            $sql .= " AND s.tingkat_surat = ?";
+            $params[] = $filters['tingkat_surat'];
+            $types .= "s";
+        }
+
         $sql .= " ORDER BY s.created_at DESC LIMIT ? OFFSET ?";
         $params[] = $limit;
         $params[] = $offset;
@@ -103,6 +109,12 @@ class SuratService
             $types .= "s";
         } else {
             $sql .= " AND s.status_surat != 'arsip'";
+        }
+
+        if (!empty($filters['tingkat_surat'])) {
+            $sql .= " AND s.tingkat_surat = ?";
+            $params[] = $filters['tingkat_surat'];
+            $types .= "s";
         }
 
         $stmt = $conn->prepare($sql);
@@ -169,12 +181,12 @@ class SuratService
             $nomorSurat = self::generateNomorSurat();
         }
 
-        $sql = "INSERT INTO surat (id_jenis, nomor_surat, nomor_agenda, tanggal_diterima, dari_instansi, ke_instansi, alamat_surat, perihal, lampiran_file, dibuat_oleh) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO surat (id_jenis, nomor_surat, nomor_agenda, tanggal_diterima, dari_instansi, ke_instansi, alamat_surat, perihal, lampiran_file, dibuat_oleh, tingkat_surat) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
-            "issssssssi",
+            "issssssssis",
             $data['id_jenis'],
             $nomorSurat,
             $nomorAgenda,
@@ -184,7 +196,8 @@ class SuratService
             $data['alamat_surat'],
             $data['perihal'],
             $data['lampiran_file'],
-            $data['dibuat_oleh']
+            $data['dibuat_oleh'],
+            $data['tingkat_surat']
         );
 
         $result = $stmt->execute();
@@ -227,11 +240,11 @@ class SuratService
     public static function update($id, $data)
     {
         $conn = getConnection();
-        $sql = "UPDATE surat SET id_jenis=?, nomor_surat=?, tanggal_diterima=?, dari_instansi=?, ke_instansi=?, alamat_surat=?, perihal=?, lampiran_file=? WHERE id=?";
+        $sql = "UPDATE surat SET id_jenis=?, nomor_surat=?, tanggal_diterima=?, dari_instansi=?, ke_instansi=?, alamat_surat=?, perihal=?, lampiran_file=?, tingkat_surat=? WHERE id=?";
 
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
-            "isssssssi",
+            "issssssssi",
             $data['id_jenis'],
             $data['nomor_surat'],
             $data['tanggal_diterima'],
@@ -240,6 +253,7 @@ class SuratService
             $data['alamat_surat'],
             $data['perihal'],
             $data['lampiran_file'],
+            $data['tingkat_surat'],
             $id
         );
 

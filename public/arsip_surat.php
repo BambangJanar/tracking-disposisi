@@ -191,10 +191,17 @@ $arsipList = dbSelect($query, $params, $types);
                                             <?php endif; ?>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $statusClass ?>">
-                                                <i class="fas <?= $statusIcon ?> mr-1"></i>
-                                                <?= $statusLabel ?>
-                                            </span>
+                                            <div class="flex flex-col gap-1 items-start">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $statusClass ?>">
+                                                    <i class="fas <?= $statusIcon ?> mr-1"></i>
+                                                    <?= $statusLabel ?>
+                                                </span>
+                                                <?php if (isset($surat['tingkat_surat']) && $surat['tingkat_surat'] !== 'biasa'): ?>
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium border <?= getTingkatSuratBadge($surat['tingkat_surat']) ?>">
+                                                        <i class="<?= getTingkatSuratIcon($surat['tingkat_surat']) ?>"></i> <?= getTingkatSuratLabel($surat['tingkat_surat']) ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                             <?= formatTanggal($surat['tanggal_diterima']) ?>
@@ -303,10 +310,17 @@ $arsipList = dbSelect($query, $params, $types);
                                         <span class="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full whitespace-nowrap">
                                             <?= htmlspecialchars($surat['nama_jenis']) ?>
                                         </span>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <?= $statusClassMobile ?>">
-                                            <i class="fas <?= $statusIconMobile ?> mr-1"></i>
-                                            <?= $statusLabelMobile ?>
-                                        </span>
+                                        <div class="flex flex-col gap-1 items-end">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <?= $statusClassMobile ?>">
+                                                <i class="fas <?= $statusIconMobile ?> mr-1"></i>
+                                                <?= $statusLabelMobile ?>
+                                            </span>
+                                            <?php if (isset($surat['tingkat_surat']) && $surat['tingkat_surat'] !== 'biasa'): ?>
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border <?= getTingkatSuratBadge($surat['tingkat_surat']) ?>">
+                                                    <i class="<?= getTingkatSuratIcon($surat['tingkat_surat']) ?>"></i> <?= getTingkatSuratLabel($surat['tingkat_surat']) ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                 </div>
 

@@ -32,6 +32,7 @@ try {
                 'ke_instansi' => $_POST['ke_instansi'] ?? '',
                 'alamat_surat' => $_POST['alamat_surat'] ?? '',
                 'perihal' => $_POST['perihal'] ?? '',
+                'tingkat_surat' => $_POST['tingkat_surat'] ?? 'biasa',
                 'dibuat_oleh' => $user['id'],
                 'lampiran_file' => null
             ];
@@ -73,6 +74,7 @@ try {
                 'ke_instansi' => $_POST['ke_instansi'] ?? '',
                 'alamat_surat' => $_POST['alamat_surat'] ?? '',
                 'perihal' => $_POST['perihal'] ?? '',
+                'tingkat_surat' => $_POST['tingkat_surat'] ?? 'biasa',
                 'lampiran_file' => $oldData['lampiran_file']
             ];
 

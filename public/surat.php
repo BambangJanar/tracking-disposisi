@@ -18,6 +18,7 @@ $downloadHandlerUrl = dirname(BASE_URL) . '/modules/download/download_handler.ph
 
 $filters = [
     'id_jenis' => $_GET['jenis'] ?? '',
+    'tingkat_surat' => $_GET['tingkat'] ?? '',
     'status_surat' => $_GET['status'] ?? '',
     'search' => $_GET['search'] ?? ''
 ];
@@ -51,8 +52,8 @@ $jenisSuratList = JenisSuratService::getAll();
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-            <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div class="sm:col-span-2 lg:col-span-1">
+            <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+                <div class="sm:col-span-2 lg:col-span-2">
                     <label class="block text-xs font-medium text-gray-500 mb-1.5">Pencarian</label>
                     <div class="relative">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -75,6 +76,17 @@ $jenisSuratList = JenisSuratService::getAll();
                 </div>
 
                 <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1.5">Tingkat Surat</label>
+                    <select name="tingkat" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition-shadow bg-white">
+                        <option value="">Semua Tingkat</option>
+                        <option value="biasa" <?= $filters['tingkat_surat'] == 'biasa' ? 'selected' : '' ?>>Biasa</option>
+                        <option value="sedang" <?= $filters['tingkat_surat'] == 'sedang' ? 'selected' : '' ?>>Sedang</option>
+                        <option value="penting" <?= $filters['tingkat_surat'] == 'penting' ? 'selected' : '' ?>>Penting</option>
+                        <option value="mendesak" <?= $filters['tingkat_surat'] == 'mendesak' ? 'selected' : '' ?>>Mendesak</option>
+                    </select>
+                </div>
+
+                <div>
                     <label class="block text-xs font-medium text-gray-500 mb-1.5">Status</label>
                     <select name="status" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition-shadow bg-white">
                         <option value="">Semua Status</option>
@@ -86,7 +98,7 @@ $jenisSuratList = JenisSuratService::getAll();
                     </select>
                 </div>
 
-                <div class="flex items-end sm:col-span-2 lg:col-span-1">
+                <div class="flex items-end sm:col-span-2 lg:col-span-5 xl:col-span-1">
                     <button type="submit" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition text-sm flex justify-center items-center gap-2 font-medium">
                         <i class="fas fa-filter"></i> Terapkan
                     </button>
@@ -151,18 +163,26 @@ $jenisSuratList = JenisSuratService::getAll();
                                         <?= date('d/m/Y', strtotime($surat['tanggal_diterima'])) ?>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <?php
-                                        $badge = match ($surat['status_surat']) {
-                                            'baru' => 'bg-primary-100 text-primary-700 border-primary-200',
-                                            'proses' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                                            'disetujui' => 'bg-green-100 text-green-700 border-green-200',
-                                            'ditolak' => 'bg-red-100 text-red-700 border-red-200',
-                                            default => 'bg-gray-100 text-gray-700 border-gray-200'
-                                        };
-                                        ?>
-                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium border <?= $badge ?>">
-                                            <?= ucfirst($surat['status_surat']) ?>
-                                        </span>
+                                        <div class="flex flex-col gap-1.5 items-center">
+                                            <?php
+                                            $badge = match ($surat['status_surat']) {
+                                                'baru' => 'bg-primary-100 text-primary-700 border-primary-200',
+                                                'proses' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
+                                                'disetujui' => 'bg-green-100 text-green-700 border-green-200',
+                                                'ditolak' => 'bg-red-100 text-red-700 border-red-200',
+                                                default => 'bg-gray-100 text-gray-700 border-gray-200'
+                                            };
+                                            ?>
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium border <?= $badge ?> w-full">
+                                                <?= ucfirst($surat['status_surat']) ?>
+                                            </span>
+                                            
+                                            <?php if (isset($surat['tingkat_surat']) && $surat['tingkat_surat'] !== 'biasa'): ?>
+                                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-medium border <?= getTingkatSuratBadge($surat['tingkat_surat']) ?> w-full flex items-center justify-center gap-1" title="Tingkat Surat: <?= getTingkatSuratLabel($surat['tingkat_surat']) ?>">
+                                                    <i class="<?= getTingkatSuratIcon($surat['tingkat_surat']) ?>"></i> <?= getTingkatSuratLabel($surat['tingkat_surat']) ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <div class="flex justify-center space-x-2">
@@ -232,9 +252,16 @@ $jenisSuratList = JenisSuratService::getAll();
                                     <p class="text-xs text-gray-500 truncate"><?= htmlspecialchars($surat['nomor_surat']) ?></p>
                                 </div>
                             </div>
-                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border uppercase tracking-wider flex-shrink-0 <?= $badge ?>">
-                                <?= $surat['status_surat'] ?>
-                            </span>
+                            <div class="flex flex-col gap-1.5 items-end flex-shrink-0">
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border uppercase tracking-wider <?= $badge ?>">
+                                    <?= $surat['status_surat'] ?>
+                                </span>
+                                <?php if (isset($surat['tingkat_surat']) && $surat['tingkat_surat'] !== 'biasa'): ?>
+                                    <span class="px-2 py-0.5 rounded-md text-[9px] font-bold border uppercase tracking-wider <?= getTingkatSuratBadge($surat['tingkat_surat']) ?> flex items-center gap-1">
+                                        <i class="<?= getTingkatSuratIcon($surat['tingkat_surat']) ?>"></i> <?= getTingkatSuratLabel($surat['tingkat_surat']) ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                         </div>
 
                         <div class="mb-3 pl-[3.25rem]">
@@ -323,14 +350,26 @@ $jenisSuratList = JenisSuratService::getAll();
                     <input type="hidden" name="id" id="suratId">
 
                     <div class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Jenis Surat <span class="text-red-500">*</span></label>
-                            <select name="id_jenis" id="id_jenis" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow bg-white">
-                                <option value="">Pilih Jenis</option>
-                                <?php foreach ($jenisSuratList as $jenis): ?>
-                                    <option value="<?= $jenis['id'] ?>"><?= $jenis['nama_jenis'] ?></option>
-                                <?php endforeach; ?>
-                            </select>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Jenis Surat <span class="text-red-500">*</span></label>
+                                <select name="id_jenis" id="id_jenis" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow bg-white">
+                                    <option value="">Pilih Jenis</option>
+                                    <?php foreach ($jenisSuratList as $jenis): ?>
+                                        <option value="<?= $jenis['id'] ?>"><?= $jenis['nama_jenis'] ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Tingkat Surat <span class="text-red-500">*</span></label>
+                                <select name="tingkat_surat" id="tingkat_surat" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow bg-white">
+                                    <option value="biasa">Biasa (Rutin, no urgency)</option>
+                                    <option value="sedang">Sedang (Perlu ditindaklanjuti)</option>
+                                    <option value="penting">Penting (Prioritas tinggi)</option>
+                                    <option value="mendesak">Mendesak (Sangat urgent)</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -435,6 +474,7 @@ $jenisSuratList = JenisSuratService::getAll();
         document.getElementById('formAction').value = 'create';
         document.getElementById('suratForm').reset();
         document.getElementById('suratId').value = '';
+        document.getElementById('tingkat_surat').value = 'biasa';
         document.getElementById('currentFile').textContent = '-';
         document.getElementById('fileNameDisplay').classList.add('hidden');
         document.getElementById('tanggal_diterima').value = '<?= date('Y-m-d') ?>';
@@ -447,6 +487,7 @@ $jenisSuratList = JenisSuratService::getAll();
         document.getElementById('formAction').value = 'update';
         document.getElementById('suratId').value = surat.id;
         document.getElementById('id_jenis').value = surat.id_jenis;
+        document.getElementById('tingkat_surat').value = surat.tingkat_surat || 'biasa';
         document.getElementById('nomor_surat').value = surat.nomor_surat;
         document.getElementById('tanggal_diterima').value = surat.tanggal_diterima || '';
         document.getElementById('dari_instansi').value = surat.dari_instansi || '';

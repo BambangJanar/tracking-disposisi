@@ -165,9 +165,16 @@ $downloadHandlerUrl = dirname(BASE_URL) . '/modules/download/download_handler.ph
                             <h2 class="text-base font-semibold text-gray-800">
                                 <i class="far fa-envelope mr-2 text-gray-400"></i> Atribut Surat
                             </h2>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= getStatusBadge($surat['status_surat']) ?>">
-                                <?= ucfirst($surat['status_surat']) ?>
-                            </span>
+                            <div class="flex items-center gap-2">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= getStatusBadge($surat['status_surat']) ?>">
+                                    <?= ucfirst($surat['status_surat']) ?>
+                                </span>
+                                <?php if (isset($surat['tingkat_surat'])): ?>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border <?= getTingkatSuratBadge($surat['tingkat_surat']) ?>">
+                                        <i class="<?= getTingkatSuratIcon($surat['tingkat_surat']) ?>"></i> <?= getTingkatSuratLabel($surat['tingkat_surat']) ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                         </div>
 
                         <div class="p-6">
@@ -185,6 +192,18 @@ $downloadHandlerUrl = dirname(BASE_URL) . '/modules/download/download_handler.ph
                                 <div class="sm:col-span-1">
                                     <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Surat</dt>
                                     <dd class="mt-1 text-sm text-gray-900"><?= htmlspecialchars($surat['nama_jenis']) ?></dd>
+                                </div>
+                                <div class="sm:col-span-1">
+                                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tingkat / Prioritas</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">
+                                        <?php if (isset($surat['tingkat_surat'])): ?>
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-medium border <?= getTingkatSuratBadge($surat['tingkat_surat']) ?>">
+                                                <i class="<?= getTingkatSuratIcon($surat['tingkat_surat']) ?>"></i> <?= getTingkatSuratLabel($surat['tingkat_surat']) ?>
+                                            </span>
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </dd>
                                 </div>
                                 <div class="sm:col-span-1">
                                     <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Diterima</dt>
