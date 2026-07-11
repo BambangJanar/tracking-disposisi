@@ -174,9 +174,9 @@ function isGroupActive($pages)
                             <?php if ($userRole == 1): ?>
                                 <a href="<?= BASE_URL ?>/laporan/laporan_aktivitas.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_aktivitas.php') ?>">Log Aktivitas</a>
                             <?php endif; ?>
-                                <a href="<?= BASE_URL ?>/laporan/laporan_log_download.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_log_download.php') ?>">
-                                    <i class="fas fa-shield-alt text-amber-500 mr-1 text-xs"></i>Log Akses File
-                                </a>
+                            <a href="<?= BASE_URL ?>/laporan/laporan_log_download.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_log_download.php') ?>">
+                                <i class="fas fa-shield-alt text-amber-500 mr-1 text-xs"></i>Log Akses File
+                            </a>
                         </div>
                     </div>
                 <?php endif; ?>

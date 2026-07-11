@@ -144,17 +144,23 @@ $stats = DownloadService::getStatistics();
                         <option value="view" <?= $filters['aksi'] === 'view' ? 'selected' : '' ?>>Lihat</option>
                     </select>
 
-                    <input type="date"
-                        name="tanggal_dari"
-                        value="<?= $filters['tanggal_dari'] ?>"
-                        class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-                        title="Dari tanggal">
+                    <div class="relative">
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Dari Tanggal</label>
+                        <input type="date"
+                            name="tanggal_dari"
+                            value="<?= $filters['tanggal_dari'] ?>"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                            title="Dari tanggal">
+                    </div>
 
-                    <input type="date"
-                        name="tanggal_sampai"
-                        value="<?= $filters['tanggal_sampai'] ?>"
-                        class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-                        title="Sampai tanggal">
+                    <div class="relative">
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Sampai Tanggal</label>
+                        <input type="date"
+                            name="tanggal_sampai"
+                            value="<?= $filters['tanggal_sampai'] ?>"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                            title="Sampai tanggal">
+                    </div>
 
                     <div class="flex gap-2">
                         <button type="submit" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
