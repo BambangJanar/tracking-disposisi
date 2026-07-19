@@ -1,10 +1,11 @@
-<?php
+﻿<?php
 // public/laporan/laporan_log_download_pdf.php
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/helpers.php';
+require_once __DIR__ . '/../../includes/watermark_pdf.php';
 require_once __DIR__ . '/../../modules/download/download_service.php';
 
 use Dompdf\Dompdf;
@@ -140,9 +141,12 @@ ob_start();
             font-weight: bold;
             text-decoration: underline;
         }
+        <?= getWatermarkCss() ?>
     </style>
 </head>
 <body>
+    <?= getWatermarkHtml() ?>
+
 
     <div class="kop-surat">
         <table>

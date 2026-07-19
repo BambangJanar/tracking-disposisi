@@ -1,10 +1,11 @@
-<?php
+﻿<?php
 // public/laporan/laporan_aktivitas_pdf.php
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/helpers.php';
+require_once __DIR__ . '/../../includes/watermark_pdf.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -130,9 +131,12 @@ ob_start();
             font-weight: bold;
             text-decoration: underline;
         }
+        <?= getWatermarkCss() ?>
     </style>
 </head>
 <body>
+    <?= getWatermarkHtml() ?>
+
 
     <div class="kop-surat">
         <table>

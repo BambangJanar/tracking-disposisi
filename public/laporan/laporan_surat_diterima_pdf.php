@@ -1,9 +1,10 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/helpers.php';
+require_once __DIR__ . '/../../includes/watermark_pdf.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -72,9 +73,12 @@ ob_start();
         .ttd-image { height: 80px; margin: 10px auto; display: block; }
         .ttd-spacer { height: 80px; }
         .ttd-nama { font-weight: bold; text-decoration: underline; }
+        <?= getWatermarkCss() ?>
     </style>
 </head>
 <body>
+    <?= getWatermarkHtml() ?>
+
     <div class="kop-surat">
         <table>
             <tr>
