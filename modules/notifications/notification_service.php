@@ -201,6 +201,26 @@ class NotificationService {
     }
     
     /**
+     * Get latest unread notification (for real-time pop-up)
+     */
+    public static function getLatestUnread($userId) {
+        $query = "SELECT n.id, n.title, n.message, n.type 
+                  FROM notifications n
+                  LEFT JOIN surat s ON n.surat_id = s.id
+                  WHERE n.user_id = ? 
+                  AND n.is_read = 0
+                  AND (
+                      s.id IS NULL 
+                      OR s.status_surat NOT IN ('disetujui', 'ditolak', 'arsip')
+                      OR n.type = 'surat_selesai'
+                  )
+                  ORDER BY n.id DESC 
+                  LIMIT 1";
+        
+        return dbSelectOne($query, [$userId], 'i');
+    }
+    
+    /**
      * FIX: Count UNIQUE surat yang disposisi-nya masih aktif UNTUK SIDEBAR
      * Kriteria Aktif:
      * 1. Status Disposisi: dikirim, diterima, atau diproses

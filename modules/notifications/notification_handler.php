@@ -53,13 +53,15 @@ try {
             ]);
             break;
             
-        // ========== Count unread (Badge Lonceng) ==========
+        // ========== Count unread (Badge Lonceng & Realtime Trigger) ==========
         case 'count_unread':
             $count = NotificationService::countUnread($user['id']);
+            $latest = NotificationService::getLatestUnread($user['id']);
             
             echo json_encode([
                 'status' => 'success',
-                'count' => $count
+                'count' => $count,
+                'latest' => $latest
             ]);
             break;
             

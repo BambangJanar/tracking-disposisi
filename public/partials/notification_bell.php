@@ -72,10 +72,16 @@ $unreadCount = NotificationService::countUnread($currentUser['id']);
     </div>
 </div>
 
+<!-- Audio Notifikasi -->
+<audio id="notif-sound" preload="auto">
+    <source src="<?= BASE_URL ?>/../assets/sounds/notification.mp3" type="audio/mpeg">
+</audio>
+
 <script>
 // Global state
 let isNotificationModalOpen = false;
 let notificationCheckInterval = null;
+let lastNotifId = localStorage.getItem('tracking_last_notif_id') || 0;
 
 // Toggle modal
 function toggleNotificationModal() {
@@ -238,10 +244,10 @@ function updateNotificationBadge(count) {
 
 // ========== AUTO-RELOAD: Check for new notifications every 30 seconds ==========
 function startNotificationPolling() {
-    // Check every 30 seconds
+    // Check every 10 seconds for real-time feel
     notificationCheckInterval = setInterval(() => {
         updateNotificationCount();
-    }, 30000); // 30 detik
+    }, 10000); // 10 detik
 }
 
 function updateNotificationCount() {
@@ -250,6 +256,33 @@ function updateNotificationCount() {
         .then(data => {
             if (data.status === 'success') {
                 updateNotificationBadge(data.count);
+                
+                // Real-time Pop-up check
+                if (data.latest && data.latest.id > lastNotifId) {
+                    // Ada notifikasi baru!
+                    lastNotifId = data.latest.id;
+                    localStorage.setItem('tracking_last_notif_id', lastNotifId);
+                    
+                    // Mainkan suara
+                    const audio = document.getElementById('notif-sound');
+                    if (audio) {
+                        audio.play().catch(e => console.log('Audio autoplay blocked', e));
+                    }
+                    
+                    // Tampilkan SweetAlert Toast
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'info',
+                            title: data.latest.title || 'Notifikasi Baru',
+                            text: data.latest.message || '',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    }
+                }
                 
                 // Reload if modal is open
                 if (isNotificationModalOpen) {
@@ -302,6 +335,6 @@ document.getElementById('notification-modal')?.addEventListener('click', (e) => 
 // ========== Start polling on page load (AUTO-RELOAD) ==========
 document.addEventListener('DOMContentLoaded', () => {
     startNotificationPolling();
-    console.log('✅ Notification polling started (30s interval)');
+    console.log('✅ Real-time Notification active (10s interval)');
 });
 </script>
