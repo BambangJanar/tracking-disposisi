@@ -53,8 +53,8 @@ $params = [$userId, $userId];
 $types = 'ii';
 
 // Filter by user role
-if ($userRole != 1) {
-    // Non-superadmin: hanya surat yang DIDISPOSISIKAN OLEH mereka
+if (!in_array($userRole, [1, 4])) {
+    // Non-admin: hanya surat yang DIDISPOSISIKAN OLEH mereka
     $sql .= " AND d.dari_user_id = ?";
     $params[] = $userId;
     $types .= 'i';
@@ -82,7 +82,7 @@ $countSql = "SELECT COUNT(DISTINCT s.id) as total FROM surat s
              JOIN disposisi d ON s.id = d.id_surat
              WHERE s.status_surat NOT IN ('arsip')";
 
-if ($userRole != 1) {
+if (!in_array($userRole, [1, 4])) {
     $countSql .= " AND d.dari_user_id = $userId";
 }
 
@@ -127,7 +127,7 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                     <i class=""></i>Disposisi Keluar
                 </h1>
                 <p class="text-gray-600 text-xs sm:text-sm mt-1">
-                    <?php if ($userRole == 1): ?>
+                    <?php if (in_array($userRole, [1, 4])): ?>
                         Semua surat yang Anda disposisikan
                     <?php else: ?>
                         Surat yang Anda disposisikan ke staff lain
@@ -135,9 +135,9 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                 </p>
             </div>
             
-            <?php if ($userRole == 1): ?>
+            <?php if (in_array($userRole, [1, 4])): ?>
             <div class="inline-flex items-center px-3 py-1.5 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">
-                <i class="fas fa-shield-alt mr-1.5"></i> Mode Admin
+                <i class="fas fa-shield-alt mr-1.5"></i> Mode <?= $userRole == 4 ? 'Head Admin' : 'Admin' ?>
             </div>
             <?php endif; ?>
         </div>

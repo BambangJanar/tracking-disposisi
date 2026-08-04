@@ -57,7 +57,7 @@ try {
             break;
             
         case 'delete':
-            requireRole('superadmin');
+            requireRole('headadmin');
             
             $id = (int)$_POST['id'];
             JenisSuratService::delete($id);

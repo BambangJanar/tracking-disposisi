@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/pagination.php';
 
 requireLogin();
-requireRole('superadmin');
+requireRole(['superadmin', 'headadmin']);
 
 $user = getCurrentUser();
 $pageTitle = 'Laporan Aktivitas';

@@ -129,8 +129,8 @@ try {
                 throw new Exception("Disposisi tidak ditemukan");
             }
 
-            // Yang bisa update: penerima disposisi atau superadmin
-            if ($disposisi['ke_user_id'] != $userId && $userRole != 1) {
+            // Yang bisa update: penerima disposisi atau Head Admin
+            if ($disposisi['ke_user_id'] != $userId && $userRole != 4) {
                 throw new Exception("Anda tidak memiliki akses untuk mengubah status disposisi ini");
             }
 
@@ -142,8 +142,8 @@ try {
                 'diproses' => ['selesai', 'ditolak']
             ];
 
-            // Superadmin bisa bypass flow
-            if ($userRole != 1) {
+            // Head Admin bisa bypass flow
+            if ($userRole != 4) {
                 if ($currentStatus !== $newStatus) {
                     if (!isset($validFlow[$currentStatus])) {
                         throw new Exception("Status '$currentStatus' tidak dapat diubah lagi.");
@@ -259,8 +259,8 @@ try {
          * Update status multiple disposisi sekaligus
          */
         case 'bulk_update':
-            // Hanya superadmin
-            if ($userRole != 1) {
+            // Hanya Head Admin
+            if ($userRole != 4) {
                 throw new Exception("Anda tidak memiliki akses untuk operasi ini");
             }
 
@@ -317,8 +317,8 @@ try {
                 throw new Exception("Disposisi tidak ditemukan");
             }
 
-            // Hanya pengirim atau superadmin yang bisa remind
-            if ($disposisi['dari_user_id'] != $userId && $userRole != 1) {
+            // Hanya pengirim atau Head Admin yang bisa remind
+            if ($disposisi['dari_user_id'] != $userId && $userRole != 4) {
                 throw new Exception("Anda tidak memiliki akses untuk mengirim reminder");
             }
 

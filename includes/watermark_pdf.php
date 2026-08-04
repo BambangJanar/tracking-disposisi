@@ -1,7 +1,7 @@
 <?php
 // includes/watermark_pdf.php
 // Helper untuk menambahkan watermark logo Bank Kalsel pada laporan PDF (dompdf)
-// Logo ditampilkan transparan, tidak miring, berulang di seluruh halaman + 1 logo besar di tengah
+// Logo ditampilkan sebagai satu logo besar transparan di tengah halaman
 
 /**
  * Mengambil watermark logo Bank Kalsel dalam format Base64
@@ -22,10 +22,8 @@ function getWatermarkLogoBase64() {
 }
 
 /**
- * Generate CSS watermark untuk dompdf
- * - .watermark-tiled: logo kecil berulang di seluruh halaman (opacity rendah)
- * - .watermark-center: satu logo besar di tengah halaman (opacity sedikit lebih tinggi)
- * Keduanya menggunakan position:fixed agar muncul di SETIAP halaman PDF
+ * Generate CSS watermark untuk dompdf (Portrait)
+ * Satu logo besar di tengah halaman
  */
 function getWatermarkCss() {
     $base64 = getWatermarkLogoBase64();
@@ -33,25 +31,15 @@ function getWatermarkCss() {
     
     return '
         /* === WATERMARK LOGO BANK KALSEL === */
-        .watermark-tiled {
-            position: fixed;
-            top: -30px;
-            left: -30px;
-            width: 850px;
-            height: 1250px;
-            z-index: -1000;
-            background-image: url("' . $base64 . '");
-            background-repeat: repeat;
-            background-size: 120px auto;
-            opacity: 0.065;
-        }
         .watermark-center {
             position: fixed;
-            top: 300px;
-            left: 130px;
-            width: 350px;
+            top: 50%;
+            left: 50%;
+            width: 450px;
+            margin-top: -225px;
+            margin-left: -225px;
             z-index: -999;
-            opacity: 0.085;
+            opacity: 0.08;
         }
     ';
 }
@@ -65,36 +53,26 @@ function getWatermarkCssLandscape() {
     
     return '
         /* === WATERMARK LOGO BANK KALSEL (LANDSCAPE) === */
-        .watermark-tiled {
-            position: fixed;
-            top: -30px;
-            left: -30px;
-            width: 1250px;
-            height: 850px;
-            z-index: -1000;
-            background-image: url("' . $base64 . '");
-            background-repeat: repeat;
-            background-size: 120px auto;
-            opacity: 0.065;
-        }
         .watermark-center {
             position: fixed;
-            top: 200px;
-            left: 280px;
-            width: 350px;
+            top: 50%;
+            left: 50%;
+            width: 450px;
+            margin-top: -225px;
+            margin-left: -225px;
             z-index: -999;
-            opacity: 0.085;
+            opacity: 0.08;
         }
     ';
 }
 
 /**
  * Generate HTML elemen watermark untuk disisipkan setelah <body>
+ * Hanya satu logo besar di tengah (tanpa tiled/berulang)
  */
 function getWatermarkHtml() {
     $base64 = getWatermarkLogoBase64();
     if (empty($base64)) return '';
     
-    return '<div class="watermark-tiled"></div>' . "\n" .
-           '    <img src="' . $base64 . '" class="watermark-center" alt="">';
+    return '<img src="' . $base64 . '" class="watermark-center" alt="">';
 }

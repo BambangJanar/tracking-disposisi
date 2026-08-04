@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // public/laporan/laporan_aktivitas_pdf.php
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../config/config.php';
@@ -11,7 +11,7 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 
 requireLogin();
-requireRole('superadmin');
+requireRole(['superadmin', 'headadmin']);
 
 $user = getCurrentUser();
 $tanggalDari = $_GET['tanggal_dari'] ?? date('Y-m-d');

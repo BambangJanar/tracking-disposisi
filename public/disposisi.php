@@ -59,9 +59,9 @@ $disposisiList = DisposisiService::getForMonitoring($userId, $userRole, $filters
                     </a>
                 </div>
 
-                <?php if ($userRole == 1): ?>
+                <?php if (in_array($userRole, [1, 4])): ?>
                     <div class="mt-2 inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                        <i class="fas fa-shield-alt mr-1"></i> Mode Admin: Melihat semua disposisi
+                        <i class="fas fa-shield-alt mr-1"></i> Mode <?= $userRole == 4 ? 'Head Admin' : 'Admin' ?>: Melihat semua disposisi
                     </div>
                 <?php elseif ($userRole == 2): ?>
                     <div class="mt-2 inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">

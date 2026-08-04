@@ -118,17 +118,17 @@ $downloadHandlerUrl = dirname(BASE_URL) . '/modules/download/download_handler.ph
                         $disposisiTooltip = "Kirim disposisi surat ini";
                         $btnColorClass = "bg-primary-600 hover:bg-primary-700 text-white";
 
-                        // LOGIKA 1: Jika Role Karyawan/Magang & Surat Selesai => DISABLE
-                        if (($userRole == 2 || $userRole == 3) && $isSuratSelesai) {
+                        // LOGIKA 1: Jika Role selain Head Admin & Surat Selesai => DISABLE
+                        if ($userRole != 4 && $isSuratSelesai) {
                             $disableDisposisi = true;
                             $disposisiBtnText = "Surat Selesai";
                             $disposisiTooltip = "Surat ini sudah selesai, tidak dapat didisposisi lagi.";
                             $btnColorClass = "bg-gray-400 cursor-not-allowed opacity-60 text-white";
                         }
-                        // LOGIKA 2: Jika Role Admin & Surat Selesai => ENABLE ("Kuasa Admin")
-                        elseif ($userRole == 1 && $isSuratSelesai) {
-                            $disableDisposisi = false; // Admin boleh override
-                            $disposisiTooltip = "Mode Admin: Disposisi ulang surat selesai";
+                        // LOGIKA 2: Jika Role Head Admin & Surat Selesai => ENABLE ("Kuasa Head Admin")
+                        elseif ($userRole == 4 && $isSuratSelesai) {
+                            $disableDisposisi = false; // Head Admin boleh override
+                            $disposisiTooltip = "Mode Head Admin: Disposisi ulang surat selesai";
                         }
 
                         // LOGIKA 3: Cek Teknis (Apakah ada disposisi gantung?)

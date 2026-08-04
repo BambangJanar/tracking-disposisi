@@ -11,7 +11,7 @@ require_once __DIR__ . '/settings_service.php';
 header('Content-Type: application/json');
 
 // Jika bukan login atau bukan superadmin, kirim error JSON
-if (!isLoggedIn() || !hasRole('superadmin')) {
+if (!isLoggedIn() || !hasRole('headadmin')) {
     echo json_encode([
         'status' => 'error',
         'message' => 'Akses ditolak.'

@@ -190,7 +190,7 @@ $jenisSuratList = JenisSuratService::getAll();
                                                 <i class="fas fa-eye text-lg"></i>
                                             </a>
 
-                                            <?php if (hasRole(['admin', 'superadmin'])): ?>
+                                            <?php if (hasRole(['admin', 'superadmin', 'headadmin'])): ?>
                                                 <button onclick='openEditModal(<?= json_encode($surat) ?>)' class="text-gray-400 hover:text-yellow-600 transition-colors p-1.5 hover:bg-gray-100 rounded-lg" title="Edit">
                                                     <i class="fas fa-edit text-lg"></i>
                                                 </button>
@@ -200,7 +200,7 @@ $jenisSuratList = JenisSuratService::getAll();
                                                 <i class="fas fa-archive text-lg"></i>
                                             </button>
 
-                                            <?php if (hasRole('superadmin')): ?>
+                                            <?php if (hasRole('headadmin')): ?>
                                                 <button onclick="deleteSurat(<?= $surat['id'] ?>)" class="text-gray-400 hover:text-red-600 transition-colors p-1.5 hover:bg-gray-100 rounded-lg" title="Hapus">
                                                     <i class="fas fa-trash text-lg"></i>
                                                 </button>
@@ -291,7 +291,7 @@ $jenisSuratList = JenisSuratService::getAll();
                                 <i class="fas fa-eye mr-1"></i> Detail
                             </a>
 
-                            <?php if (hasRole(['admin', 'superadmin'])): ?>
+                            <?php if (hasRole(['admin', 'superadmin', 'headadmin'])): ?>
                                 <button onclick='openEditModal(<?= json_encode($surat) ?>)' class="p-2 text-yellow-600 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -301,7 +301,7 @@ $jenisSuratList = JenisSuratService::getAll();
                                 <i class="fas fa-archive"></i>
                             </button>
 
-                            <?php if (hasRole('superadmin')): ?>
+                            <?php if (hasRole('headadmin')): ?>
                                 <button onclick="deleteSurat(<?= $surat['id'] ?>)" class="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
                                     <i class="fas fa-trash"></i>
                                 </button>

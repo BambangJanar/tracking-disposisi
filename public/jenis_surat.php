@@ -8,7 +8,7 @@ require_once __DIR__ . '/../includes/pagination.php'; // Load pagination helper
 require_once __DIR__ . '/../modules/jenis_surat/jenis_surat_service.php';
 
 requireLogin();
-requireRole(['admin', 'superadmin']);
+requireRole(['admin', 'superadmin', 'headadmin']);
 
 $user = getCurrentUser();
 $pageTitle = 'Jenis Surat';
@@ -81,7 +81,7 @@ $pagination = new Pagination($totalData, $perPage, $page);
                                                 title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <?php if (hasRole('superadmin')): ?>
+                                            <?php if (hasRole('headadmin')): ?>
                                                 <button onclick="deleteJenis(<?= $jenis['id'] ?>)"
                                                     class="text-red-600 hover:text-red-800 transition-colors"
                                                     title="Hapus">
@@ -128,7 +128,7 @@ $pagination = new Pagination($totalData, $perPage, $page);
                                     class="flex-1 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 py-2 px-4 rounded-lg text-sm font-medium transition-colors">
                                     <i class="fas fa-edit mr-1"></i>Edit
                                 </button>
-                                <?php if (hasRole('superadmin')): ?>
+                                <?php if (hasRole('headadmin')): ?>
                                     <button onclick="deleteJenis(<?= $jenis['id'] ?>)"
                                         class="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-2 px-4 rounded-lg text-sm font-medium transition-colors">
                                         <i class="fas fa-trash mr-1"></i>Hapus

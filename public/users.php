@@ -7,7 +7,7 @@ require_once __DIR__ . '/../modules/users/users_service.php';
 
 // Pastikan hanya Superadmin yang bisa akses
 requireLogin();
-requireRole('superadmin');
+requireRole('headadmin');
 
 $pageTitle = 'Manajemen User';
 $currentStatus = $_GET['status'] ?? 'all';

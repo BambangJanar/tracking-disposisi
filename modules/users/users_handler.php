@@ -63,7 +63,7 @@ try {
     // ============================================================================
     if (in_array($action, ['approve', 'reject', 'delete', 'change_role', 'check_activity'])) {
         
-        if (!hasRole('superadmin')) throw new Exception('Akses ditolak. Hanya Superadmin.');
+        if (!hasRole('headadmin')) throw new Exception('Akses ditolak. Hanya Head Admin.');
         
         $targetId = $_POST['id'] ?? 0;
         if (!$targetId) throw new Exception('ID User tidak valid');

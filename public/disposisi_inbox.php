@@ -49,8 +49,8 @@ $joins = "FROM surat s
           JOIN users u ON s.dibuat_oleh = u.id";
 
 // LOGIKA JOIN: Ambil disposisi terbaru
-if ($userRole == 1) {
-    // Admin: Melihat disposisi terbaru secara global per surat
+if (in_array($userRole, [1, 4])) {
+    // Admin/Head Admin: Melihat disposisi terbaru secara global per surat
     $joins .= " JOIN disposisi d ON d.id = (
                     SELECT MAX(d_inner.id) 
                     FROM disposisi d_inner 
@@ -74,7 +74,7 @@ $where = "WHERE s.status_surat NOT IN ('arsip', 'disetujui', 'ditolak')
 // Params awal: userId untuk JOIN subquery (hanya untuk non-admin)
 $params = [];
 $types = '';
-if ($userRole != 1) {
+if (!in_array($userRole, [1, 4])) {
     $params[] = $userId;
     $types .= 'i';
 }
@@ -137,7 +137,7 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                     <i class=""></i>Disposisi Masuk
                 </h1>
                 <p class="text-gray-600 text-xs sm:text-sm mt-1">
-                    <?php if ($userRole == 1): ?>
+                    <?php if (in_array($userRole, [1, 4])): ?>
                         Daftar disposisi aktif (Belum Selesai)
                     <?php else: ?>
                         Surat yang perlu Anda tindak lanjuti
@@ -145,9 +145,9 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                 </p>
             </div>
 
-            <?php if ($userRole == 1): ?>
+            <?php if (in_array($userRole, [1, 4])): ?>
                 <div class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                    <i class="fas fa-shield-alt mr-1.5"></i> Mode Admin
+                    <i class="fas fa-shield-alt mr-1.5"></i> Mode <?= $userRole == 4 ? 'Head Admin' : 'Admin' ?>
                 </div>
             <?php endif; ?>
         </div>

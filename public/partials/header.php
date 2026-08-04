@@ -133,7 +133,7 @@ $currentUser = function_exists('getCurrentUser') ? getCurrentUser() : null;
                         <p class="text-sm font-medium text-gray-900"><?= htmlspecialchars($currentUser['nama_lengkap']) ?></p>
                         <p class="text-xs text-gray-500">
                             <?php 
-                            $roleLabels = [1 => 'Kepala Bagian', 2 => 'Karyawan', 3 => 'Anak Magang'];
+                            $roleLabels = [4 => 'Kepala Pimpinan Divisi', 1 => 'Kepala Bagian', 2 => 'Karyawan', 3 => 'Anak Magang'];
                             echo $roleLabels[$currentUser['id_role']] ?? ucfirst($currentUser['role'] ?? 'User');
                             ?>
                         </p>
@@ -143,7 +143,7 @@ $currentUser = function_exists('getCurrentUser') ? getCurrentUser() : null;
                         <i class="fas fa-user mr-2 w-4 text-center"></i> Profil Saya
                     </a>
                     
-                    <?php if (isset($currentUser['id_role']) && $currentUser['id_role'] == 1): // Superadmin ?>
+                    <?php if (isset($currentUser['id_role']) && $currentUser['id_role'] == 4): // Head Admin ?>
                     <a href="<?= BASE_URL ?>/pengaturan.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
                         <i class="fas fa-cog mr-2 w-4 text-center"></i> Setting
                     </a>

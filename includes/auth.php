@@ -121,6 +121,7 @@ function logActivity($userId, $aktivitas, $keterangan = null) {
 // Get role label for display
 function getRoleLabel($role) {
     $labels = [
+        'headadmin' => 'Kepala Pimpinan Divisi',
         'superadmin' => 'Kepala Bagian',
         'admin' => 'Karyawan',
         'user' => 'Anak Magang'

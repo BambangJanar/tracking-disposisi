@@ -24,7 +24,7 @@ $appLogo = function_exists('getSetting') ? getSetting('app_logo') : null;
 
 // Pending User Count (Superadmin only)
 $pendingCount = 0;
-if (hasRole('superadmin') && class_exists('UsersService')) {
+if (hasRole('headadmin') && class_exists('UsersService')) {
     $pendingCount = UsersService::countPending();
 }
 
@@ -91,7 +91,7 @@ function isGroupActive($pages)
                     <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
                     <p class="text-xs text-gray-500 capitalize">
                         <?php
-                        $roleLabels = [1 => 'Kepala Bagian', 2 => 'Karyawan', 3 => 'Anak Magang'];
+                        $roleLabels = [4 => 'Kepala Pimpinan Divisi', 1 => 'Kepala Bagian', 2 => 'Karyawan', 3 => 'Anak Magang'];
                         echo $roleLabels[$userRole] ?? getRoleLabel($role);
                         ?>
                     </p>
@@ -171,7 +171,7 @@ function isGroupActive($pages)
                             <a href="<?= BASE_URL ?>/laporan/laporan_disposisi.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_disposisi.php') ?>">Disposisi</a>
                             <a href="<?= BASE_URL ?>/laporan/laporan_kinerja_disposisi.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_kinerja_disposisi.php') ?>">Kinerja Disposisi</a>
                             <a href="<?= BASE_URL ?>/laporan/laporan_statistik_pengguna.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_statistik_pengguna.php') ?>">Statistik Pengguna</a>
-                            <?php if ($userRole == 1): ?>
+                            <?php if (in_array($userRole, [1, 4])): ?>
                                 <a href="<?= BASE_URL ?>/laporan/laporan_aktivitas.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_aktivitas.php') ?>">Log Aktivitas</a>
                             <?php endif; ?>
                             <a href="<?= BASE_URL ?>/laporan/laporan_log_download.php" class="block px-3 py-2 text-sm text-gray-600 rounded-md hover:text-primary-600 hover:bg-gray-50 <?= isActive('laporan_log_download.php') ?>">
@@ -197,7 +197,7 @@ function isGroupActive($pages)
                         Master Jenis Surat
                     </a>
 
-                    <?php if ($userRole == 1): ?>
+                    <?php if ($userRole == 4): ?>
                         <a href="<?= BASE_URL ?>/users.php" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors <?= isActive('users.php') ?>">
                             <div class="flex items-center">
                                 <i class="fas fa-users-cog w-6 text-center mr-2"></i>

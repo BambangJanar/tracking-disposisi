@@ -365,8 +365,8 @@ class DisposisiService {
                 JOIN users u2 ON d.ke_user_id = u2.id";
         
         // Role-based filtering
-        if ($userRole == 1) {
-            // Superadmin: Lihat semua
+        if (in_array($userRole, [1, 4])) {
+            // Head Admin & Kepala Bagian: Lihat semua
             $query .= " WHERE 1=1";
         } elseif ($userRole == 2) {
             // Karyawan: Disposisi yang dia kirim ATAU terima, termasuk yang terlibat via stakeholder
@@ -421,7 +421,7 @@ class DisposisiService {
                   JOIN surat s ON d.id_surat = s.id";
         
         // Role-based filtering
-        if ($userRole == 1) {
+        if (in_array($userRole, [1, 4])) {
             $query .= " WHERE 1=1";
         } elseif ($userRole == 2) {
             $query .= " LEFT JOIN surat_stakeholders ss ON ss.surat_id = s.id AND ss.user_id = ?
@@ -842,11 +842,11 @@ class DisposisiService {
             return ['success' => false, 'message' => 'Disposisi tidak ditemukan'];
         }
 
-        // Cek apakah user adalah pengirim atau superadmin
+        // Cek apakah user adalah pengirim atau Head Admin
         $user = dbSelectOne("SELECT id_role FROM users WHERE id = ?", [$userId], 'i');
         $userRole = $user['id_role'] ?? 3;
 
-        if ($disposisi['dari_user_id'] != $userId && $userRole != 1) {
+        if ($disposisi['dari_user_id'] != $userId && $userRole != 4) {
             return ['success' => false, 'message' => 'Anda tidak memiliki akses untuk membatalkan disposisi ini'];
         }
 

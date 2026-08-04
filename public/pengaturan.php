@@ -7,7 +7,7 @@ require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../modules/settings/settings_service.php';
 
 requireLogin();
-requireRole('superadmin');
+requireRole('headadmin');
 
 $user = getCurrentUser();
 $pageTitle = 'Pengaturan Sistem';
