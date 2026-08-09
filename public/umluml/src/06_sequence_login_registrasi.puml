@@ -1,0 +1,46 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam sequenceArrowColor #37474F
+skinparam sequenceMessageAlign center
+skinparam participantBackgroundColor #E3F2FD
+skinparam actorBackgroundColor #FFF8E1
+skinparam titleFontSize 16
+title Sequence Diagram - Login dan Registrasi Akun
+actor "Pengguna" as U
+participant "Halaman Login\nlogin.php" as L
+participant "includes/auth.php\nloginUser()" as A
+database "Database\nDB" as DB
+
+U -> L : Masukkan email dan password
+L -> A : Kirim data login
+activate A
+A -> DB : Cari user berdasarkan email\nJOIN roles dan bagian,\nstatus_aktif = 1
+DB --> A : Data user atau kosong
+alt User ditemukan
+    A -> A : Bandingkan password
+    alt Password cocok
+        A -> DB : Catat log_aktivitas login
+        A --> L : Buat session\nuser_id, nama, role,\nid_bagian, nama_bagian
+        L --> U : Redirect ke dashboard\natau redirect_after_login
+    else Password salah
+        A --> L : Error Password salah
+        L --> U : Tampilkan pesan error
+    end
+else User tidak ditemukan atau tidak aktif
+    A --> L : Error Email tidak ditemukan\natau akun tidak aktif
+    L --> U : Tampilkan pesan error
+end
+deactivate A
+
+ref over U, DB : Registrasi akun baru via register_handler.php\n(role user, status pending, status_aktif 0)\nmenunggu persetujuan Kepala Pimpinan di menu Users
+
+U -> L : Klik tombol Logout
+L -> A : logoutUser()
+activate A
+A -> DB : Catat log_aktivitas logout
+A -> A : Hapus session\n(session_destroy)
+A --> L : Redirect login.php\nstatus = logged_out
+deactivate A
+@enduml

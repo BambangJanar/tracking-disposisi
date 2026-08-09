@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wireframe Login - Tracking Disposisi Surat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Menambahkan font ala sketch/tulisan tangan jika tersedia, fallback ke sans */
+      @import url("https://fonts.googleapis.com/css2?family=Chilanka&family=Inter:wght@400;600;800&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .balsamiq-box {
+        border: 2px solid #000;
+        box-shadow: 4px 4px 0px #000;
+        background-color: #fff;
+      }
+      .balsamiq-button {
+        border: 2px solid #000;
+        box-shadow: 4px 4px 0px #000;
+        background-color: #e5e7eb;
+        transition: all 0.1s;
+      }
+      .balsamiq-button:active {
+        box-shadow: 0px 0px 0px #000;
+        transform: translate(4px, 4px);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-white min-h-screen flex items-center justify-center text-gray-900"
+  >
+    <div class="flex flex-col md:flex-row w-full min-h-screen">
+      <!-- BAGIAN KIRI: Banner Informasi (Disembunyikan di layar kecil) -->
+      <div
+        class="hidden md:flex md:w-1/2 bg-gray-100 flex-col items-center justify-center p-12 border-r-4 border-black relative overflow-hidden"
+      >
+        <!-- Pattern background ala wireframe -->
+        <div
+          class="absolute inset-0 opacity-10"
+          style="
+            background-image: radial-gradient(#000 2px, transparent 2px);
+            background-size: 20px 20px;
+          "
+        ></div>
+
+        <div class="relative z-10 flex flex-col items-center text-center">
+          <!-- Placeholder Logo Bank -->
+          <div
+            class="balsamiq-box px-8 py-6 flex flex-col items-center mb-10 border-dashed"
+          >
+            <div
+              class="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center mb-2 bg-gray-200"
+            >
+              <div class="w-4 h-4 bg-black rounded-full"></div>
+            </div>
+            <h2 class="text-2xl font-bold tracking-tight">bank.kalsel</h2>
+            <p class="text-xs font-semibold mt-1">
+              Setia Melayani, Melaju Bersama
+            </p>
+          </div>
+
+          <h1 class="text-4xl font-black mb-6 tracking-wide">
+            Tracking Disposisi Surat
+          </h1>
+
+          <p
+            class="text-sm font-semibold max-w-lg leading-relaxed uppercase border-t-2 border-b-2 border-black py-4"
+          >
+            Rancang Bangun Sistem Informasi Digitalisasi Arsip Dan Manajemen
+            Disposisi Surat Berbasis Real-Time Tracking Pada Bank Kalsel
+          </p>
+        </div>
+      </div>
+
+      <!-- BAGIAN KANAN: Form Login -->
+      <div
+        class="w-full md:w-1/2 flex items-center justify-center p-8 bg-white"
+      >
+        <div class="w-full max-w-md">
+          <div class="mb-10">
+            <h2 class="text-4xl font-black mb-2">Selamat Datang</h2>
+            <p class="text-gray-600 font-medium">
+              Silakan login untuk mengakses akun Anda.
+            </p>
+          </div>
+
+          <form class="space-y-6">
+            <!-- Input Email -->
+            <div>
+              <label class="block font-bold mb-2 text-sm">Email Address</label>
+              <div class="balsamiq-box flex items-center px-4 py-3">
+                <!-- Icon Mail -->
+                <svg
+                  class="w-5 h-5 text-gray-800 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                <input
+                  type="email"
+                  placeholder="xxxx"
+                  class="w-full bg-transparent outline-none font-medium placeholder-gray-500 text-sm"
+                />
+              </div>
+            </div>
+
+            <!-- Input Password -->
+            <div>
+              <label class="block font-bold mb-2 text-sm">Password</label>
+              <div class="balsamiq-box flex items-center px-4 py-3">
+                <!-- Icon Lock -->
+                <svg
+                  class="w-5 h-5 text-gray-800 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  ></path>
+                </svg>
+                <input
+                  type="password"
+                  placeholder="xxxx"
+                  class="w-full bg-transparent outline-none font-medium placeholder-gray-500 text-sm tracking-widest"
+                />
+                <!-- Icon Eye -->
+                <svg
+                  class="w-5 h-5 text-gray-800 ml-3 cursor-pointer"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  ></path>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Link Daftar -->
+            <div class="pt-2">
+              <a
+                href="#"
+                class="text-sm font-bold underline decoration-2 underline-offset-4 hover:bg-black hover:text-white transition-colors px-1"
+                >Belum punya akun? Daftar</a
+              >
+            </div>
+
+            <!-- Tombol Login -->
+            <div class="pt-4">
+              <button
+                type="button"
+                class="balsamiq-button w-full font-black py-4 flex items-center justify-center text-sm uppercase tracking-wide cursor-pointer"
+              >
+                <svg
+                  class="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                  ></path>
+                </svg>
+                Masuk Sekarang
+              </button>
+            </div>
+          </form>
+
+          <!-- Footer -->
+          <div class="mt-16 text-center">
+            <p
+              class="text-xs font-bold text-gray-500 border-t-2 border-dashed border-gray-300 pt-4"
+            >
+              © 2026 Tracking Disposisi Surat. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

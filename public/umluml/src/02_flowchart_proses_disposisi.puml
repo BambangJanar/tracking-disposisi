@@ -1,0 +1,68 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam activityStartColor #1B5E20
+skinparam activityEndColor #B71C1C
+skinparam activityBorderColor #1565C0
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityDiamondBorderColor #F9A825
+skinparam activityDiamondBackgroundColor #FFF8E1
+skinparam arrowColor #37474F
+skinparam titleFontSize 16
+title Flowchart Detail - Proses Disposisi Surat\n(Transisi Status Disposisi dan Surat)
+start
+:Staf membuka detail surat\nklik tombol Buat Disposisi;
+:Isi penerima dan catatan\nkirim data ke server;
+if (Penerima diisi?\ndari_user berbeda ke_user) then (Tidak)
+    :Tampilkan error\npenerima wajib diisi\natau tidak boleh disposisi\nke diri sendiri;
+    stop
+else (Ya)
+    if (Disposisi aktif duplikat\nke penerima yang sama\nmasih ada?) then (Ya)
+        :Tampilkan error\nduplikat disposisi aktif;
+        stop
+    else (Tidak)
+        :Simpan disposisi\nstatus = DIKIRIM;
+        :Catat stakeholder\npenerima utama atau delegasi;
+        :Ubah surat baru menjadi PROSES;
+        :Kirim notifikasi ke penerima;
+    endif
+endif
+if (Pengirim membatalkan\nsebelum diproses penerima?) then (Ya)
+    :Batalkan disposisi\nhapus data disposisi dan\nstakeholder yang tidak terpakai;
+    stop
+else (Tidak)
+    :Penerima membuka detail surat;
+endif
+:Penerima menyetujui otomatis\nstatus DIKIRIM menjadi DITERIMA\n+tanggal_respon;
+:Penerima atau Kepala Pimpinan\nmelakukan update status;
+if (Aktor = Kepala Pimpinan\nDivisi? bypass transisi) then (Ya)
+    :Ubah langsung ke\nstatus tujuan yang valid;
+else (Tidak)
+    if (Transisi valid?\nDITERIMA ke DIPROSES,\nDIPROSES ke SELESAI/DITOLAK,\nDITERIMA ke SELESAI/DITOLAK) then (Ya)
+        :Simpan status + catatan +\ntanggal_respon;
+        :Kirim notifikasi surat_update\nke pengirim;
+        :Catat log aktivitas;
+    else (Tidak)
+        :Tampilkan error\nstatus tidak valid;
+        stop
+    endif
+endif
+if (Status menjadi SELESAI\natau DITOLAK?) then (Tidak)
+    :Disposisi berlanjut\npada status baru;
+    stop
+else (Ya)
+    if (Masih ada disposisi\naktif lain untuk surat?) then (Ya)
+        :Status surat tetap PROSES\nmenunggu disposisi lain;
+    else (Tidak)
+        if (Semua disposisi\nSELESAI?) then (Ya)
+            :Status surat = DISETUJUI;
+        else (Tidak)
+            :Status surat = DITOLAK\nalasan_penolakan dicatat;
+        endif
+        :Bersihkan notifikasi surat dan\nnonaktifkan stakeholder;
+        :Kirim notifikasi surat selesai\nke seluruh stakeholder;
+    endif
+endif
+stop
+@enduml

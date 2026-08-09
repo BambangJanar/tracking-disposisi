@@ -1,0 +1,82 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam sequenceArrowColor #37474F
+skinparam sequenceMessageAlign center
+skinparam participantBackgroundColor #E3F2FD
+skinparam actorBackgroundColor #FFF8E1
+skinparam titleFontSize 16
+title Sequence Diagram - Data Master dan Pengaturan Aplikasi
+actor "Kepala Pimpinan\nDivisi" as KP
+actor "Admin / Superadmin" as A
+participant "jenis_surat_handler.php" as JH
+participant "users_handler.php" as UH
+participant "settings_handler.php" as SH
+participant "Service Layer\njenis_surat / users / settings" as SV
+database "Database\nDB" as DB
+
+alt Kelola jenis surat\n(role admin, superadmin, headadmin)
+    A -> JH : Tambah / ubah / hapus\njenis surat
+    activate JH
+    JH -> SV : create / update / delete
+    activate SV
+    alt Aksi = hapus
+        SV -> DB : Cek id_jenis dipakai\noleh tabel surat
+        alt Masih dipakai
+            SV --> JH : Tolak dengan pesan\njenis sedang digunakan
+            JH --> A : Tampilkan pesan error
+        else Tidak dipakai
+            SV -> DB : DELETE jenis_surat
+            SV --> JH : Sukses
+            JH --> A : Tampilkan daftar jenis surat
+        end
+    else Tambah atau ubah
+        SV -> DB : INSERT / UPDATE jenis_surat
+        SV --> JH : Sukses
+        JH --> A : Tampilkan daftar jenis surat
+    end
+    deactivate SV
+    deactivate JH
+end
+
+alt Kelola user\n(role headadmin saja)
+    KP -> UH : Approve / reject akun pending\natau ubah role user
+    activate UH
+    UH -> SV : updateStatus / updateRole
+    activate SV
+    SV -> DB : UPDATE users\nstatus_aktif, status, id_role
+    deactivate SV
+    UH --> KP : Daftar user diperbarui
+    deactivate UH
+
+    KP -> UH : Hapus user
+    activate UH
+    UH -> SV : delete(userId)
+    activate SV
+    SV -> DB : Cek hasRelatedData\nriwayat surat/disposisi
+    alt Ada riwayat
+        SV --> UH : Blokir penghapusan
+        UH --> KP : Pesan user tidak bisa dihapus
+    else Tidak ada riwayat
+        SV -> DB : DELETE users
+        SV --> UH : Sukses
+        UH --> KP : User terhapus
+    end
+    deactivate SV
+    deactivate UH
+end
+
+alt Kelola pengaturan aplikasi\n(role headadmin saja)
+    KP -> SH : Simpan pengaturan\napp_name, deskripsi, logo,\nfavicon, identitas instansi,\nTTD, warna tema
+    activate SH
+    SH -> SV : update(data)
+    activate SV
+    SV -> SV : uploadFile jika ada\nlogo/TTD ke uploads/settings
+    SV -> DB : UPDATE settings (row id 1)
+    deactivate SV
+    SH -> SH : clearSettingsCache
+    SH --> KP : Sukses, pengaturan berlaku\npada halaman dan laporan PDF
+    deactivate SH
+end
+@enduml

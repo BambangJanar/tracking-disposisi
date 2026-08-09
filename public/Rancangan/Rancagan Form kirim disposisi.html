@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wireframe - Kirim Disposisi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #e5e7eb;
+      }
+
+      .balsamiq-box {
+        border: 4px solid #000;
+        box-shadow: 8px 8px 0px #000;
+        background-color: #fff;
+      }
+      .balsamiq-input {
+        border: 2px solid #000;
+        padding: 0.75rem 1rem;
+        width: 100%;
+        outline: none;
+        font-weight: 800;
+        font-size: 0.875rem;
+        box-shadow: 4px 4px 0px #000;
+        transition: all 0.1s;
+      }
+      .balsamiq-input:focus {
+        box-shadow: 0px 0px 0px #000;
+        transform: translate(4px, 4px);
+      }
+      .balsamiq-button {
+        border: 2px solid #000;
+        box-shadow: 4px 4px 0px #000;
+        font-weight: 900;
+        transition: all 0.1s;
+      }
+      .balsamiq-button:active {
+        box-shadow: 0px 0px 0px #000;
+        transform: translate(4px, 4px);
+      }
+
+      ::-webkit-scrollbar {
+        width: 12px;
+      }
+      ::-webkit-scrollbar-track {
+        border-left: 2px solid #000;
+        background: #f3f4f6;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #000;
+        border: 2px solid #f3f4f6;
+      }
+    </style>
+  </head>
+  <body
+    class="flex items-center justify-center h-screen p-4 relative overflow-hidden"
+  >
+    <div
+      class="absolute inset-0 opacity-10 pointer-events-none"
+      style="
+        background-image: radial-gradient(#000 2px, transparent 2px);
+        background-size: 20px 20px;
+      "
+    ></div>
+
+    <div class="balsamiq-box w-full max-w-lg flex flex-col max-h-[90vh] z-10">
+      <!-- Header -->
+      <div
+        class="px-6 py-4 border-b-4 border-black flex justify-between items-start bg-gray-50 shrink-0"
+      >
+        <div>
+          <h2 class="text-xl font-black">Kirim Disposisi</h2>
+          <p class="text-xs font-bold text-gray-500 mt-1">
+            Teruskan surat ini ke pengguna lain
+          </p>
+        </div>
+        <button
+          class="balsamiq-button w-8 h-8 flex items-center justify-center bg-white cursor-pointer mt-1"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6 space-y-6 overflow-y-auto flex-1 bg-white">
+        <div>
+          <label class="block font-black mb-2 text-sm"
+            >Tujuan Disposisi <span class="text-black text-lg">*</span></label
+          >
+          <select
+            class="balsamiq-input appearance-none bg-white cursor-pointer text-gray-500"
+          >
+            <option>👤 -- Pilih Penerima --</option>
+            <option>Kepala Bagian</option>
+            <option>Karyawan</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-black mb-2 text-sm"
+            >Catatan / Instruksi</label
+          >
+          <textarea
+            rows="4"
+            class="balsamiq-input resize-none placeholder-gray-400"
+          >xxxx</textarea>
+          <p class="text-right text-[10px] font-bold mt-2 text-gray-500">
+            Opsional
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div
+        class="px-6 py-4 border-t-4 border-black flex justify-end space-x-4 bg-gray-50 shrink-0"
+      >
+        <button class="balsamiq-button px-5 py-2.5 bg-white text-sm uppercase">
+          Batal
+        </button>
+        <button
+          class="balsamiq-button px-5 py-2.5 bg-black text-white text-sm uppercase flex items-center"
+        >
+          <span class="mr-2">✈️</span> Kirim Sekarang
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keluaran - Kinerja Disposisi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #e5e7eb;
+      }
+      .balsamiq-paper {
+        border: 4px solid #000;
+        box-shadow: 12px 12px 0px #000;
+        background-color: #fff;
+      }
+      .wireframe-table th,
+      .wireframe-table td {
+        border: 2px solid #000;
+        padding: 0.75rem;
+        text-align: center;
+      }
+      .wireframe-table th {
+        font-weight: 900;
+        background-color: #f9fafb;
+      }
+    </style>
+  </head>
+  <body class="flex items-center justify-center min-h-screen p-8 relative">
+    <div
+      class="absolute inset-0 opacity-10 pointer-events-none"
+      style="
+        background-image: radial-gradient(#000 2px, transparent 2px);
+        background-size: 20px 20px;
+      "
+    ></div>
+
+    <div
+      class="balsamiq-paper w-full max-w-4xl p-8 relative z-10 flex flex-col min-h-[700px]"
+    >
+      <div
+        class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none z-0 text-[8rem] font-black uppercase overflow-hidden"
+      >
+        xxxx.xxxx
+      </div>
+
+      <!-- KOP SURAT -->
+      <div
+        class="flex items-center border-b-4 border-double border-black pb-6 mb-8 relative z-10"
+      >
+        <div class="w-32 flex flex-col items-center justify-center font-black">
+          <span class="text-4xl">❄</span
+          ><span class="text-sm mt-1">xxxx.xxxx</span>
+        </div>
+        <div class="flex-1 text-center text-sm">
+          <h1 class="text-3xl font-black uppercase tracking-widest mb-2">
+            XXXX XXXXX
+          </h1>
+          <p class="font-bold">
+            Jl. xxxx xxxx No.x, xxxx xxxx xxxx, Kec. xxxx xxxx, Kota xxxx, xxxx
+            xxxx xxxxx
+          </p>
+          <p class="font-bold">Telp: xxxxxxxxxx | Email: xxxx@xxxx.xx.xx</p>
+        </div>
+        <div class="w-32"></div>
+      </div>
+
+      <!-- JUDUL -->
+      <div class="text-center mb-8 relative z-10">
+        <h2
+          class="text-xl font-black uppercase underline decoration-2 underline-offset-4 mb-2"
+        >
+          LAPORAN KINERJA DISPOSISI
+        </h2>
+        <p class="font-bold text-sm">Periode: xx/xx/xxxx s/d xx/xx/xxxx</p>
+      </div>
+
+      <!-- TABEL DENGAN DUMMY SENSOR -->
+      <table
+        class="w-full text-sm border-collapse wireframe-table mb-8 relative z-10 flex-1"
+      >
+        <thead>
+          <tr>
+            <th class="w-12">No</th>
+            <th class="text-left">Nama</th>
+            <th>Role</th>
+            <th>Total</th>
+            <th>Respon</th>
+            <th>Belum</th>
+            <th>Selesai</th>
+            <th>Ditolak</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td class="text-left font-bold">Xxxxx</td>
+            <td>User</td>
+            <td>5</td>
+            <td>5</td>
+            <td>0</td>
+            <td>1</td>
+            <td>3</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td class="text-left font-bold">Xxxxxx Xxxxxx</td>
+            <td>Superadmin</td>
+            <td>2</td>
+            <td>2</td>
+            <td>0</td>
+            <td>0</td>
+            <td>1</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- TANDA TANGAN -->
+      <div
+        class="mt-auto pt-16 flex justify-end text-sm text-center relative z-10"
+      >
+        <div class="w-72">
+          <p class="font-bold mb-1">xxxx, xx Xxxx xxxx</p>
+          <p class="font-black uppercase mb-12">KEPALA DIVISI XXXXX XXXXXX</p>
+          <div class="text-2xl font-black mb-1 opacity-50">✍️</div>
+          <p class="font-black uppercase underline decoration-2">XXXXXXXXX</p>
+          <p class="font-bold">NIP. xxxxxxxxxx</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

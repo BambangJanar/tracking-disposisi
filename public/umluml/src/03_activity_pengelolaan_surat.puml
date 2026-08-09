@@ -1,0 +1,43 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam activityStartColor #1B5E20
+skinparam activityEndColor #B71C1C
+skinparam activityBorderColor #1565C0
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityDiamondBorderColor #F9A825
+skinparam activityDiamondBackgroundColor #FFF8E1
+skinparam arrowColor #37474F
+skinparam titleFontSize 16
+title Activity Diagram - Pengelolaan Surat Masuk/Keluar\n(Registrasi Surat Baru)
+|Petugas / Admin|
+start
+:Pilih menu Surat\nlalu klik Tambah Surat;
+:Isi form data surat\njenis surat, nomor surat,\ntanggal diterima, dari/ke instansi,\nperihal, tingkat surat;
+:Unggah lampiran\npdf/jpg/jpeg/png, maks 5 MB;
+|Sistem|
+:Validasi data wajib\njenis surat, tanggal diterima,\nperihal;
+if (Data lengkap?) then (Tidak)
+    |Petugas / Admin|
+    :Tampilkan pesan\nMohon lengkapi data wajib;
+else (Ya)
+    |Sistem|
+    :Validasi format dan ukuran file;
+    if (File valid?) then (Tidak)
+        |Petugas / Admin|
+        :Tampilkan pesan error file\nformat tidak didukung\natau melebihi 5 MB;
+    else (Ya)
+        |Sistem|
+        :Simpan file ke folder uploads/surat\ndengan nama file unik;
+        :Generate nomor agenda otomatis\nSM/SK/PR/SU + nomor urut + tahun;
+        :Simpan data surat\nstatus = baru,\ndicatat oleh pembuat;
+        :Simpan stakeholder role pembuat;
+        :Kirim notifikasi surat_masuk\nke semua user kecuali pembuat;
+        :Catat log aktivitas tambah_surat;
+        |Petugas / Admin|
+        :Tampilkan daftar surat\ndan status terbaru;
+    endif
+endif
+stop
+@enduml

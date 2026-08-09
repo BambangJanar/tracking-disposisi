@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wireframe - Tambah Surat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #e5e7eb;
+      }
+
+      .balsamiq-box {
+        border: 4px solid #000;
+        box-shadow: 8px 8px 0px #000;
+        background-color: #fff;
+      }
+      .balsamiq-input {
+        border: 2px solid #000;
+        padding: 0.5rem 0.75rem;
+        width: 100%;
+        outline: none;
+        font-weight: 600;
+        font-size: 0.875rem;
+        box-shadow: 3px 3px 0px #000;
+        transition: all 0.1s;
+      }
+      .balsamiq-input:focus {
+        box-shadow: 0px 0px 0px #000;
+        transform: translate(3px, 3px);
+      }
+      .balsamiq-button {
+        border: 2px solid #000;
+        box-shadow: 4px 4px 0px #000;
+        font-weight: 900;
+        transition: all 0.1s;
+      }
+      .balsamiq-button:active {
+        box-shadow: 0px 0px 0px #000;
+        transform: translate(4px, 4px);
+      }
+
+      /* Custom Scrollbar bergaya Wireframe */
+      ::-webkit-scrollbar {
+        width: 12px;
+      }
+      ::-webkit-scrollbar-track {
+        border-left: 2px solid #000;
+        background: #f3f4f6;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #000;
+        border: 2px solid #f3f4f6;
+      }
+    </style>
+  </head>
+  <body
+    class="flex items-center justify-center h-screen p-4 relative overflow-hidden"
+  >
+    <!-- Background Pattern -->
+    <div
+      class="absolute inset-0 opacity-10 pointer-events-none"
+      style="
+        background-image: radial-gradient(#000 2px, transparent 2px);
+        background-size: 20px 20px;
+      "
+    ></div>
+
+    <!-- Modal Box: Ditambahkan max-h-[90vh] agar tidak melewati layar -->
+    <div class="balsamiq-box w-full max-w-2xl flex flex-col max-h-[90vh] z-10">
+      <!-- Header (Fixed) -->
+      <div
+        class="px-6 py-4 border-b-4 border-black flex justify-between items-center bg-gray-50 shrink-0"
+      >
+        <h2 class="text-xl font-black">Tambah Surat</h2>
+        <button
+          class="balsamiq-button w-8 h-8 flex items-center justify-center bg-white cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Body (Scrollable): Ditambahkan overflow-y-auto -->
+      <div class="p-6 space-y-4 overflow-y-auto flex-1 bg-white">
+        <div>
+          <label class="block font-black mb-1 text-sm"
+            >Jenis Surat <span class="text-black text-lg">*</span></label
+          >
+          <select
+            class="balsamiq-input appearance-none bg-white cursor-pointer text-gray-500"
+          >
+            <option>Pilih Jenis</option>
+            <option>Surat Masuk</option>
+            <option>Surat Keluar</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-black mb-1 text-sm">Nomor Surat</label>
+            <input
+              type="text"
+              value="xxxx/xxxx/xxxx"
+              class="balsamiq-input bg-gray-50 placeholder-gray-400"
+            />
+            <p class="text-[10px] font-bold mt-1 text-gray-600">
+              Kosongkan untuk auto-generate
+            </p>
+          </div>
+          <div>
+            <label class="block font-black mb-1 text-sm"
+              >Tanggal Surat <span class="text-black text-lg">*</span></label
+            >
+            <div class="relative">
+              <input
+                type="text"
+                value="xx/xx/xxxx"
+                class="balsamiq-input pr-10"
+              />
+              <span class="absolute right-3 top-2 font-black text-lg">📅</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-black mb-1 text-sm">Tanggal Diterima</label>
+          <div class="relative">
+            <input
+              type="text"
+              placeholder="xx/xx/xxxx"
+              class="balsamiq-input pr-10 placeholder-gray-400"
+            />
+            <span class="absolute right-3 top-2 font-black text-lg">📅</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-black mb-1 text-sm">Dari Instansi</label>
+            <input
+              type="text"
+              value="xxxx"
+              class="balsamiq-input placeholder-gray-400"
+            />
+          </div>
+          <div>
+            <label class="block font-black mb-1 text-sm">Ke Instansi</label>
+            <input
+              type="text"
+              value="xxxxx"
+              class="balsamiq-input placeholder-gray-400"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-black mb-1 text-sm">Alamat Surat</label>
+          <textarea
+            rows="2"
+            class="balsamiq-input resize-none placeholder-gray-400"
+          >xxxxx</textarea>
+        </div>
+      </div>
+
+      <!-- Footer (Fixed) -->
+      <div
+        class="px-6 py-4 border-t-4 border-black flex justify-end space-x-4 bg-gray-50 shrink-0"
+      >
+        <button class="balsamiq-button px-5 py-2.5 bg-white text-sm uppercase">
+          Batal
+        </button>
+        <button
+          class="balsamiq-button px-5 py-2.5 bg-black text-white text-sm uppercase flex items-center"
+        >
+          <span class="mr-2">💾</span> Simpan
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

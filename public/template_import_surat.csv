@@ -1,0 +1,3 @@
+Jenis Surat (Masuk/Keluar),Nomor Surat,Tanggal Diterima,Dari Instansi,Ke Instansi,Alamat Surat,Perihal,Kegiatan,Tingkat Surat (biasa/sedang/penting/mendesak)
+Surat Masuk,001/A/2026,2026-08-01,Dinas Pendidikan Kota Banjarmasin,Bank Kalsel Divisi Sekretaris Perusahaan,"Jl. Pendidikan No 1, Banjarmasin",Undangan Rapat Evaluasi Pendidikan,Rapat Tahunan,biasa
+Surat Keluar,002/B/2026,2026-08-02,Bank Kalsel Divisi Sekretaris Perusahaan,Kementerian Keuangan RI,"Jl. Keuangan No 2, Banjarmasin",Laporan Realisasi Pajak Tahunan 2025,Pelaporan Pajak,penting

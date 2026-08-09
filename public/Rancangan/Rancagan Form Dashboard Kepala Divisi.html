@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wireframe - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+      }
+
+      /* Utility untuk gaya Balsamiq */
+      .balsamiq-box {
+        border: 2px solid #000;
+        box-shadow: 4px 4px 0px #000;
+        background-color: #fff;
+      }
+      .balsamiq-button {
+        border: 2px solid #000;
+        box-shadow: 4px 4px 0px #000;
+        background-color: #fff;
+        transition: all 0.1s;
+      }
+      .balsamiq-button:active {
+        box-shadow: 0px 0px 0px #000;
+        transform: translate(4px, 4px);
+      }
+      .balsamiq-badge {
+        border: 2px solid #000;
+        font-weight: 800;
+        padding: 0.1rem 0.5rem;
+        display: inline-block;
+      }
+
+      /* Table Wireframe */
+      .wireframe-table th {
+        border-bottom: 2px dashed #000;
+        padding: 0.75rem 1rem;
+        text-transform: uppercase;
+        font-weight: 900;
+        font-size: 0.75rem;
+      }
+      .wireframe-table td {
+        border-bottom: 2px solid #e5e7eb;
+        padding: 1rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 flex h-screen overflow-hidden text-gray-900">
+    <!-- SIDEBAR -->
+    <aside
+      class="w-64 bg-white border-r-4 border-black flex flex-col hidden md:flex z-20"
+    >
+      <!-- Logo -->
+      <div
+        class="h-16 flex items-center justify-center border-b-4 border-black bg-gray-50"
+      >
+        <h1 class="font-black text-xl tracking-tight">bank.kalsel</h1>
+      </div>
+
+      <!-- Profile Info -->
+      <div class="p-6 border-b-2 border-black flex items-center bg-gray-50">
+        <div
+          class="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center font-black text-xl mr-3 shadow-[2px_2px_0px_#000] bg-white"
+        >
+          K
+        </div>
+        <div>
+          <p class="font-black text-sm">Kepala Divisi</p>
+          <p class="text-xs font-bold mt-1">● Online</p>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex-1 overflow-y-auto py-4">
+        <div
+          class="px-6 mb-2 text-xs font-black text-gray-500 uppercase tracking-wider"
+        >
+          Utama
+        </div>
+        <!-- Active Menu -->
+        <a
+          href="#"
+          class="flex items-center px-6 py-3 bg-black text-white border-y-2 border-black font-black"
+        >
+          [Icon] &nbsp; Dashboard
+        </a>
+
+        <div
+          class="px-6 mt-6 mb-2 text-xs font-black text-gray-500 uppercase tracking-wider"
+        >
+          Persuratan
+        </div>
+        <a
+          href="#"
+          class="flex items-center px-6 py-2.5 hover:bg-gray-200 font-bold border-b border-transparent hover:border-black"
+          >Semua Surat</a
+        >
+        <a
+          href="#"
+          class="flex items-center px-6 py-2.5 hover:bg-gray-200 font-bold border-b border-transparent hover:border-black"
+          >Disposisi Masuk</a
+        >
+        <a
+          href="#"
+          class="flex items-center px-6 py-2.5 hover:bg-gray-200 font-bold border-b border-transparent hover:border-black"
+          >Disposisi Keluar</a
+        >
+        <a
+          href="#"
+          class="flex items-center px-6 py-2.5 hover:bg-gray-200 font-bold border-b border-transparent hover:border-black"
+          >Monitoring Disposisi</a
+        >
+
+        <div
+          class="px-6 mt-6 mb-2 text-xs font-black text-gray-500 uppercase tracking-wider"
+        >
+          Laporan & Arsip
+        </div>
+        <a
+          href="#"
+          class="flex items-center justify-between px-6 py-2.5 hover:bg-gray-200 font-bold"
+        >
+          Pusat Laporan <span>▼</span>
+        </a>
+        <a
+          href="#"
+          class="flex items-center px-6 py-2.5 hover:bg-gray-200 font-bold"
+          >Arsip Digital</a
+        >
+      </nav>
+
+      <!-- Bottom Actions -->
+      <div class="p-4 border-t-4 border-black bg-gray-50">
+        <a
+          href="#"
+          class="flex items-center px-2 py-2 font-black hover:bg-gray-200"
+          >Profil Saya</a
+        >
+        <a
+          href="#"
+          class="flex items-center px-2 py-2 font-black mt-1 hover:bg-gray-200"
+          >Logout ⏏</a
+        >
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col overflow-hidden relative">
+      <!-- Pattern background untuk memberi kesan wireframe canvas -->
+      <div
+        class="absolute inset-0 opacity-10 pointer-events-none"
+        style="
+          background-image: radial-gradient(#000 2px, transparent 2px);
+          background-size: 20px 20px;
+        "
+      ></div>
+
+      <!-- Topbar -->
+      <header
+        class="h-16 bg-white border-b-4 border-black flex items-center justify-between px-6 z-10"
+      >
+        <h1 class="font-black text-xl hidden md:block">
+          Tracking Disposisi Surat
+        </h1>
+        <div class="flex items-center space-x-6 ml-auto">
+          <button class="font-black text-xl relative">
+            🔔
+            <span
+              class="absolute -top-1 -right-1 w-3 h-3 bg-black rounded-full border-2 border-white"
+            ></span>
+          </button>
+          <div class="flex items-center space-x-2 border-l-2 border-black pl-6">
+            <span class="font-black text-sm hidden md:block"
+              >Kepala Pimpinan Divisi ▼</span
+            >
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="flex-1 overflow-y-auto p-6 lg:p-8 z-10">
+        <!-- Greeting & Actions -->
+        <div
+          class="balsamiq-box p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between bg-gray-50"
+        >
+          <div>
+            <h2 class="text-3xl font-black mb-1">
+              Halo, Kepala Pimpinan Divisi 👋
+            </h2>
+            <p class="font-bold text-gray-600">
+              Thursday, 06 August 2026 • Bagian: -
+            </p>
+          </div>
+          <div class="mt-4 md:mt-0 flex space-x-3">
+            <button
+              class="balsamiq-button px-5 py-3 font-black text-sm uppercase flex items-center bg-blue-100"
+            >
+              + Buat Surat
+            </button>
+            <button
+              class="balsamiq-button px-5 py-3 font-black text-sm uppercase flex items-center"
+            >
+              Cek Inbox
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <!-- Card 1 -->
+          <div class="balsamiq-box p-6">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <p class="font-bold mb-1">Surat Masuk</p>
+                <h3 class="text-4xl font-black">8</h3>
+              </div>
+              <div
+                class="w-12 h-12 border-2 border-black flex items-center justify-center font-black text-xl rounded shadow-[2px_2px_0px_#000]"
+              >
+                📥
+              </div>
+            </div>
+            <p class="text-xs font-black uppercase underline decoration-2">
+              Data Terupdate
+            </p>
+          </div>
+          <!-- Card 2 -->
+          <div class="balsamiq-box p-6">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <p class="font-bold mb-1">Surat Keluar</p>
+                <h3 class="text-4xl font-black">6</h3>
+              </div>
+              <div
+                class="w-12 h-12 border-2 border-black flex items-center justify-center font-black text-xl rounded shadow-[2px_2px_0px_#000]"
+              >
+                📤
+              </div>
+            </div>
+            <p class="text-xs font-bold text-gray-500">
+              Total semua surat keluar
+            </p>
+          </div>
+          <!-- Card 3 -->
+          <div class="balsamiq-box p-6">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <p class="font-bold mb-1">Perlu Tindakan</p>
+                <h3 class="text-4xl font-black">0</h3>
+              </div>
+              <div
+                class="w-12 h-12 border-2 border-black flex items-center justify-center font-black text-xl rounded shadow-[2px_2px_0px_#000]"
+              >
+                ⚠️
+              </div>
+            </div>
+            <span class="balsamiq-badge text-xs bg-gray-200"
+              >Disposisi Pending</span
+            >
+          </div>
+          <!-- Card 4 -->
+          <div class="balsamiq-box p-6">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <p class="font-bold mb-1">Total Arsip</p>
+                <h3 class="text-4xl font-black">6</h3>
+              </div>
+              <div
+                class="w-12 h-12 border-2 border-black flex items-center justify-center font-black text-xl rounded shadow-[2px_2px_0px_#000]"
+              >
+                🗄️
+              </div>
+            </div>
+            <p class="text-xs font-bold text-gray-500">
+              Arsip digital tersimpan
+            </p>
+          </div>
+        </div>
+
+        <!-- Bottom Section: Table & Chart -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Table Surat Terbaru -->
+          <div class="lg:col-span-2 balsamiq-box overflow-hidden flex flex-col">
+            <div
+              class="p-6 border-b-4 border-black flex justify-between items-center bg-gray-50"
+            >
+              <h3 class="font-black text-xl">Surat Terbaru</h3>
+              <a href="#" class="font-black underline decoration-2 text-sm"
+                >Lihat Semua</a
+              >
+            </div>
+            <div class="overflow-x-auto p-4 flex-1">
+              <table class="w-full text-left wireframe-table">
+                <thead>
+                  <tr>
+                    <th>Surat</th>
+                    <th>Jenis</th>
+                    <th>Tanggal</th>
+                    <th>Status</th>
+                    <th class="text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <p class="font-black">AGD-20260717-001</p>
+                      <p class="text-xs text-gray-500">dhdhg</p>
+                    </td>
+                    <td>Surat Keluar</td>
+                    <td>17 Jul 2026</td>
+                    <td>
+                      <span class="balsamiq-badge text-[10px] uppercase"
+                        >Proses</span
+                      >
+                    </td>
+                    <td class="text-center">
+                      <button class="balsamiq-button px-2 py-1 text-xs">
+                        Lihat
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="font-black">AGD-20260716-001</p>
+                      <p class="text-xs text-gray-500">dccbcb</p>
+                    </td>
+                    <td>Surat Keluar</td>
+                    <td>16 Jul 2026</td>
+                    <td>
+                      <span class="balsamiq-badge text-[10px] uppercase"
+                        >Proses</span
+                      >
+                    </td>
+                    <td class="text-center">
+                      <button class="balsamiq-button px-2 py-1 text-xs">
+                        Lihat
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Chart Status Surat -->
+          <div
+            class="balsamiq-box p-6 flex flex-col items-center justify-center bg-gray-50"
+          >
+            <h3
+              class="font-black text-xl mb-6 self-start w-full border-b-2 border-black pb-2"
+            >
+              Status Surat
+            </h3>
+
+            <!-- Sketsa Doughnut Chart -->
+            <div class="relative flex items-center justify-center my-6">
+              <div
+                class="w-48 h-48 rounded-full border-[16px] border-black relative"
+              >
+                <!-- Segmen putus-putus untuk mensimulasikan potongan pie chart di wireframe -->
+                <div
+                  class="absolute top-0 right-0 w-24 h-24 border-b-4 border-l-4 border-black border-dashed transform translate-x-2 -translate-y-2"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="grid grid-cols-2 gap-4 w-full mt-4 font-bold text-sm">
+              <div class="flex items-center">
+                <span
+                  class="w-4 h-4 border-2 border-black mr-2 bg-gray-200"
+                ></span>
+                Baru
+              </div>
+              <div class="flex items-center">
+                <span
+                  class="w-4 h-4 border-2 border-black mr-2"
+                  style="
+                    background: repeating-linear-gradient(
+                      45deg,
+                      transparent,
+                      transparent 2px,
+                      #000 2px,
+                      #000 4px
+                    );
+                  "
+                ></span>
+                Proses
+              </div>
+              <div class="flex items-center">
+                <span
+                  class="w-4 h-4 border-2 border-black mr-2 bg-black"
+                ></span>
+                Disetujui
+              </div>
+              <div class="flex items-center">
+                <span
+                  class="w-4 h-4 border-2 border-black mr-2"
+                  style="
+                    background: radial-gradient(
+                      circle,
+                      #000 30%,
+                      transparent 30%
+                    );
+                  "
+                ></span>
+                Ditolak
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

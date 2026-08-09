@@ -1,0 +1,86 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam activityStartColor #1B5E20
+skinparam activityEndColor #B71C1C
+skinparam activityBorderColor #1565C0
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityDiamondBorderColor #F9A825
+skinparam activityDiamondBackgroundColor #FFF8E1
+skinparam arrowColor #37474F
+skinparam titleFontSize 16
+title Flowchart Sistem Usulan\nAplikasi Tracking Disposisi Surat
+start
+:Login / Registrasi akun;
+if (Akun aktif?\nemail terdaftar dan\nstatus_aktif = 1) then (Ya)
+    :Tampilkan Dashboard utama\nstatistik surat masuk/keluar,\nnotifikasi, menu utama;
+else (Tidak)
+    if (Melakukan registrasi\nakun baru?) then (Ya)
+        :Daftar akun baru\nrole user, status pending,\nstatus_aktif = 0;
+        :Tunggu persetujuan\nKepala Pimpinan Divisi;
+        stop
+    else (Tidak)
+        :Tampilkan pesan error\nEmail tidak ditemukan atau\nakun tidak aktif;
+        stop
+    endif
+endif
+:Input surat baru\njenis surat, nomor surat,\ntanggal diterima, dari/ke instansi,\nperihal, tingkat surat,\nlampiran opsional;
+if (Data wajib lengkap?\njenis surat, tanggal diterima,\nperihal) then (Tidak)
+    :Tampilkan pesan\nMohon lengkapi data wajib;
+    stop
+else (Ya)
+    if (Lampiran valid?\nformat pdf/jpg/jpeg/png,\nmaks 5 MB) then (Tidak)
+        :Tampilkan pesan error file;
+        stop
+    else (Ya)
+        :Simpan surat\nnomor agenda otomatis,\nstatus surat = baru;
+        :Kirim notifikasi surat masuk\nke semua user kecuali pembuat;
+        :Catat log aktivitas tambah surat;
+    endif
+endif
+:Lihat detail surat dan\nbuat disposisi\npilih penerima, isi catatan;
+if (Validasi disposisi lolos?\nsurat valid, penerima diisi,\nbukan disposisi ke diri sendiri,\ntidak ada disposisi aktif duplikat) then (Tidak)
+    :Tampilkan pesan error sesuai kasus;
+    stop
+else (Ya)
+    :Simpan disposisi\nstatus = dikirim;
+    :Tentukan stakeholder penerima\npenerima utama atau\npenerima delegasi;
+    if (Surat berstatus baru?) then (Ya)
+        :Ubah status surat\nmenjadi proses;
+    endif
+    :Kirim notifikasi disposisi baru\nke penerima;
+    :Catat log aktivitas\npembuatan disposisi;
+endif
+:Penerima membuka detail surat\nstatus otomatis menjadi diterima\n(tanggal_respon diisi);
+:Penerima memperbarui status\ndiproses, selesai, atau ditolak\n+ catatan respon;
+if (Transisi status valid?\ndikirim jadi diterima,\nditerima jadi diproses/selesai/ditolak,\ndiproses jadi selesai/ditolak,\natau aksi Kepala Pimpinan) then (Tidak)
+    :Tampilkan pesan\nstatus tidak valid;
+    stop
+else (Ya)
+    :Simpan status + catatan +\ntanggal_respon;
+    :Kirim notifikasi update\nke pengirim;
+    :Catat log aktivitas\nupdate disposisi;
+endif
+if (Status = selesai atau\nditolak?) then (Ya)
+    :Cek seluruh disposisi\nsurat yang masih aktif;
+    if (Semua disposisi tuntas\nselesai atau ditolak?) then (Ya)
+        :Ubah status surat menjadi disetujui\njika seluruhnya selesai,\natau ditolak + alasan penolakan;
+        :Bersihkan notifikasi dan\nnonaktifkan stakeholder;
+        :Kirim notifikasi\nsurat selesai;
+    else (Belum)
+        :Tunggu disposisi lain\ndiselesaikan;
+    endif
+else (Belum)
+    :Proses disposisi berlanjut\noleh penerima;
+endif
+:Kelola arsip surat\narsipkan dengan menyimpan\nstatus sebelumnya,\nunarsip, atau hapus;
+:Lihat laporan dengan filter tanggal\nrekap surat, disposisi, kinerja,\naktivitas, log download,\nstatistik pengguna;
+if (Cetak laporan PDF?) then (Ya)
+    :Generate PDF via Dompdf\nlogo dan TTD dari pengaturan,\nditambah watermark;
+    :Tampilkan PDF inline untuk\ndiunduh atau dicetak;
+else (Tidak)
+endif
+:Logout\ncatat log aktivitas dan\nhapus session;
+stop
+@enduml

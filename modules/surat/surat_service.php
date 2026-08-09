@@ -181,12 +181,12 @@ class SuratService
             $nomorSurat = self::generateNomorSurat();
         }
 
-        $sql = "INSERT INTO surat (id_jenis, nomor_surat, nomor_agenda, tanggal_diterima, dari_instansi, ke_instansi, alamat_surat, perihal, lampiran_file, dibuat_oleh, tingkat_surat) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO surat (id_jenis, nomor_surat, nomor_agenda, tanggal_diterima, dari_instansi, ke_instansi, alamat_surat, perihal, kegiatan, lampiran_file, dibuat_oleh, tingkat_surat) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
-            "issssssssis",
+            "isssssssssis",
             $data['id_jenis'],
             $nomorSurat,
             $nomorAgenda,
@@ -195,6 +195,7 @@ class SuratService
             $data['ke_instansi'],
             $data['alamat_surat'],
             $data['perihal'],
+            $data['kegiatan'],
             $data['lampiran_file'],
             $data['dibuat_oleh'],
             $data['tingkat_surat']
@@ -240,11 +241,11 @@ class SuratService
     public static function update($id, $data)
     {
         $conn = getConnection();
-        $sql = "UPDATE surat SET id_jenis=?, nomor_surat=?, tanggal_diterima=?, dari_instansi=?, ke_instansi=?, alamat_surat=?, perihal=?, lampiran_file=?, tingkat_surat=? WHERE id=?";
+        $sql = "UPDATE surat SET id_jenis=?, nomor_surat=?, tanggal_diterima=?, dari_instansi=?, ke_instansi=?, alamat_surat=?, perihal=?, kegiatan=?, lampiran_file=?, tingkat_surat=? WHERE id=?";
 
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
-            "issssssssi",
+            "isssssssssi",
             $data['id_jenis'],
             $data['nomor_surat'],
             $data['tanggal_diterima'],
@@ -252,6 +253,7 @@ class SuratService
             $data['ke_instansi'],
             $data['alamat_surat'],
             $data['perihal'],
+            $data['kegiatan'],
             $data['lampiran_file'],
             $data['tingkat_surat'],
             $id

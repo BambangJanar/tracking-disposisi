@@ -1,0 +1,101 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam sequenceArrowColor #37474F
+skinparam sequenceMessageAlign center
+skinparam participantBackgroundColor #E3F2FD
+skinparam actorBackgroundColor #FFF8E1
+skinparam titleFontSize 16
+title Sequence Diagram - Alur Disposisi Surat\n(Dari Pembuatan Hingga Penyelesaian)
+actor "Pengirim" as K
+actor "Penerima" as R
+actor "Kepala Pimpinan" as KP
+participant "disposisi_handler.php" as H
+participant "DisposisiService" as D
+participant "NotificationService" as N
+participant "SuratService" as SR
+database "Database\nDB" as DB
+
+K -> H : Buat disposisi\nid_surat, ke_user_id, catatan
+activate H
+H -> H : Validasi\nsurat valid, penerima wajib,\nno self-disposisi,\nno duplikat disposisi aktif
+alt Gagal validasi
+    H --> K : Pesan error sesuai kasus
+else Lolos validasi
+    H -> D : createDisposisi(data)
+    activate D
+    D -> DB : INSERT disposisi\nstatus = dikirim
+    D -> DB : INSERT stakeholder\npenerima_utama atau\npenerima_delegasi
+    D -> N : notifyDisposisiBaru(penerima)
+    activate N
+    N -> DB : INSERT notifikasi\ntype = disposisi_baru
+    deactivate N
+    D --> H : Sukses
+    deactivate D
+    H -> SR : Ubah status surat\nbaru menjadi proses
+    H -> DB : log_aktivitas\ndisposisi_surat
+    H --> K : Sukses, notifikasi terkirim
+end
+deactivate H
+
+R -> H : Buka detail surat\ndari inbox atau notifikasi
+activate H
+H -> D : autoAcceptDisposisi(surat, user)
+activate D
+D -> DB : UPDATE status dikirim\nmenjadi diterima + tanggal_respon
+deactivate D
+H --> R : Tampilkan detail surat\ndan history disposisi
+
+R -> H : Update status\nselesai, diproses, atau ditolak\n+ catatan respon
+activate H
+H -> H : Otorisasi penerima/kepala\n+ validasi transisi status
+alt Tidak berhak atau transisi invalid
+    H --> R : Error status tidak valid
+else Valid
+    H -> D : updateStatus(id, status, catatan)
+    activate D
+    D -> DB : UPDATE status_disposisi,\ncatatan, tanggal_respon
+    D -> N : notifySuratUpdate(pengirim)
+    activate N
+    N -> DB : INSERT notifikasi\ntype = surat_update
+    deactivate N
+    alt Status = selesai atau ditolak
+        D -> DB : Cek sisa disposisi\nmasih aktif untuk surat
+        alt Semua disposisi tuntas
+            D -> DB : UPDATE surat = disetujui\natau ditolak + alasan_penolakan
+            D -> DB : clearBySurat + \ndeactivateStakeholders
+            D -> N : notifySuratSelesai(stakeholder)
+            activate N
+            N -> DB : INSERT notifikasi\ntype = surat_selesai
+            deactivate N
+        else Masih ada disposisi aktif
+            D -> DB : Status surat tetap proses
+        end
+    else Status lanjutan
+        D -> DB : Status disposisi diperbarui
+    end
+    D --> H : Sukses
+    deactivate D
+    H --> R : Sukses, status tersimpan
+    K <- H : Notifikasi surat_update\nditerima pengirim
+end
+deactivate H
+
+opt Pembatalan atau bypass
+    KP -> H : Update langsung / bypass\ntransisi status (Kepala Pimpinan)
+    H -> D : updateStatus ke status tujuan
+    activate D
+    D -> DB : UPDATE status sesuai tujuan
+    deactivate D
+    H --> KP : Sukses
+    K -> H : Batalkan disposisi\nhanya status dikirim,\noleh pengirim atau superadmin
+    activate H
+    H -> D : cancel(id, userId)
+    activate D
+    D -> DB : DELETE disposisi + stakeholder\nyang tidak terpakai
+    deactivate D
+    H --> K : Disposisi dibatalkan
+    deactivate H
+end
+@enduml

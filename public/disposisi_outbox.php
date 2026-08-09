@@ -13,11 +13,7 @@ $userId = $user['id'];
 $userRole = $user['id_role'] ?? 3;
 $pageTitle = 'Disposisi Keluar';
 
-// Anak magang tidak bisa akses halaman ini
-if ($userRole == 3) {
-    header("Location: index.php?error=" . urlencode("Anda tidak memiliki akses ke halaman ini"));
-    exit;
-}
+// Anak magang bisa akses, tapi hanya melihat disposisi miliknya (di-handle oleh filter non-admin di bawah)
 
 // Filters
 $filters = [

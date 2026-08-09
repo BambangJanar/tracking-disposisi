@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wireframe - Profil Saya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .balsamiq-box {
+        border: 4px solid #000;
+        box-shadow: 6px 6px 0px #000;
+        background-color: #fff;
+      }
+      .balsamiq-input {
+        border: 2px solid #000;
+        padding: 0.75rem;
+        width: 100%;
+        outline: none;
+        font-weight: 800;
+        box-shadow: 4px 4px 0px #000;
+      }
+      .balsamiq-button {
+        border: 2px solid #000;
+        box-shadow: 4px 4px 0px #000;
+        font-weight: 900;
+        transition: all 0.1s;
+        background: #000;
+        color: #fff;
+      }
+      .balsamiq-button:active {
+        box-shadow: 0px 0px 0px #000;
+        transform: translate(4px, 4px);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 flex h-screen overflow-hidden text-gray-900">
+    <!-- SIDEBAR -->
+    <aside
+      class="w-64 bg-white border-r-4 border-black hidden md:flex flex-col z-20 shrink-0"
+    >
+      <div
+        class="h-16 border-b-4 border-black flex items-center justify-center bg-gray-50"
+      >
+        <h1 class="font-black text-xl">bank.kalsel</h1>
+      </div>
+      <div class="p-4 flex-1 overflow-y-auto font-bold space-y-4 text-sm mt-4">
+        <a href="#" class="block px-4 py-2 hover:bg-gray-200">Dashboard</a>
+        <a
+          href="#"
+          class="block px-4 py-2 bg-black text-white border-2 border-black shadow-[2px_2px_0px_#ccc]"
+          >Profil Saya</a
+        >
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col overflow-hidden relative">
+      <div
+        class="absolute inset-0 opacity-10 pointer-events-none"
+        style="
+          background-image: radial-gradient(#000 2px, transparent 2px);
+          background-size: 20px 20px;
+        "
+      ></div>
+
+      <header
+        class="h-16 bg-white border-b-4 border-black flex items-center justify-between px-6 z-10 shrink-0 bg-gray-50"
+      >
+        <h1 class="font-black text-sm md:text-lg">Profil Saya</h1>
+        <div class="font-black text-sm">Nindri Yuwani ▼</div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-6 lg:p-8 z-10">
+        <div class="mb-8">
+          <h2 class="text-3xl font-black mb-1">Profil Saya</h2>
+          <p class="font-bold text-gray-600 text-sm">
+            Kelola informasi pribadi dan keamanan akun Anda
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Left: Kartu Profil -->
+          <div
+            class="balsamiq-box bg-white overflow-hidden flex flex-col h-fit"
+          >
+            <!-- Banner Atas -->
+            <div class="h-24 bg-gray-200 border-b-4 border-black relative">
+              <!-- Avatar -->
+              <div
+                class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full flex items-center justify-center text-2xl font-black shadow-[4px_4px_0px_#000]"
+              >
+                NI
+              </div>
+            </div>
+            <div class="pt-14 pb-6 px-6 text-center border-b-4 border-black">
+              <h3 class="text-xl font-black">xxxx</h3>
+              <p class="text-sm font-bold text-gray-500 mb-3">
+                xxxx
+              </p>
+              <span
+                class="border-2 border-black px-3 py-1 text-xs font-black uppercase shadow-[2px_2px_0px_#000]"
+                >Kepala Bagian</span
+              >
+            </div>
+            <div class="p-6 text-sm font-bold space-y-3 bg-gray-50">
+              <div
+                class="flex justify-between border-b-2 border-dashed border-gray-300 pb-2"
+              >
+                <span class="text-gray-500">Bergabung</span>
+                <span>29 Nov 2025</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">Bagian</span>
+                <span class="text-right">Kepala Bagian Divisi ...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Form Edit -->
+          <div class="lg:col-span-2 space-y-6">
+            <!-- Edit Informasi -->
+            <div class="balsamiq-box p-6 bg-white">
+              <h3
+                class="font-black text-lg border-b-4 border-black pb-4 mb-6 flex items-center"
+              >
+                <span class="mr-2">👤</span> Edit Informasi
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label
+                    class="block text-xs font-black uppercase text-gray-500 mb-2"
+                    >Nama Lengkap</label
+                  >
+                  <input
+                    type="text"
+                    value="xxxx"
+                    class="balsamiq-input"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-black uppercase text-gray-500 mb-2"
+                    >Email</label
+                  >
+                  <input
+                    type="email"
+                    value="xxxx"
+                    class="balsamiq-input"
+                  />
+                </div>
+                <div class="md:col-span-2">
+                  <label
+                    class="block text-xs font-black uppercase text-gray-500 mb-2"
+                    >Bagian / Divisi
+                    <span class="normal-case text-[10px]"
+                      >(Default: Kepala Bagian)</span
+                    ></label
+                  >
+                  <input
+                    type="text"
+                    value="xxxx"
+                    class="balsamiq-input"
+                  />
+                  <p class="text-[10px] font-bold text-gray-400 mt-2">
+                    Kosongkan jika ingin menggunakan default dari sistem.
+                  </p>
+                </div>
+              </div>
+              <div class="flex justify-end">
+                <button
+                  class="balsamiq-button px-6 py-3 text-sm uppercase flex items-center"
+                >
+                  💾 Simpan Perubahan
+                </button>
+              </div>
+            </div>
+
+            <!-- Keamanan -->
+            <div class="balsamiq-box p-6 bg-white">
+              <h3
+                class="font-black text-lg border-b-4 border-black pb-4 mb-6 flex items-center"
+              >
+                <span class="mr-2">🔒</span> Keamanan
+              </h3>
+              <div class="mb-4">
+                <label
+                  class="block text-xs font-black uppercase text-gray-500 mb-2"
+                  >Password Saat Ini</label
+                >
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  class="balsamiq-input bg-gray-50"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

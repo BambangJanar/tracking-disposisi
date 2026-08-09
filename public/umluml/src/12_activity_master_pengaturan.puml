@@ -1,0 +1,81 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam activityStartColor #1B5E20
+skinparam activityEndColor #B71C1C
+skinparam activityBorderColor #1565C0
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityDiamondBorderColor #F9A825
+skinparam activityDiamondBackgroundColor #FFF8E1
+skinparam arrowColor #37474F
+skinparam titleFontSize 16
+title Activity Diagram - Kelola Jenis Surat, User, dan Pengaturan\n(Swimlane: Kepala Pimpinan, Sistem)
+|Kepala Pimpinan Divisi|
+start
+:Buka menu Jenis Surat\natau Users atau Pengaturan;
+|Sistem|
+:Verifikasi role headadmin\natau admin/superadmin\nsesuai menu;
+if (Akses diizinkan?) then (Tidak)
+    |Kepala Pimpinan Divisi|
+    :Tampilkan halaman unauthorized;
+    stop
+else (Ya)
+    |Sistem|
+    :Tampilkan data sesuai menu\njenis surat, daftar user,\natau form pengaturan;
+endif
+|Kepala Pimpinan Divisi|
+if (Menu = Jenis Surat?) then (Ya)
+    if (Aksi = Tambah atau Ubah?) then (Ya)
+        :Isi nama jenis, kode, deskripsi;
+        |Sistem|
+        :Validasi dan simpan\njenis surat;
+        :Catat log aktivitas;
+    else if (Aksi = Hapus?) then (Ya)
+        |Sistem|
+        if (Jenis dipakai surat?) then (Ya)
+            |Kepala Pimpinan Divisi|
+            :Tampilkan pesan\njenis tidak bisa dihapus;
+        else (Tidak)
+            |Sistem|
+            :Hapus jenis surat;
+        endif
+    endif
+else if (Menu = Users?) then (Ya)
+    |Kepala Pimpinan Divisi|
+    if (Aksi = Approve atau Reject\nakun pending?) then (Ya)
+        :Pilih akun pending;
+        |Sistem|
+        :Update status akun\naktif atau nonaktif;
+        :Catat log aktivitas;
+    else if (Aksi = Ubah role?) then (Ya)
+        |Kepala Pimpinan Divisi|
+        :Pilih role baru;
+        |Sistem|
+        :Update role user;
+    else if (Aksi = Hapus user?) then (Ya)
+        |Sistem|
+        if (User punya riwayat\nsurat/disposisi?) then (Ya)
+            |Kepala Pimpinan Divisi|
+            :Tampilkan pesan\ntidak dapat dihapus;
+        else (Tidak)
+            |Sistem|
+            :Hapus akun user;
+        endif
+    else if (Aksi = Ganti password?) then (Ya)
+        |Sistem|
+        :Validasi password lama\ndan simpan password baru;
+    endif
+else if (Menu = Pengaturan?) then (Ya)
+    |Kepala Pimpinan Divisi|
+    :Ubah data pengaturan\nidentitas aplikasi dan instansi,\nTTD, warna tema;
+    if (Unggah logo atau\ngambar TTD?) then (Ya)
+        |Sistem|
+        :Simpan file ke\nuploads/settings;
+    else (Tidak)
+    endif
+    |Sistem|
+    :Simpan pengaturan dan\nbersihkan cache settings;
+endif
+stop
+@enduml

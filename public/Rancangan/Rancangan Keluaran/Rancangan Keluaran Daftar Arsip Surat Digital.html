@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keluaran - Daftar Arsip Surat Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #e5e7eb;
+      }
+      .balsamiq-paper {
+        border: 4px solid #000;
+        box-shadow: 12px 12px 0px #000;
+        background-color: #fff;
+      }
+      .wireframe-table th,
+      .wireframe-table td {
+        border: 2px solid #000;
+        padding: 0.5rem;
+        text-align: center;
+        font-size: 0.7rem;
+      }
+      .wireframe-table th {
+        font-weight: 900;
+        background-color: #f9fafb;
+        text-transform: uppercase;
+      }
+      .balsamiq-badge {
+        border: 2px solid #000;
+        font-weight: 900;
+        padding: 0.1rem 0.4rem;
+        text-transform: uppercase;
+        font-size: 0.6rem;
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body class="flex items-center justify-center min-h-screen p-4 relative">
+    <div
+      class="absolute inset-0 opacity-10 pointer-events-none"
+      style="
+        background-image: radial-gradient(#000 2px, transparent 2px);
+        background-size: 20px 20px;
+      "
+    ></div>
+
+    <div
+      class="balsamiq-paper w-full max-w-6xl p-8 relative z-10 flex flex-col h-[90vh]"
+    >
+      <!-- KOP SURAT -->
+      <div
+        class="flex items-center border-b-4 border-double border-black pb-4 mb-6"
+      >
+        <div class="w-32 flex flex-col items-center justify-center font-black">
+          <span class="text-3xl">❄</span
+          ><span class="text-xs mt-1">xxxx.xxxx</span>
+        </div>
+        <div class="flex-1 text-center text-xs">
+          <h1 class="text-2xl font-black uppercase tracking-widest mb-1">
+            XXXX XXXXX
+          </h1>
+          <p class="font-bold">
+            Jl. xxxx xxxx No.x, xxxx xxxx xxxx, Kec. xxxx xxxx, Kota xxxx, xxxx
+            xxxx xxxxx
+          </p>
+          <p class="font-bold">Telp: xxxxxxxxxx | Email: xxxx@xxxx.xx.xx</p>
+        </div>
+        <div class="w-32"></div>
+      </div>
+
+      <!-- JUDUL -->
+      <div class="text-center mb-6">
+        <h2
+          class="text-lg font-black uppercase underline decoration-2 underline-offset-4 mb-1"
+        >
+          DAFTAR ARSIP SURAT DIGITAL
+        </h2>
+        <p class="font-bold text-xs">Dicetak pada: xx/xx/xxxx xx:xx WIB</p>
+      </div>
+
+      <!-- TABEL -->
+      <div class="flex-1 overflow-hidden flex flex-col">
+        <table class="w-full border-collapse wireframe-table mb-2">
+          <thead>
+            <tr>
+              <th class="w-8">No</th>
+              <th>No. Agenda</th>
+              <th>No. Surat</th>
+              <th>Jenis</th>
+              <th>Perihal</th>
+              <th>Dari / Ke Instansi</th>
+              <th>Tgl Surat</th>
+              <th>Status Sblm</th>
+              <th>Tgl Arsip</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Hanya 1 baris agar muat di layar & Full tersensor -->
+            <tr>
+              <td class="font-bold">1</td>
+              <td class="font-black">xxxx-xxxxxxxx-xxx</td>
+              <td class="font-bold">xxx/xx/xxxx</td>
+              <td class="font-bold">Surat Masuk</td>
+              <td class="text-left font-bold">xxxx xxxx xxxx xxxx xxxx xxxx</td>
+              <td class="text-left">
+                <span class="font-black">Dari:</span> xxxx xxxx<br />
+                <span class="font-black">Ke:</span> xxxx xxxx xxxx
+              </td>
+              <td class="font-bold">xx/xx/xxxx</td>
+              <td><span class="balsamiq-badge">Baru</span></td>
+              <td class="font-bold">xx/xx/xxxx</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="text-xs font-bold text-gray-600">Total: 1 surat diarsipkan</p>
+      </div>
+
+      <!-- TANDA TANGAN -->
+      <div class="mt-4 flex justify-end text-xs text-center">
+        <div class="w-64">
+          <p class="font-bold mb-1">xxxx, xx Xxxx xxxx</p>
+          <p class="font-black uppercase mb-16">KEPALA DIVISI XXXXX XXXXXX</p>
+          <div class="text-xl font-black mb-1 opacity-50">✍️</div>
+          <p class="font-black uppercase underline decoration-2">XXXXXXXXX</p>
+          <p class="font-bold">NIP. xxxxxxxxxx</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

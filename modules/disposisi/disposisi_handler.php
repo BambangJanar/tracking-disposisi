@@ -137,7 +137,7 @@ try {
             // Validasi flow status
             $currentStatus = $disposisi['status_disposisi'];
             $validFlow = [
-                'dikirim' => ['diterima'],
+                'dikirim' => ['diterima', 'diproses', 'selesai', 'ditolak'],
                 'diterima' => ['diproses', 'selesai', 'ditolak'],
                 'diproses' => ['selesai', 'ditolak']
             ];

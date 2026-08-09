@@ -1,0 +1,59 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam sequenceArrowColor #37474F
+skinparam sequenceMessageAlign center
+skinparam participantBackgroundColor #E3F2FD
+skinparam actorBackgroundColor #FFF8E1
+skinparam titleFontSize 16
+title Sequence Diagram - Laporan dan Download Lampiran
+actor "User" as U
+participant "Halaman Laporan\npublic/laporan/" as L
+participant "Halaman PDF\nlaporan_*_pdf.php" as PDF
+participant "download_handler.php\naksi download / view" as DH
+participant "DownloadService\nlogDownload" as DL
+participant "config.php\ngetAllSettings" as C
+database "Database\nDB" as DB
+
+U -> L : Pilih jenis laporan dan\nrentang tanggal_dari\nsampai tanggal_sampai
+activate L
+L -> DB : Query data dengan filter\nparameterized
+DB --> L : Data laporan dan statistik
+L --> U : Tampilkan tabel laporan\ndan ringkasan statistik
+
+U -> L : Klik Cetak PDF
+L -> PDF : Render PDF\nmembawa parameter filter
+activate PDF
+PDF -> C : Ambil pengaturan aplikasi\napp_name, instansi_logo,\nTTD penandatangan
+C --> PDF : Data settings
+PDF -> PDF : Generate HTML ke PDF\nvia Dompdf + watermark
+PDF --> U : Stream PDF inline\nuntuk diunduh atau dicetak
+deactivate PDF
+deactivate L
+
+U -> DH : Unduh atau lihat lampiran\ndari halaman detail surat
+activate DH
+DH -> DB : Cari surat dan\npastikan lampiran_file ada
+alt File tidak ditemukan
+    DH --> U : Error file tidak ditemukan
+else File ditemukan
+    DH -> DL : logDownload(user, surat,\nnama_file, aksi, IP, user_agent)
+    activate DL
+    DL -> DB : INSERT log_download
+    deactivate DL
+    DH -> DB : INSERT log_aktivitas\ndownload_file atau view_file
+    DH -> DH : Header MIME, Content-Length,\nContent-Disposition,\nattachment atau inline
+    DH --> U : Stream file via readfile
+end
+deactivate DH
+
+opt Hanya role admin / superadmin\n(role 1 dan 2)
+    U -> DH : Lihat log download per surat\naction = get_log
+    activate DH
+    DH -> DB : getLogBySurat(surat_id)
+    DB --> DH : Riwayat log download
+    DH --> U : Tampilkan log\nuser, waktu, aksi, IP
+    deactivate DH
+end
+@enduml

@@ -1,0 +1,54 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam sequenceArrowColor #37474F
+skinparam sequenceMessageAlign center
+skinparam participantBackgroundColor #E3F2FD
+skinparam actorBackgroundColor #FFF8E1
+skinparam titleFontSize 16
+title Sequence Diagram - Pembuatan Surat Baru
+actor "Petugas / Admin" as P
+participant "Form Surat\npublic/surat.php" as F
+participant "surat_handler.php\naction = create" as H
+participant "SuratService\nuploadLampiran\ndanalainnya" as S
+participant "NotificationService\nnotifySuratMasuk" as N
+database "Database\nDB" as DB
+
+P -> F : Isi form data surat dan\npilih file lampiran
+F -> H : POST data surat\nid_jenis, nomor_surat,\ntanggal_diterima, instansi,\nperihal, tingkat_surat,\nlampiran_file
+activate H
+H -> H : Validasi data wajib\njenis surat, tanggal diterima,\nperihal
+alt Validasi gagal
+    H --> F : Error\nMohon lengkapi data wajib
+    F --> P : Tampilkan pesan error
+else Validasi lolos
+    H -> S : uploadLampiran(file)
+    activate S
+    S -> S : Validasi ekstensi pdf/jpg/jpeg/png\ndan ukuran maks 5 MB
+    alt File tidak valid
+        S --> H : Exception file tidak valid
+        H --> F : Error file
+        F --> P : Tampilkan pesan error file
+    else File valid
+        S -> S : Simpan file ke uploads/surat\nnama unik uniqid_waktu.ext
+        S --> H : Nama file tersimpan
+    end
+    deactivate S
+    H -> S : create(data surat)
+    activate S
+    S -> DB : generateNomorAgenda\nSM/SK/PR/SU + urutan + tahun
+    S -> DB : INSERT surat\nstatus = baru, dibuat_oleh
+    S -> DB : INSERT surat_stakeholders\nrole_type = pembuat
+    S --> H : id surat baru
+    deactivate S
+    H -> N : notifySuratMasuk(surat)\nkecuali user pembuat
+    activate N
+    N -> DB : INSERT notifications\nuntuk semua user aktif\ntype = surat_masuk
+    deactivate N
+    H -> DB : INSERT log_aktivitas\ntambah_surat
+    H --> F : Sukses + id surat
+    F --> P : Tampilkan daftar surat\ndan notifikasi bell
+end
+deactivate H
+@enduml

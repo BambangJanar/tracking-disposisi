@@ -1,0 +1,67 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam activityStartColor #1B5E20
+skinparam activityEndColor #B71C1C
+skinparam activityBorderColor #1565C0
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityDiamondBorderColor #F9A825
+skinparam activityDiamondBackgroundColor #FFF8E1
+skinparam arrowColor #37474F
+skinparam titleFontSize 16
+title Activity Diagram - Alur Disposisi Surat\n(Swimlane: Pengirim, Sistem, Penerima, Kepala Pimpinan)
+|Pengirim (Staf/Admin)|
+start
+:Buka detail surat;
+:Klik Buat Disposisi;
+:Pilih penerima dan isi catatan;
+|Sistem|
+:Validasi disposisi\nid surat valid,\npenerima wajib diisi,\nbukan disposisi ke diri sendiri,\ntidak ada disposisi aktif duplikat;
+if (Validasi lolos?) then (Tidak)
+    |Pengirim|
+    :Tampilkan pesan error\nsesuai kasus;
+    stop
+else (Ya)
+    |Sistem|
+    :Simpan disposisi\nstatus = dikirim;
+    :Tentukan stakeholder penerima\npenerima_utama jika pengirim\nbukan stakeholder,\npenerima_delegasi jika rantai delegasi;
+    if (Status surat = baru?) then (Ya)
+        :Ubah status surat\nmenjadi proses;
+    endif
+    :Kirim notifikasi disposisi_baru\nke penerima;
+    :Catat log aktivitas\ndisposisi_surat;
+    |Penerima|
+    :Buka detail surat\nmelalui inbox atau notifikasi;
+    |Sistem|
+    :Auto accept\nstatus dikirim menjadi diterima,\ntanggal_respon diisi;
+    |Penerima|
+    :Perbarui status disposisi\ndiproses, selesai, atau ditolak\n+ isi catatan respon;
+    |Sistem|
+    if (Transisi valid?\natau aktor = Kepala Pimpinan) then (Tidak)
+        |Penerima|
+        :Tampilkan pesan\nstatus tidak valid;
+        stop
+    else (Ya)
+        |Sistem|
+        :Simpan status + catatan +\ntanggal_respon;
+        :Kirim notifikasi surat_update\nke pengirim;
+        :Catat log aktivitas\nupdate_disposisi;
+        if (Status = selesai\natau ditolak?) then (Tidak)
+            |Penerima|
+            :Lanjutkan pemrosesan\ndisposisi;
+        else (Ya)
+            |Sistem|
+            :Cek disposisi lain\nmasih aktif untuk surat;
+            if (Semua disposisi tuntas?) then (Belum)
+                :Tunggu disposisi lain\nselesai;
+            else (Tuntas)
+                :Ubah status surat\nmenjadi disetujui atau ditolak;
+                :Bersihkan notifikasi dan\nnonaktifkan stakeholder;
+                :Kirim notifikasi surat_selesai\nke seluruh stakeholder;
+            endif
+        endif
+    endif
+endif
+stop
+@enduml

@@ -33,6 +33,7 @@ $conn = getConnection();
 $columns = "s.*, 
             j.nama_jenis,
             u.nama_lengkap as dibuat_oleh_nama,
+            s.dibuat_oleh as dibuat_oleh_id,
             d.id as id_disposisi, 
             d.status_disposisi,
             d.catatan as catatan_disposisi,
@@ -66,9 +67,10 @@ if (in_array($userRole, [1, 4])) {
 }
 
 // === MODIFIKASI FILTER ===
-// 1. Surat tidak boleh status 'arsip', 'disetujui', 'ditolak' (Hanya surat aktif)
+// 1. Surat tidak boleh status 'arsip', 'disetujui' (Hanya surat aktif)
 // 2. Disposisi hanya status 'dikirim', 'diterima', 'diproses' (Inbox aktif)
-$where = "WHERE s.status_surat NOT IN ('arsip', 'disetujui', 'ditolak')
+// 3. Surat 'ditolak' tetap tampil jika ada disposisi aktif ke user ini (untuk fitur arsipkan)
+$where = "WHERE s.status_surat NOT IN ('arsip', 'disetujui')
           AND d.status_disposisi IN ('dikirim', 'diterima', 'diproses')";
 
 // Params awal: userId untuk JOIN subquery (hanya untuk non-admin)
@@ -264,6 +266,14 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                             <?php endif; ?>
+
+                                            <?php if ($surat['status_surat'] === 'ditolak' && (int)$surat['dibuat_oleh_id'] === $userId): ?>
+                                                <button onclick="arsipkanSurat(<?= $surat['id'] ?>)"
+                                                    class="text-blue-600 hover:text-blue-800 font-medium"
+                                                    title="Arsipkan Surat">
+                                                    <i class="fas fa-archive"></i>
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -326,6 +336,13 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                                     <i class="fas fa-edit mr-1"></i> Update
                                 </button>
                             <?php endif; ?>
+
+                            <?php if ($surat['status_surat'] === 'ditolak' && (int)$surat['dibuat_oleh_id'] === $userId): ?>
+                                <button onclick="arsipkanSurat(<?= $surat['id'] ?>)"
+                                    class="flex-1 text-center py-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-xs font-medium">
+                                    <i class="fas fa-archive mr-1"></i> Arsipkan
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -370,7 +387,9 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                             <select name="status" id="statusSelect" required class="w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow appearance-none bg-white">
                                 <option value="diproses">Diproses (Sedang dikerjakan)</option>
                                 <option value="disetujui">Disetujui / Selesai</option>
+                                <?php if ($userRole != 3): ?>
                                 <option value="ditolak">Ditolak / Kembalikan</option>
+                                <?php endif; ?>
                             </select>
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
@@ -401,6 +420,48 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     const disposisiHandlerPath = '../modules/disposisi/disposisi_handler.php';
+    const suratHandlerPath = '../modules/surat/surat_handler.php';
+
+    // Fungsi Arsipkan Surat
+    function arsipkanSurat(id) {
+        Swal.fire({
+            title: 'Arsipkan Surat?',
+            text: 'Surat ini akan dipindahkan ke Arsip Digital.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3B82F6',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: '<i class="fas fa-archive mr-1"></i> Ya, Arsipkan',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: suratHandlerPath,
+                    type: 'POST',
+                    data: { action: 'arsipkan', id: id },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil Diarsipkan',
+                                text: 'Surat telah dipindahkan ke Arsip Digital.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => location.reload());
+                        } else {
+                            Swal.fire('Gagal', response.message, 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        let msg = 'Terjadi kesalahan sistem';
+                        try { const res = JSON.parse(xhr.responseText); if (res.message) msg = res.message; } catch(e) {}
+                        Swal.fire('Error', msg, 'error');
+                    }
+                });
+            }
+        });
+    }
 
     // Helper: Get Tailwind classes for status badge
     function getStatusBadgeClass(status) {

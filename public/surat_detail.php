@@ -94,7 +94,7 @@ $downloadHandlerUrl = dirname(BASE_URL) . '/modules/download/download_handler.ph
                             </button>
                         <?php endif; ?>
 
-                        <button onclick="window.print()" class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all">
+                        <button onclick="window.print()" class="hidden inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all">
                             <i class="fas fa-print mr-2 text-gray-500"></i> Cetak
                         </button>
 
@@ -224,6 +224,14 @@ $downloadHandlerUrl = dirname(BASE_URL) . '/modules/download/download_handler.ph
                                         <?= nl2br(htmlspecialchars($surat['perihal'])) ?>
                                     </dd>
                                 </div>
+                                <?php if ($surat['kegiatan']): ?>
+                                    <div class="sm:col-span-2">
+                                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Kegiatan</dt>
+                                        <dd class="mt-2 text-sm text-gray-800 bg-gray-50 p-3 rounded-lg border border-gray-100 leading-relaxed">
+                                            <?= nl2br(htmlspecialchars($surat['kegiatan'])) ?>
+                                        </dd>
+                                    </div>
+                                <?php endif; ?>
                             </dl>
                         </div>
                     </div>

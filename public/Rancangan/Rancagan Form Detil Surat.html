@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wireframe - Detail Surat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .balsamiq-box {
+        border: 4px solid #000;
+        box-shadow: 6px 6px 0px #000;
+        background-color: #fff;
+      }
+      .balsamiq-button {
+        border: 2px solid #000;
+        box-shadow: 3px 3px 0px #000;
+        font-weight: 900;
+        transition: all 0.1s;
+        background: #fff;
+      }
+      .balsamiq-button:active {
+        box-shadow: 0px 0px 0px #000;
+        transform: translate(3px, 3px);
+      }
+      .balsamiq-badge {
+        border: 2px solid #000;
+        font-weight: 800;
+        padding: 0.1rem 0.5rem;
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 flex h-screen overflow-hidden text-gray-900">
+    <!-- SIDEBAR (Simple version for context) -->
+    <aside
+      class="w-64 bg-white border-r-4 border-black hidden md:flex flex-col z-20 shrink-0"
+    >
+      <div
+        class="h-16 border-b-4 border-black flex items-center justify-center bg-gray-50"
+      >
+        <h1 class="font-black text-xl">bank.kalsel</h1>
+      </div>
+      <div class="p-4 flex-1 overflow-y-auto font-bold space-y-4 text-sm mt-4">
+        <a href="#" class="block px-4 py-2 hover:bg-gray-200">Dashboard</a>
+        <a
+          href="#"
+          class="block px-4 py-2 bg-black text-white border-2 border-black shadow-[2px_2px_0px_#ccc]"
+          >Semua Surat</a
+        >
+        <a href="#" class="block px-4 py-2 hover:bg-gray-200"
+          >Disposisi Masuk</a
+        >
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col overflow-hidden relative">
+      <div
+        class="absolute inset-0 opacity-10 pointer-events-none"
+        style="
+          background-image: radial-gradient(#000 2px, transparent 2px);
+          background-size: 20px 20px;
+        "
+      ></div>
+
+      <!-- Topbar -->
+      <header
+        class="h-16 bg-white border-b-4 border-black flex items-center justify-between px-6 z-10 shrink-0 bg-gray-50"
+      >
+        <h1 class="font-black text-sm md:text-lg">Detail Surat</h1>
+        <div class="font-black text-sm">Nindri Yuwani ▼</div>
+      </header>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-y-auto p-6 lg:p-8 z-10">
+        <!-- Page Title & Actions -->
+        <div
+          class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"
+        >
+          <div>
+            <a href="#" class="text-sm font-black underline mb-2 inline-block"
+              >← Daftar Surat</a
+            >
+            <h2 class="text-3xl font-black mb-1">Detail Surat</h2>
+            <p class="font-bold text-gray-600 text-sm">
+              Informasi lengkap dan riwayat disposisi surat.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <button
+              class="balsamiq-button px-4 py-2 text-xs uppercase bg-gray-200 text-gray-500 cursor-not-allowed"
+            >
+              Tidak Ada File
+            </button>
+            <button class="balsamiq-button px-4 py-2 text-xs uppercase">
+              🖨️ Cetak
+            </button>
+            <button
+              class="balsamiq-button px-4 py-2 text-xs uppercase bg-black text-white"
+            >
+              ✓ Setujui
+            </button>
+            <button
+              class="balsamiq-button px-4 py-2 text-xs uppercase bg-white"
+            >
+              ✕ Tolak
+            </button>
+            <button
+              class="balsamiq-button px-4 py-2 text-xs uppercase bg-black text-white border-black"
+            >
+              ✈️ Disposisi
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Atribut Surat -->
+          <div class="lg:col-span-2 balsamiq-box p-6 bg-white">
+            <div
+              class="flex justify-between items-center border-b-4 border-black pb-4 mb-4"
+            >
+              <h3 class="font-black text-lg">✉️ Atribut Surat</h3>
+              <span class="balsamiq-badge text-xs">Baru</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <p class="text-xs font-black text-gray-500 uppercase">
+                  Nomor Agenda
+                </p>
+                <p
+                  class="font-black text-lg border-2 border-black inline-block px-2 py-1 mt-1 bg-gray-50"
+                >
+                  xxxx
+                </p>
+              </div>
+              <div>
+                <p class="text-xs font-black text-gray-500 uppercase">
+                  Nomor Surat
+                </p>
+                <p class="font-bold mt-1">xxxx/xxxx/xxxx</p>
+              </div>
+              <div>
+                <p class="text-xs font-black text-gray-500 uppercase">
+                  Jenis Surat
+                </p>
+                <p class="font-bold mt-1">Surat Keluar</p>
+              </div>
+              <div>
+                <p class="text-xs font-black text-gray-500 uppercase">
+                  Tanggal Surat
+                </p>
+                <p class="font-bold mt-1">📅 xx/xx/xxxx</p>
+              </div>
+              <div class="md:col-span-2">
+                <p class="text-xs font-black text-gray-500 uppercase">
+                  Dari Instansi
+                </p>
+                <p class="font-black mt-1">xxxx</p>
+              </div>
+              <div class="md:col-span-2">
+                <p class="text-xs font-black text-gray-500 uppercase">
+                  Perihal
+                </p>
+                <div
+                  class="border-2 border-black p-3 mt-1 font-bold bg-gray-50"
+                >
+                  xxxx
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ringkasan -->
+          <div class="balsamiq-box p-6 bg-white h-fit">
+            <h3 class="font-black text-lg border-b-4 border-black pb-4 mb-4">
+              RINGKASAN
+            </h3>
+            <div
+              class="border-2 border-black p-4 flex items-center bg-gray-50 shadow-[4px_4px_0px_#000] mb-6"
+            >
+              <div
+                class="w-12 h-12 border-2 border-black rounded-full flex items-center justify-center font-black text-xl mr-4 bg-white"
+              >
+                🔗
+              </div>
+              <div>
+                <p class="text-xs font-black uppercase">Total Disposisi</p>
+                <p class="text-3xl font-black">1</p>
+              </div>
+            </div>
+
+            <div>
+              <p class="text-xs font-bold text-gray-500 mb-2">
+                ℹ Surat ini dibuat oleh:
+              </p>
+              <div class="flex items-center">
+                <div
+                  class="w-8 h-8 border-2 border-black rounded-full flex items-center justify-center font-black text-sm mr-2 bg-gray-200"
+                >
+                  N
+                </div>
+                <p class="font-bold text-sm">xxxx</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

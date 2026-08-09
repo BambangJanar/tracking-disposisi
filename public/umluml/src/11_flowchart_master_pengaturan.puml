@@ -1,0 +1,74 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam activityStartColor #1B5E20
+skinparam activityEndColor #B71C1C
+skinparam activityBorderColor #1565C0
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityDiamondBorderColor #F9A825
+skinparam activityDiamondBackgroundColor #FFF8E1
+skinparam arrowColor #37474F
+skinparam titleFontSize 16
+title Flowchart - Data Master dan Pengaturan Aplikasi
+start
+:Login sebagai\nAdmin, Superadmin, atau Headadmin;
+if (Menu dipilih?) then (Jenis Surat)
+    :Buka menu Jenis Surat;
+    if (Aksi = Tambah?) then (Ya)
+        :Isi nama jenis, kode,\ndan deskripsi;
+        :Simpan ke database;
+    else if (Aksi = Ubah?) then (Ya)
+        :Pilih jenis surat\nubah nama/kode/deskripsi;
+        :Simpan perubahan;
+    else if (Aksi = Hapus?) then (Ya)
+        if (Jenis masih dipakai\noleh data surat?) then (Ya)
+            :Tolak penghapusan\ntampilkan pesan jenis\nsedang digunakan;
+            stop
+        else (Tidak)
+            :Hapus jenis surat;
+        endif
+    endif
+    :Catat perubahan;
+else if (Menu = Manajemen User?) then (Ya)
+    if (Role = Headadmin?) then (Ya)
+        :Buka menu Users;
+        if (Aksi = Setujui akun pending?) then (Ya)
+            :Aktifkan akun\nstatus_aktif = 1;
+        else if (Aksi = Tolak akun pending?) then (Ya)
+            :Nonaktifkan atau\nhapus akun;
+        else if (Aksi = Ubah role?) then (Ya)
+            :Pilih role baru\nsuperadmin/admin/user/headadmin;
+            :Simpan perubahan role;
+        else if (Aksi = Hapus user?) then (Ya)
+            if (User punya riwayat\nsurat atau disposisi?) then (Ya)
+                :Tolak penghapusan\nblokir data terkait;
+                stop
+            else (Tidak)
+                :Hapus akun user;
+            endif
+        else if (Aksi = Ganti password?) then (Ya)
+            :Verifikasi password lama;
+            :Simpan password baru;
+        endif
+    else (Tidak)
+        :Tampilkan pesan unauthorized\nkhusus Kepala Pimpinan;
+        stop
+    endif
+else if (Menu = Pengaturan Aplikasi?) then (Ya)
+    if (Role = Headadmin?) then (Ya)
+        :Buka menu Pengaturan;
+        :Ubah nama aplikasi, deskripsi,\nlogo, favicon, nama instansi,\nalamat, telepon, email,\nTTD penandatangan, warna tema;
+        if (Unggah file\nlogo/TTD?) then (Ya)
+            :Simpan file ke uploads/settings\ndengan nama unik;
+        else (Tidak)
+        endif
+        :Simpan pengaturan\n+ bersihkan cache settings;
+        :Tampilkan pemberitahuan sukses;
+    else (Tidak)
+        :Tampilkan pesan unauthorized\nkhusus Kepala Pimpinan;
+        stop
+    endif
+endif
+stop
+@enduml

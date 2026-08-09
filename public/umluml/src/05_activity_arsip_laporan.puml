@@ -1,0 +1,53 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam activityStartColor #1B5E20
+skinparam activityEndColor #B71C1C
+skinparam activityBorderColor #1565C0
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityDiamondBorderColor #F9A825
+skinparam activityDiamondBackgroundColor #FFF8E1
+skinparam arrowColor #37474F
+skinparam titleFontSize 16
+title Activity Diagram - Arsip Surat dan Laporan
+|User (semua role)|
+start
+:Buka menu Arsip Surat\ndan Laporan;
+|Sistem|
+:Tampilkan daftar surat\nberstatus arsip;
+|User|
+if (Pilih aksi?) then (Arsipkan surat aktif)
+    |Sistem|
+    :Simpan status_sebelum_arsip;
+    :Ubah status_surat\nmenjadi arsip;
+    :Bersihkan notifikasi dan\nnonaktifkan stakeholder;
+    :Catat log aktivitas\narsipkan surat;
+else if (Unarsip surat) then
+    |Sistem|
+    :Kembalikan status_surat\nke status_sebelum_arsip;
+    :Catat log aktivitas\nunarsip surat;
+else if (Hapus permanen surat) then
+    |Sistem|
+    :Hapus data surat\nbeserta notifikasi dan\nstakeholder terkait;
+    :Catat log aktivitas\nhapus surat;
+else if (Buat laporan) then
+    |Sistem|
+    :Tampilkan halaman laporan\nfilter tanggal_dari\ndan tanggal_sampai;
+    |User|
+    :Pilih jenis laporan dan\natur rentang tanggal;\nrekap surat, disposisi, kinerja,\naktivitas, log download,\nstatistik pengguna;
+    |Sistem|
+    :Query data sesuai filter\nparameterized;
+    :Tampilkan tabel dan\nringkasan statistik;
+    |User|
+    if (Cetak PDF?) then (Ya)
+        |Sistem|
+        :Render PDF dengan Dompdf\nlogo dan TTD dari pengaturan,\nwatermark;
+        :Tampilkan PDF inline\nuntuk diunduh/dicetak;
+    else (Tidak)
+    endif
+else (Kembali ke menu utama)
+    stop
+endif
+stop
+@enduml

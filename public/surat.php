@@ -45,10 +45,18 @@ $jenisSuratList = JenisSuratService::getAll();
                 <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Manajemen Surat</h1>
                 <p class="text-gray-600 text-xs sm:text-sm">Kelola arsip surat masuk, keluar, dan proposal</p>
             </div>
-            <button onclick="openAddModal()" class="w-full sm:w-auto bg-primary-600 text-white px-4 py-2.5 rounded-lg hover:bg-primary-700 transition flex items-center justify-center gap-2 shadow-sm text-sm font-medium">
-                <i class="fas fa-plus"></i>
-                <span>Tambah Surat</span>
-            </button>
+            <div class="flex gap-2 w-full sm:w-auto">
+                <?php if (hasRole(['superadmin', 'admin'])): ?>
+                <button onclick="openImportModal()" class="w-full sm:w-auto bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-sm text-sm font-medium">
+                    <i class="fas fa-file-import"></i>
+                    <span>Import Data</span>
+                </button>
+                <?php endif; ?>
+                <button onclick="openAddModal()" class="w-full sm:w-auto bg-primary-600 text-white px-4 py-2.5 rounded-lg hover:bg-primary-700 transition flex items-center justify-center gap-2 shadow-sm text-sm font-medium">
+                    <i class="fas fa-plus"></i>
+                    <span>Tambah Surat</span>
+                </button>
+            </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
@@ -200,7 +208,7 @@ $jenisSuratList = JenisSuratService::getAll();
                                                 <i class="fas fa-archive text-lg"></i>
                                             </button>
 
-                                            <?php if (hasRole('headadmin')): ?>
+                                            <?php if (hasRole(['admin', 'superadmin', 'headadmin'])): ?>
                                                 <button onclick="deleteSurat(<?= $surat['id'] ?>)" class="text-gray-400 hover:text-red-600 transition-colors p-1.5 hover:bg-gray-100 rounded-lg" title="Hapus">
                                                     <i class="fas fa-trash text-lg"></i>
                                                 </button>
@@ -301,7 +309,7 @@ $jenisSuratList = JenisSuratService::getAll();
                                 <i class="fas fa-archive"></i>
                             </button>
 
-                            <?php if (hasRole('headadmin')): ?>
+                            <?php if (hasRole(['admin', 'superadmin', 'headadmin'])): ?>
                                 <button onclick="deleteSurat(<?= $surat['id'] ?>)" class="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
                                     <i class="fas fa-trash"></i>
                                 </button>
@@ -382,8 +390,8 @@ $jenisSuratList = JenisSuratService::getAll();
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Diterima <span class="text-red-500">*</span></label>
-                                <input type="date" name="tanggal_diterima" id="tanggal_diterima" required
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Diterima</label>
+                                <input type="date" name="tanggal_diterima" id="tanggal_diterima"
                                     value="<?= date('Y-m-d') ?>"
                                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm">
                             </div>
@@ -417,6 +425,13 @@ $jenisSuratList = JenisSuratService::getAll();
                             <textarea name="perihal" id="perihal" required rows="3"
                                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
                                 placeholder="Isi perihal surat"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Kegiatan</label>
+                            <textarea name="kegiatan" id="kegiatan" rows="2"
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                                placeholder="Nama kegiatan terkait surat (opsional)"></textarea>
                         </div>
 
                         <div>
@@ -454,6 +469,63 @@ $jenisSuratList = JenisSuratService::getAll();
         </div>
     </div>
 </div>
+
+<!-- Modal Import CSV -->
+<?php if (hasRole(['superadmin', 'admin'])): ?>
+<div id="importModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto backdrop-blur-sm transition-opacity">
+    <div class="flex items-center justify-center min-h-screen p-4 sm:p-6">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg relative">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-file-import text-green-600 mr-2"></i>Import Data Surat</h3>
+                <button onclick="closeImportModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-6">
+                <!-- Step 1: Download Template -->
+                <div class="mb-6">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2"><span class="inline-flex items-center justify-center w-5 h-5 bg-green-100 text-green-700 rounded-full text-xs font-bold mr-1.5">1</span> Download Template</h4>
+                    <p class="text-xs text-gray-500 mb-3">Unduh file template CSV, lalu isi dengan data surat Anda. Pastikan urutan kolomnya tidak diubah.</p>
+                    <a href="template_import_surat.csv" download class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-download text-green-600"></i> Download Template CSV
+                    </a>
+                </div>
+
+                <!-- Step 2: Upload -->
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2"><span class="inline-flex items-center justify-center w-5 h-5 bg-green-100 text-green-700 rounded-full text-xs font-bold mr-1.5">2</span> Upload File CSV</h4>
+                    <p class="text-xs text-gray-500 mb-3">Upload file CSV yang sudah Anda isi datanya sesuai dengan template di atas.</p>
+                    <form id="importForm" enctype="multipart/form-data">
+                        <input type="hidden" name="action" value="import_csv">
+                        <div class="flex items-center justify-center w-full">
+                            <label for="csv_file" class="flex flex-col items-center justify-center w-full h-32 border-2 border-green-300 border-dashed rounded-lg cursor-pointer bg-green-50 hover:bg-green-100 transition-colors">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <i class="fas fa-file-csv text-3xl text-green-500 mb-2"></i>
+                                    <p class="text-sm text-gray-600"><span class="font-semibold text-green-600">Klik untuk pilih file</span></p>
+                                    <p class="text-xs text-gray-500 mt-1">Format: .csv (UTF-8)</p>
+                                </div>
+                                <input id="csv_file" name="csv_file" type="file" class="hidden" accept=".csv" onchange="showCsvFileName(this)">
+                            </label>
+                        </div>
+                        <p id="csvFileNameDisplay" class="text-sm font-medium text-gray-800 mt-2 hidden text-center"></p>
+
+                        <!-- Hasil Import -->
+                        <div id="importResultArea" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
+
+                        <div class="mt-5 flex justify-end gap-3">
+                            <button type="button" onclick="closeImportModal()" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">Batal</button>
+                            <button type="submit" id="btnImport" class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium shadow-sm">
+                                <i class="fas fa-upload mr-1.5"></i> Import Sekarang
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -494,6 +566,7 @@ $jenisSuratList = JenisSuratService::getAll();
         document.getElementById('ke_instansi').value = surat.ke_instansi || '';
         document.getElementById('alamat_surat').value = surat.alamat_surat;
         document.getElementById('perihal').value = surat.perihal;
+        document.getElementById('kegiatan').value = surat.kegiatan || '';
         document.getElementById('currentFile').textContent = surat.lampiran_file || '-';
         document.getElementById('fileNameDisplay').classList.add('hidden');
         document.getElementById('suratModal').classList.remove('hidden');
@@ -622,6 +695,94 @@ $jenisSuratList = JenisSuratService::getAll();
         const cleanUrl = window.location.pathname;
         window.history.replaceState({}, '', cleanUrl);
     }
+
+    // ==================== IMPORT CSV ====================
+    function openImportModal() {
+        document.getElementById('importModal').classList.remove('hidden');
+        document.getElementById('importForm').reset();
+        document.getElementById('csvFileNameDisplay').classList.add('hidden');
+        document.getElementById('importResultArea').classList.add('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeImportModal() {
+        document.getElementById('importModal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    function showCsvFileName(input) {
+        const display = document.getElementById('csvFileNameDisplay');
+        if (input.files && input.files[0]) {
+            display.textContent = '📄 ' + input.files[0].name;
+            display.classList.remove('hidden');
+        } else {
+            display.classList.add('hidden');
+        }
+    }
+
+    $('#importForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const fileInput = document.getElementById('csv_file');
+        if (!fileInput.files || !fileInput.files[0]) {
+            Swal.fire('Perhatian', 'Pilih file CSV terlebih dahulu', 'warning');
+            return;
+        }
+
+        const formData = new FormData(this);
+        const btn = $('#btnImport');
+        const originalText = btn.html();
+        const resultArea = $('#importResultArea');
+
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1.5"></i> Mengimpor...');
+        resultArea.addClass('hidden');
+
+        $.ajax({
+            url: handlerUrl,
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            success: function(res) {
+                btn.prop('disabled', false).html(originalText);
+
+                if (res.status === 'success') {
+                    let html = '<div class="bg-green-50 border border-green-200 text-green-800 p-3 rounded-lg">';
+                    html += '<i class="fas fa-check-circle mr-1"></i> ' + res.message;
+                    if (res.details && res.details.length > 0) {
+                        html += '<ul class="mt-2 text-xs text-red-600 list-disc pl-4">';
+                        res.details.forEach(d => html += '<li>' + d + '</li>');
+                        html += '</ul>';
+                    }
+                    html += '</div>';
+                    resultArea.html(html).removeClass('hidden');
+
+                    // Reload halaman setelah 2 detik
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    let html = '<div class="bg-red-50 border border-red-200 text-red-800 p-3 rounded-lg">';
+                    html += '<i class="fas fa-exclamation-circle mr-1"></i> ' + res.message;
+                    if (res.details && res.details.length > 0) {
+                        html += '<ul class="mt-2 text-xs list-disc pl-4">';
+                        res.details.forEach(d => html += '<li>' + d + '</li>');
+                        html += '</ul>';
+                    }
+                    html += '</div>';
+                    resultArea.html(html).removeClass('hidden');
+                }
+            },
+            error: function() {
+                btn.prop('disabled', false).html(originalText);
+                Swal.fire('Error', 'Terjadi kesalahan koneksi server', 'error');
+            }
+        });
+    });
+
+    // Tutup modal import dengan Escape atau klik luar
+    document.getElementById('importModal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeImportModal();
+    });
 </script>
 
 <?php include 'partials/footer.php'; ?>

@@ -1,0 +1,53 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam sequenceArrowColor #37474F
+skinparam sequenceMessageAlign center
+skinparam participantBackgroundColor #E3F2FD
+skinparam actorBackgroundColor #FFF8E1
+skinparam titleFontSize 16
+title Sequence Diagram - Registrasi Akun dan\nPersetujuan Kepala Pimpinan
+actor "Calon User\nAnak Magang" as C
+actor "Kepala Pimpinan\nDivisi" as KP
+participant "register_handler.php" as RH
+participant "users_handler.php\naction approve / reject" as UH
+participant "UsersService\nupdateStatus" as US
+database "Database\nDB" as DB
+
+C -> RH : Daftar akun\nnama_lengkap, email, password,\nid_bagian
+activate RH
+RH -> DB : Cek emailExists
+alt Email sudah terpakai
+    RH --> C : Error Email sudah terdaftar
+else Email tersedia
+    RH -> DB : INSERT user\nrole = user (role 3),\nstatus = pending,\nstatus_aktif = 0,\npassword disimpan
+    RH --> C : Sukses\nakun menunggu persetujuan\nKepala Pimpinan
+end
+deactivate RH
+
+C -> UH : Coba login\nakun masih pending
+activate UH
+UH --> C : Ditolak\nakun belum diaktifkan
+deactivate UH
+
+KP -> UH : Buka menu Users\nlihat daftar akun pending
+activate UH
+UH -> US : approve atau reject\n(updateStatus)
+activate US
+alt Approve
+    US -> DB : UPDATE users\nstatus_aktif = 1,\nstatus = active
+else Reject
+    US -> DB : Hapus atau nonaktifkan\nakun pengguna
+end
+deactivate US
+UH --> KP : Status akun diperbarui
+deactivate UH
+
+C -> UH : Login kembali\ndengan akun yang disetujui
+activate UH
+UH -> DB : Verifikasi email + status_aktif
+DB --> UH : Akun aktif
+UH --> C : Berhasil masuk\nrole user dengan akses terbatas\n(no akses outbox dan log download)
+deactivate UH
+@enduml

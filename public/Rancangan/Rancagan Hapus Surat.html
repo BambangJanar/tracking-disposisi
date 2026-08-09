@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wireframe - Hapus Surat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .balsamiq-box {
+        border: 2px solid #000;
+        box-shadow: 6px 6px 0px #000;
+        background-color: #fff;
+      }
+      .balsamiq-button {
+        border: 2px solid #000;
+        box-shadow: 4px 4px 0px #000;
+        transition: all 0.1s;
+      }
+      .balsamiq-button:active {
+        box-shadow: 0px 0px 0px #000;
+        transform: translate(4px, 4px);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-200">
+    <!-- Overlay Modal -->
+    <div
+      class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50"
+    >
+      <!-- Box Modal -->
+      <div
+        class="balsamiq-box w-full max-w-sm flex flex-col p-8 text-center bg-white relative mt-10"
+      >
+        <!-- Floating Warning Icon -->
+        <div
+          class="absolute -top-12 left-1/2 transform -translate-x-1/2 w-24 h-24 bg-white border-2 border-black rounded-full flex items-center justify-center shadow-[4px_4px_0px_#000]"
+        >
+          <span class="text-orange-500 text-5xl font-black">!</span>
+        </div>
+
+        <!-- Content -->
+        <div class="mt-10">
+          <h2 class="text-3xl font-black mb-3">Hapus Surat?</h2>
+          <p class="text-gray-600 font-semibold mb-8">
+            Data yang dihapus tidak bisa dikembalikan!
+          </p>
+
+          <!-- Buttons -->
+          <div class="flex justify-center space-x-4">
+            <button
+              class="balsamiq-button px-6 py-3 bg-red-500 text-white font-black text-sm cursor-pointer"
+            >
+              Ya, Hapus
+            </button>
+            <button
+              class="balsamiq-button px-6 py-3 bg-gray-500 text-white font-black text-sm cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

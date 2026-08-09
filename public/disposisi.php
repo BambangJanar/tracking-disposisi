@@ -52,11 +52,7 @@ $disposisiList = DisposisiService::getForMonitoring($userId, $userRole, $filters
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800 mb-1 sm:mb-2">Monitoring Disposisi</h1>
                         <p class="text-sm sm:text-base text-gray-600"><?= $pageSubtitle ?></p>
                     </div>
-                    <a href="monitoring_disposisi_pdf.php?<?= http_build_query(['status' => $filters['status_disposisi'], 'search' => $filters['search']]) ?>"
-                        target="_blank"
-                        class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
-                        <i class="fas fa-file-pdf mr-2"></i> Cetak PDF
-                    </a>
+                    <!-- Tombol Cetak PDF disembunyikan sesuai permintaan karena fungsinya mirip dengan Laporan Disposisi -->
                 </div>
 
                 <?php if (in_array($userRole, [1, 4])): ?>
