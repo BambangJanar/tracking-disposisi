@@ -1,0 +1,2 @@
+[22-Aug-2026 13:17:43 Asia/Makassar] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in D:\@Data\AppData\laragon\www\tracking-disposisi\public\captcha.php on line 6
+[22-Aug-2026 13:17:43 Asia/Makassar] PHP Warning:  Cannot modify header information - headers already sent by (output started at D:\@Data\AppData\laragon\www\tracking-disposisi\config\config.php:13) in D:\@Data\AppData\laragon\www\tracking-disposisi\public\captcha.php on line 37

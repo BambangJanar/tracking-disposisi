@@ -213,7 +213,7 @@ $settings = getAllSettings();
     <!-- Toolbar -->
     <div class="viewer-toolbar">
         <div class="toolbar-left">
-            <a href="javascript:history.back()" class="back-btn">
+            <a href="<?= 'surat_detail.php?id=' . $suratId ?>" onclick="goBack(event)" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
                 <span>Kembali</span>
             </a>
@@ -331,6 +331,16 @@ $settings = getAllSettings();
                 notif.style.transition = 'opacity 0.3s';
                 setTimeout(() => notif.remove(), 300);
             }, 3000);
+        }
+
+        // === FUNGSI KEMBALI ===
+        function goBack(e) {
+            // Jika ada history sebelumnya, gunakan history.back()
+            if (window.history.length > 1 && document.referrer) {
+                e.preventDefault();
+                window.history.back();
+            }
+            // Jika tidak ada history, biarkan href default (surat_detail.php) bekerja
         }
 
         // CSS Animation

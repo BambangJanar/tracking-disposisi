@@ -28,25 +28,45 @@ $offset = ($page - 1) * $perPage;
 
 // QUERY BARU: Ambil UNIQUE SURAT yang DIDISPOSISIKAN OLEH user
 $conn = getConnection();
+$params = [];
+$types = '';
+
+if (in_array($userRole, [1, 4])) {
+    // Admin & Head Admin: Lihat semua info disposisi
+    $infoQuery = "(SELECT GROUP_CONCAT(CONCAT(u2.nama_lengkap, ' (', d2.status_disposisi, ')') SEPARATOR ', ')
+                   FROM disposisi d2
+                   JOIN users u2 ON d2.ke_user_id = u2.id
+                   WHERE d2.id_surat = s.id) as disposisi_info";
+                   
+    $dateQuery = "(SELECT MAX(d3.tanggal_disposisi) 
+                   FROM disposisi d3 
+                   WHERE d3.id_surat = s.id) as tanggal_disposisi_terakhir";
+} else {
+    // Non-admin: Hanya info disposisi yang MEREKA buat
+    $infoQuery = "(SELECT GROUP_CONCAT(CONCAT(u2.nama_lengkap, ' (', d2.status_disposisi, ')') SEPARATOR ', ')
+                   FROM disposisi d2
+                   JOIN users u2 ON d2.ke_user_id = u2.id
+                   WHERE d2.id_surat = s.id AND d2.dari_user_id = ?) as disposisi_info";
+                   
+    $dateQuery = "(SELECT MAX(d3.tanggal_disposisi) 
+                   FROM disposisi d3 
+                   WHERE d3.id_surat = s.id AND d3.dari_user_id = ?) as tanggal_disposisi_terakhir";
+                   
+    $params[] = $userId;
+    $params[] = $userId;
+    $types .= 'ii';
+}
 
 $sql = "SELECT DISTINCT s.*, 
                j.nama_jenis,
                u.nama_lengkap as dibuat_oleh_nama,
-               (SELECT GROUP_CONCAT(CONCAT(u2.nama_lengkap, ' (', d2.status_disposisi, ')') SEPARATOR ', ')
-                FROM disposisi d2
-                JOIN users u2 ON d2.ke_user_id = u2.id
-                WHERE d2.id_surat = s.id AND d2.dari_user_id = ?) as disposisi_info,
-               (SELECT MAX(d3.tanggal_disposisi) 
-                FROM disposisi d3 
-                WHERE d3.id_surat = s.id AND d3.dari_user_id = ?) as tanggal_disposisi_terakhir
+               $infoQuery,
+               $dateQuery
         FROM surat s
         JOIN jenis_surat j ON s.id_jenis = j.id
         JOIN users u ON s.dibuat_oleh = u.id
         JOIN disposisi d ON s.id = d.id_surat
         WHERE s.status_surat NOT IN ('arsip')";
-
-$params = [$userId, $userId];
-$types = 'ii';
 
 // Filter by user role
 if (!in_array($userRole, [1, 4])) {

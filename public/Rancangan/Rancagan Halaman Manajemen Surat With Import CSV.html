@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wireframe Brutalist - Manajemen Surat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&display=swap");
+
+      body {
+        font-family: "Inter", sans-serif;
+        font-weight: 800;
+      }
+
+      /* Pola Latar Belakang Titik-titik */
+      .bg-dots {
+        background-color: #f8fafc;
+        background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+        background-size: 24px 24px;
+      }
+
+      /* Gaya Brutalist (Garis Tebal & Bayangan Solid) */
+      .border-brutal {
+        border: 3px solid #000;
+      }
+      .border-b-brutal {
+        border-bottom: 3px solid #000;
+      }
+      .border-r-brutal {
+        border-right: 3px solid #000;
+      }
+      .border-t-brutal {
+        border-top: 3px solid #000;
+      }
+
+      .shadow-brutal {
+        box-shadow: 6px 6px 0px 0px #000;
+        transition:
+          transform 0.1s,
+          box-shadow 0.1s;
+      }
+      .shadow-brutal-sm {
+        box-shadow: 4px 4px 0px 0px #000;
+        transition:
+          transform 0.1s,
+          box-shadow 0.1s;
+      }
+
+      /* Efek Hover untuk tombol brutalist */
+      button:hover.shadow-brutal,
+      a:hover.shadow-brutal {
+        transform: translate(-2px, -2px);
+        box-shadow: 8px 8px 0px 0px #000;
+      }
+      button:active.shadow-brutal,
+      a:active.shadow-brutal {
+        transform: translate(4px, 4px);
+        box-shadow: 0px 0px 0px 0px #000;
+      }
+    </style>
+  </head>
+  <body class="text-black overflow-hidden h-screen flex flex-col">
+    <!-- HEADER -->
+    <header
+      class="flex h-16 bg-white border-b-brutal z-30 shrink-0 w-full relative"
+    >
+      <!-- Logo Area -->
+      <div
+        class="w-[280px] border-r-brutal flex items-center px-6 shrink-0 bg-white"
+      >
+        <span class="text-lg tracking-tight flex gap-1.5 items-center">
+          <span class="text-blue-600 font-black">bank.kalsel</span>
+          <span>Tracking Disposisi Surat</span>
+        </span>
+      </div>
+
+      <!-- Topbar Kanan -->
+      <div class="flex-1 flex justify-end items-center px-8 bg-white gap-6">
+        <!-- Ikon Lonceng -->
+        <button
+          class="w-10 h-10 border-brutal rounded-full flex items-center justify-center hover:bg-gray-100"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+            ></path>
+          </svg>
+        </button>
+
+        <!-- Profil Dropdown -->
+        <div
+          class="border-brutal px-3 py-1.5 flex items-center gap-3 shadow-brutal-sm cursor-pointer bg-blue-50"
+        >
+          <div
+            class="w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm border-2 border-black"
+          >
+            T
+          </div>
+          <span class="text-sm tracking-wide">Tri Yadi</span>
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            viewBox="0 0 24 24"
+          >
+            <path d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- KONTEN UTAMA & SIDEBAR -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- SIDEBAR -->
+      <aside
+        class="w-[280px] bg-white border-r-brutal flex flex-col shrink-0 z-20 overflow-y-auto"
+      >
+        <!-- Profil Singkat Sidebar -->
+        <div class="p-6 border-b-brutal flex items-center gap-4 bg-gray-50">
+          <div
+            class="w-12 h-12 bg-blue-600 border-brutal text-white rounded-full flex items-center justify-center text-xl"
+          >
+            T
+          </div>
+          <div class="leading-tight">
+            <div class="text-base">Tri Yadi</div>
+            <div
+              class="text-xs text-gray-600 flex items-center gap-1.5 mt-1 font-semibold"
+            >
+              <span
+                class="w-2.5 h-2.5 bg-green-500 border border-black rounded-full inline-block"
+              ></span>
+              Karyawan
+            </div>
+          </div>
+        </div>
+
+        <!-- Menu Navigasi -->
+        <nav class="py-6 flex flex-col gap-1">
+          <!-- UTAMA -->
+          <div
+            class="text-[10px] text-gray-500 uppercase tracking-widest px-8 mb-2 mt-2"
+          >
+            Utama
+          </div>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-8 py-2.5 text-sm hover:bg-gray-100 transition-colors"
+          >
+            <i class="fa-solid fa-house text-xl w-6 text-center text-black"></i>
+            Dashboard
+          </a>
+
+          <!-- PERSURATAN -->
+          <div
+            class="text-[10px] text-gray-500 uppercase tracking-widest px-8 mb-2 mt-6"
+          >
+            Persuratan
+          </div>
+          <!-- Menu Aktif (Brutalist style) -->
+          <a
+            href="#"
+            class="flex items-center gap-3 px-8 py-2.5 text-sm bg-black text-white mx-3 border-brutal shadow-brutal-sm mb-1 rounded-sm"
+          >
+            <i
+              class="fa-solid fa-envelope text-xl w-6 text-center text-white"
+            ></i>
+            Semua Surat
+          </a>
+
+          <a
+            href="#"
+            class="flex items-center justify-between px-8 py-2.5 text-sm hover:bg-gray-100 transition-colors"
+          >
+            <div class="flex items-center gap-3">
+              <i
+                class="fa-solid fa-inbox text-xl w-6 text-center text-black"
+              ></i>
+              Disposisi Masuk
+            </div>
+            <span
+              class="bg-black text-white border-2 border-black text-[10px] px-2 py-0.5 rounded-full"
+              >9</span
+            >
+          </a>
+
+          <a
+            href="#"
+            class="flex items-center gap-3 px-8 py-2.5 text-sm hover:bg-gray-100 transition-colors"
+          >
+            <i
+              class="fa-solid fa-paper-plane text-xl w-6 text-center text-black"
+            ></i>
+            Disposisi Keluar
+          </a>
+
+          <a
+            href="#"
+            class="flex items-center gap-3 px-8 py-2.5 text-sm hover:bg-gray-100 transition-colors"
+          >
+            <i
+              class="fa-solid fa-rotate text-xl w-6 text-center text-black"
+            ></i>
+            Monitoring Disposisi
+          </a>
+
+          <!-- LAPORAN & ARSIP -->
+          <div
+            class="text-[10px] text-gray-500 uppercase tracking-widest px-8 mb-2 mt-6"
+          >
+            Laporan & Arsip
+          </div>
+          <a
+            href="#"
+            class="flex items-center justify-between px-8 py-2.5 text-sm hover:bg-gray-100 transition-colors"
+          >
+            <div class="flex items-center gap-3">
+              <i
+                class="fa-solid fa-file-lines text-xl w-6 text-center text-black"
+              ></i>
+              Pusat Laporan
+            </div>
+            <svg
+              class="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="4"
+              viewBox="0 0 24 24"
+            >
+              <path d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-8 py-2.5 text-sm hover:bg-gray-100 transition-colors"
+          >
+            <i
+              class="fa-solid fa-box-archive text-xl w-6 text-center text-black"
+            ></i>
+            Arsip Digital
+          </a>
+
+          <!-- ADMINISTRATOR -->
+          <div
+            class="text-[10px] text-gray-500 uppercase tracking-widest px-8 mb-2 mt-6"
+          >
+            Administrator
+          </div>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-8 py-2.5 text-sm hover:bg-gray-100 transition-colors"
+          >
+            <i class="fa-solid fa-user text-xl w-6 text-center text-black"></i>
+            Profil Saya
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-8 py-2.5 text-sm text-black hover:bg-gray-200 transition-colors mt-2"
+          >
+            <i
+              class="fa-solid fa-right-from-bracket text-xl w-6 text-center text-black"
+            ></i>
+            Logout
+          </a>
+        </nav>
+      </aside>
+
+      <!-- AREA KERJA UTAMA -->
+      <main class="flex-1 bg-dots p-10 overflow-y-auto relative z-10">
+        <!-- Header Halaman & Tombol -->
+        <div
+          class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6"
+        >
+          <div>
+            <h1 class="text-4xl tracking-tight mb-2">Manajemen Surat</h1>
+            <p class="text-gray-600 text-sm font-semibold">
+              Kelola arsip surat masuk, keluar, dan proposal
+            </p>
+          </div>
+          <div class="flex gap-4">
+            <!-- Tombol Import (Hijau bergaya brutal) -->
+            <button
+              class="bg-green-500 text-black border-brutal px-5 py-2.5 flex items-center gap-2 shadow-brutal text-sm hover:bg-green-400"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                ></path>
+              </svg>
+              Import Data
+            </button>
+            <!-- Tombol Tambah Surat (Biru bergaya brutal) -->
+            <button
+              class="bg-blue-600 text-white border-brutal px-5 py-2.5 flex items-center gap-2 shadow-brutal text-sm hover:bg-blue-500"
+            >
+              <span class="text-xl leading-none">+</span>
+              Tambah Surat
+            </button>
+          </div>
+        </div>
+
+        <!-- Kotak Filter -->
+        <div class="bg-white border-brutal shadow-brutal p-6 mb-10">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+            <div class="col-span-1 md:col-span-1">
+              <label class="block text-xs uppercase tracking-widest mb-2"
+                >Pencarian</label
+              >
+              <div class="relative">
+                <span
+                  class="absolute inset-y-0 left-3 flex items-center text-black"
+                  >🔍</span
+                >
+                <input
+                  type="text"
+                  placeholder="No. Agenda / Perihal..."
+                  class="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-black outline-none focus:bg-yellow-50 placeholder-gray-400 font-bold"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs uppercase tracking-widest mb-2"
+                >Jenis Surat</label
+              >
+              <select
+                class="w-full px-3 py-2.5 text-sm border-2 border-black outline-none focus:bg-yellow-50 font-bold bg-white cursor-pointer appearance-none"
+              >
+                <option>Semua Jenis</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs uppercase tracking-widest mb-2"
+                >Tingkat Surat</label
+              >
+              <select
+                class="w-full px-3 py-2.5 text-sm border-2 border-black outline-none focus:bg-yellow-50 font-bold bg-white cursor-pointer appearance-none"
+              >
+                <option>Semua Tingkat</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs uppercase tracking-widest mb-2"
+                >Status</label
+              >
+              <select
+                class="w-full px-3 py-2.5 text-sm border-2 border-black outline-none focus:bg-yellow-50 font-bold bg-white cursor-pointer appearance-none"
+              >
+                <option>Semua Status</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <button
+              class="bg-black text-white border-brutal px-8 py-2.5 flex items-center gap-2 shadow-brutal-sm text-sm hover:bg-gray-800"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                ></path>
+              </svg>
+              Terapkan
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabel Data -->
+        <div class="bg-white border-brutal shadow-brutal overflow-x-auto">
+          <!-- Header Tabel -->
+          <div class="min-w-[1000px]">
+            <div
+              class="grid grid-cols-12 gap-4 px-6 py-4 border-b-brutal text-xs uppercase tracking-widest bg-gray-50"
+            >
+              <div class="col-span-4">Info Surat</div>
+              <div class="col-span-3">Asal/Tujuan</div>
+              <div class="col-span-2 text-center">Tgl Diterima</div>
+              <div class="col-span-1 text-center">Status</div>
+              <div class="col-span-2 text-center">Aksi</div>
+            </div>
+
+            <!-- Item Tabel 1 -->
+            <div
+              class="grid grid-cols-12 gap-4 px-6 py-6 border-b-brutal items-center hover:bg-gray-50 transition-colors"
+            >
+              <!-- Info -->
+              <div class="col-span-4 flex items-start gap-4">
+                <div
+                  class="w-12 h-12 bg-white border-2 border-black text-black flex items-center justify-center shrink-0"
+                >
+                  <i class="fa-solid fa-envelope text-2xl"></i>
+                </div>
+                <div class="leading-tight">
+                  <div class="text-base mb-1">XXX-XXXXXX-XXX</div>
+                  <div class="text-[11px] text-gray-500 mb-2 tracking-wide">
+                    XXX.XXXXXX-XXX.XXXX-XX.X.XX.XX.XX.X-X.X.XXXX
+                  </div>
+                  <div class="text-sm">XXXXXXXXXX XXXXXXX XXXXX</div>
+                </div>
+              </div>
+              <!-- Asal/Tujuan -->
+              <div
+                class="col-span-3 text-[12px] space-y-2 pt-1 font-semibold text-gray-700"
+              >
+                <div class="flex items-center gap-2 truncate">
+                  <span class="text-black font-black">→</span> XXXXXXX XXXXXXXXX
+                  XXX XXX...
+                </div>
+                <div class="flex items-center gap-2 truncate">
+                  <span class="text-black font-black">←</span> XXXX XXXXXX
+                  XXXXXX XXXXXX...
+                </div>
+              </div>
+              <!-- Tanggal -->
+              <div class="col-span-2 text-center text-sm pt-1">14/01/2026</div>
+              <!-- Status -->
+              <div class="col-span-1 flex justify-center pt-1">
+                <span
+                  class="bg-white border-2 border-black px-3 py-1 text-xs uppercase tracking-wider text-black font-bold"
+                  >Baru</span
+                >
+              </div>
+              <!-- Aksi (Tombol Brutalist Kecil) -->
+              <div class="col-span-2 flex justify-center gap-2 pt-1">
+                <button
+                  class="w-8 h-8 border-2 border-black bg-white hover:bg-gray-200 flex items-center justify-center shadow-brutal-sm"
+                  title="View"
+                >
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                <button
+                  class="w-8 h-8 border-2 border-black bg-white hover:bg-gray-200 flex items-center justify-center shadow-brutal-sm"
+                  title="Edit"
+                >
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button
+                  class="w-8 h-8 border-2 border-black bg-black text-white hover:bg-gray-800 flex items-center justify-center shadow-brutal-sm"
+                  title="Delete"
+                >
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Item Tabel 2 -->
+            <div
+              class="grid grid-cols-12 gap-4 px-6 py-6 border-b-brutal items-center hover:bg-gray-50 transition-colors"
+            >
+              <div class="col-span-4 flex items-start gap-4">
+                <div
+                  class="w-12 h-12 bg-white border-2 border-black text-black flex items-center justify-center shrink-0"
+                >
+                  <i class="fa-solid fa-envelope text-2xl"></i>
+                </div>
+                <div class="leading-tight">
+                  <div class="text-base mb-1">XXX-XXXXXX-XXX</div>
+                  <div class="text-[11px] text-gray-500 mb-2 tracking-wide">
+                    XXX/XX/XXXXXX-XX/XX/XX/XXXX
+                  </div>
+                  <div class="text-sm">XXXXXXXXXX XXXXXXX XXXXX</div>
+                </div>
+              </div>
+              <div
+                class="col-span-3 text-[12px] space-y-2 pt-1 font-semibold text-gray-700"
+              >
+                <div class="flex items-center gap-2 truncate">
+                  <span class="text-black font-black">→</span> XXXXXX XXXXXXXX
+                  XXXXXXX P...
+                </div>
+                <div class="flex items-center gap-2 truncate">
+                  <span class="text-black font-black">←</span> XXXX XXXXXX
+                  XXXXXX XXXXXX...
+                </div>
+              </div>
+              <div class="col-span-2 text-center text-sm pt-1">14/01/2026</div>
+              <div class="col-span-1 flex justify-center pt-1">
+                <span
+                  class="bg-white border-2 border-black px-3 py-1 text-xs uppercase tracking-wider text-black font-bold"
+                  >Baru</span
+                >
+              </div>
+              <div class="col-span-2 flex justify-center gap-2 pt-1">
+                <button
+                  class="w-8 h-8 border-2 border-black bg-white hover:bg-gray-200 flex items-center justify-center shadow-brutal-sm"
+                >
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                <button
+                  class="w-8 h-8 border-2 border-black bg-white hover:bg-gray-200 flex items-center justify-center shadow-brutal-sm"
+                >
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button
+                  class="w-8 h-8 border-2 border-black bg-black text-white hover:bg-gray-800 flex items-center justify-center shadow-brutal-sm"
+                >
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Item Tabel 3 -->
+            <div
+              class="grid grid-cols-12 gap-4 px-6 py-6 items-center hover:bg-gray-50 transition-colors"
+            >
+              <div class="col-span-4 flex items-start gap-4">
+                <div
+                  class="w-12 h-12 bg-white border-2 border-black text-black flex items-center justify-center shrink-0"
+                >
+                  <i class="fa-solid fa-envelope text-2xl"></i>
+                </div>
+                <div class="leading-tight">
+                  <div class="text-base mb-1">XXX-XXXXXX-XXX</div>
+                  <div class="text-[11px] text-gray-500 mb-2 tracking-wide">
+                    XXX/XXX/XXXX
+                  </div>
+                  <div class="text-sm">
+                    XXXXXXXX XXXXX XXXXXXXXX XXXXXX XXXXXXX...
+                  </div>
+                </div>
+              </div>
+              <div
+                class="col-span-3 text-[12px] space-y-2 pt-1 font-semibold text-gray-700"
+              >
+                <div class="flex items-center gap-2 truncate">
+                  <span class="text-black font-black">→</span> XXXXXX
+                </div>
+                <div class="flex items-center gap-2 truncate">
+                  <span class="text-black font-black">←</span> XXXX XXXXXX
+                  XXXXXX XXXXXX...
+                </div>
+              </div>
+              <div class="col-span-2 text-center text-sm pt-1">19/01/2026</div>
+              <div class="col-span-1 flex justify-center pt-1">
+                <span
+                  class="bg-white border-2 border-black px-3 py-1 text-xs uppercase tracking-wider text-black font-bold"
+                  >Baru</span
+                >
+              </div>
+              <div class="col-span-2 flex justify-center gap-2 pt-1">
+                <button
+                  class="w-8 h-8 border-2 border-black bg-white hover:bg-gray-200 flex items-center justify-center shadow-brutal-sm"
+                >
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                <button
+                  class="w-8 h-8 border-2 border-black bg-white hover:bg-gray-200 flex items-center justify-center shadow-brutal-sm"
+                >
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button
+                  class="w-8 h-8 border-2 border-black bg-black text-white hover:bg-gray-800 flex items-center justify-center shadow-brutal-sm"
+                >
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

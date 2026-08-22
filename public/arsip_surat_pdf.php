@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // public/arsip_surat_pdf.php - Cetak PDF Arsip Digital
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config/config.php';
@@ -48,6 +48,8 @@ if (!empty($settings['ttd_image'])) {
 // Ambil filter dari GET
 // ============================================================================
 $search = $_GET['search'] ?? '';
+$dari_tanggal = $_GET['dari_tanggal'] ?? '';
+$sampai_tanggal = $_GET['sampai_tanggal'] ?? '';
 
 $params = [];
 $types = '';
@@ -67,6 +69,21 @@ if (!empty($search)) {
     $params[] = $searchWild;
     $params[] = $searchWild;
     $types .= 'sss';
+}
+
+if (!empty($dari_tanggal) && !empty($sampai_tanggal)) {
+    $query .= " AND DATE(s.tanggal_diterima) BETWEEN ? AND ?";
+    $params[] = $dari_tanggal;
+    $params[] = $sampai_tanggal;
+    $types .= 'ss';
+} elseif (!empty($dari_tanggal)) {
+    $query .= " AND DATE(s.tanggal_diterima) >= ?";
+    $params[] = $dari_tanggal;
+    $types .= 's';
+} elseif (!empty($sampai_tanggal)) {
+    $query .= " AND DATE(s.tanggal_diterima) <= ?";
+    $params[] = $sampai_tanggal;
+    $types .= 's';
 }
 
 $query .= " ORDER BY s.updated_at DESC";
@@ -264,6 +281,17 @@ ob_start();
         <p>Dicetak pada: <?= date('d/m/Y H:i') ?> WIB</p>
         <?php if (!empty($search)): ?>
             <p>Pencarian: "<?= htmlspecialchars($search) ?>"</p>
+        <?php endif; ?>
+        <?php if (!empty($dari_tanggal) || !empty($sampai_tanggal)): ?>
+            <p>Filter Tanggal: 
+                <?php if (!empty($dari_tanggal) && !empty($sampai_tanggal)): ?>
+                    <?= date('d/m/Y', strtotime($dari_tanggal)) ?> s.d <?= date('d/m/Y', strtotime($sampai_tanggal)) ?>
+                <?php elseif (!empty($dari_tanggal)): ?>
+                    Mulai <?= date('d/m/Y', strtotime($dari_tanggal)) ?>
+                <?php elseif (!empty($sampai_tanggal)): ?>
+                    Sampai <?= date('d/m/Y', strtotime($sampai_tanggal)) ?>
+                <?php endif; ?>
+            </p>
         <?php endif; ?>
     </div>
 

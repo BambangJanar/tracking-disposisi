@@ -20,8 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = sanitize($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
+    $captcha = $_POST['captcha'] ?? '';
+
     if (empty($email) || empty($password)) {
         $error = 'Email dan password wajib diisi';
+    } elseif (empty($captcha)) {
+        $error = 'Kode CAPTCHA wajib diisi';
+    } elseif (strtolower($captcha) !== strtolower($_SESSION['captcha_code'] ?? '')) {
+        $error = 'Kode CAPTCHA tidak valid';
     } else {
         $result = loginUser($email, $password);
         if ($result['success']) {
@@ -79,7 +85,7 @@ $themeColor = $settings['theme_color'] ?? 'blue';
                 class="absolute inset-0 w-full h-full object-cover" alt="Background">
 
             <div class="relative z-20 text-center px-12 text-white">
-                <div class="mb-6 inline-block p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl">
+                <div class="mb-6 inline-block p-4 bg-white rounded-2xl shadow-xl">
                     <?php if ($appLogo): ?>
                         <img src="<?= SETTINGS_UPLOAD_URL . $appLogo ?>" alt="Logo" class="h-20 w-auto">
                     <?php else: ?>
@@ -147,6 +153,24 @@ $themeColor = $settings['theme_color'] ?? 'blue';
                                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" onclick="togglePassword()">
                                     <i class="fas fa-eye text-gray-400 hover:text-gray-600" id="toggleIcon"></i>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="captcha" class="block text-sm font-medium text-gray-700 mb-1">Keamanan CAPTCHA</label>
+                            <div class="flex items-center space-x-3 mb-2 bg-gray-50 p-2 rounded-xl border border-gray-200">
+                                <img src="captcha.php" id="captchaImage" alt="CAPTCHA" class="h-12 w-auto rounded border">
+                                <button type="button" onclick="document.getElementById('captchaImage').src = 'captcha.php?' + Math.random();" class="p-2 text-gray-500 hover:text-primary-600 transition-colors focus:outline-none" title="Refresh CAPTCHA">
+                                    <i class="fas fa-sync-alt text-lg"></i>
+                                </button>
+                            </div>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-shield-alt text-gray-400"></i>
+                                </div>
+                                <input id="captcha" name="captcha" type="text" required autocomplete="off"
+                                    class="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
+                                    placeholder="Masukkan kode di atas">
                             </div>
                         </div>
                     </div>

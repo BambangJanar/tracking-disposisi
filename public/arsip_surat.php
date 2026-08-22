@@ -47,6 +47,25 @@ if (!empty($_GET['search'])) {
     $types .= 'sss';
 }
 
+$dari_tanggal = $_GET['dari_tanggal'] ?? '';
+$sampai_tanggal = $_GET['sampai_tanggal'] ?? '';
+
+// Filter Tanggal
+if (!empty($dari_tanggal) && !empty($sampai_tanggal)) {
+    $query .= " AND DATE(s.tanggal_diterima) BETWEEN ? AND ?";
+    $params[] = $dari_tanggal;
+    $params[] = $sampai_tanggal;
+    $types .= 'ss';
+} elseif (!empty($dari_tanggal)) {
+    $query .= " AND DATE(s.tanggal_diterima) >= ?";
+    $params[] = $dari_tanggal;
+    $types .= 's';
+} elseif (!empty($sampai_tanggal)) {
+    $query .= " AND DATE(s.tanggal_diterima) <= ?";
+    $params[] = $sampai_tanggal;
+    $types .= 's';
+}
+
 // Count total untuk pagination
 $countQuery = "SELECT COUNT(*) as total FROM surat s WHERE s.status_surat = 'arsip'";
 $countParams = [];
@@ -59,6 +78,21 @@ if (!empty($_GET['search'])) {
     $countParams[] = $search;
     $countParams[] = $search;
     $countTypes .= 'sss';
+}
+
+if (!empty($dari_tanggal) && !empty($sampai_tanggal)) {
+    $countQuery .= " AND DATE(s.tanggal_diterima) BETWEEN ? AND ?";
+    $countParams[] = $dari_tanggal;
+    $countParams[] = $sampai_tanggal;
+    $countTypes .= 'ss';
+} elseif (!empty($dari_tanggal)) {
+    $countQuery .= " AND DATE(s.tanggal_diterima) >= ?";
+    $countParams[] = $dari_tanggal;
+    $countTypes .= 's';
+} elseif (!empty($sampai_tanggal)) {
+    $countQuery .= " AND DATE(s.tanggal_diterima) <= ?";
+    $countParams[] = $sampai_tanggal;
+    $countTypes .= 's';
 }
 
 $totalResult = dbSelectOne($countQuery, $countParams, $countTypes);
@@ -90,7 +124,7 @@ $arsipList = dbSelect($query, $params, $types);
                             Daftar surat yang telah diarsipkan
                         </p>
                     </div>
-                    <a href="arsip_surat_pdf.php?<?= http_build_query(['search' => $_GET['search'] ?? '']) ?>"
+                    <a href="arsip_surat_pdf.php?<?= http_build_query(['search' => $_GET['search'] ?? '', 'dari_tanggal' => $dari_tanggal, 'sampai_tanggal' => $sampai_tanggal]) ?>"
                         target="_blank"
                         class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
                         <i class="fas fa-file-pdf mr-2"></i> Cetak PDF
@@ -99,27 +133,48 @@ $arsipList = dbSelect($query, $params, $types);
             </div>
 
             <!-- Search Filter -->
-            <?php if ($totalArsip > 0 || !empty($_GET['search'])): ?>
-                <div class="bg-white rounded-lg shadow p-4 mb-4 sm:mb-6">
-                    <form method="GET" class="flex gap-2">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4 sm:mb-6">
+                <form method="GET" class="flex flex-col md:flex-row gap-4">
+                    <!-- Search Input -->
+                    <div class="flex-1">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Pencarian</label>
                         <input type="text"
                             name="search"
                             value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
-                            placeholder="Cari nomor agenda, perihal, atau nomor surat..."
-                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500">
+                            placeholder="Cari nomor agenda, perihal..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    
+                    <!-- Date Range -->
+                    <div class="flex-1">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Dari Tanggal</label>
+                        <input type="date"
+                            name="dari_tanggal"
+                            value="<?= htmlspecialchars($dari_tanggal) ?>"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Sampai Tanggal</label>
+                        <input type="date"
+                            name="sampai_tanggal"
+                            value="<?= htmlspecialchars($sampai_tanggal) ?>"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500">
+                    </div>
 
-                        <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                            <i class="fas fa-search"></i><span class="ml-2 hidden sm:inline">Cari</span>
+                    <!-- Buttons -->
+                    <div class="flex items-end gap-2">
+                        <button type="submit" class="w-full md:w-auto px-6 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-900 transition-colors whitespace-nowrap">
+                            <i class="fas fa-filter mr-2"></i> Filter Data
                         </button>
 
-                        <?php if (!empty($_GET['search'])): ?>
-                            <a href="arsip_surat.php" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium text-center transition-colors">
-                                <i class="fas fa-times"></i><span class="ml-2 hidden sm:inline">Reset</span>
+                        <?php if (!empty($_GET['search']) || !empty($dari_tanggal) || !empty($sampai_tanggal)): ?>
+                            <a href="arsip_surat.php" class="w-full md:w-auto px-4 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors whitespace-nowrap text-center">
+                                <i class="fas fa-undo"></i>
                             </a>
                         <?php endif; ?>
-                    </form>
-                </div>
-            <?php endif; ?>
+                    </div>
+                </form>
+            </div>
 
             <!-- Desktop Table -->
             <div class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
@@ -255,7 +310,7 @@ $arsipList = dbSelect($query, $params, $types);
 
                 <?php if ($pagination->hasPages()): ?>
                     <div class="border-t border-gray-200 px-4 py-3">
-                        <?= $pagination->render('arsip_surat.php', ['search' => $_GET['search'] ?? '']) ?>
+                        <?= $pagination->render('arsip_surat.php', ['search' => $_GET['search'] ?? '', 'dari_tanggal' => $dari_tanggal, 'sampai_tanggal' => $sampai_tanggal]) ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -376,7 +431,7 @@ $arsipList = dbSelect($query, $params, $types);
 
                     <?php if ($pagination->hasPages()): ?>
                         <div class="bg-white rounded-lg shadow p-4">
-                            <?= $pagination->render('arsip_surat.php', ['search' => $_GET['search'] ?? '']) ?>
+                            <?= $pagination->render('arsip_surat.php', ['search' => $_GET['search'] ?? '', 'dari_tanggal' => $dari_tanggal, 'sampai_tanggal' => $sampai_tanggal]) ?>
                         </div>
                     <?php endif; ?>
                 <?php endif; ?>
