@@ -10,7 +10,7 @@ define('APP_VERSION', '1.0.0');
 // ============================================================================
 // DETEKSI ENVIRONMENT (LOCAL vs PRODUCTION)
 // ============================================================================
-$isLocalhost = in_array($_SERVER['SERVER_NAME'], ['localhost', '127.0.0.1', '::1']);
+$isLocalhost = in_array($_SERVER['SERVER_NAME'], ['localhost', '127.0.0.1', '::1']) || strpos($_SERVER['SERVER_NAME'], '.test') !== false || strpos($_SERVER['SERVER_NAME'], '.local') !== false;
 
 // ============================================================================
 // AUTO-DETECT BASE URL (PERBAIKAN LOGIKA)

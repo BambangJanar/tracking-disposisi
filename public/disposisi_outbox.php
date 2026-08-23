@@ -15,10 +15,11 @@ $pageTitle = 'Disposisi Keluar';
 
 // Anak magang bisa akses, tapi hanya melihat disposisi miliknya (di-handle oleh filter non-admin di bawah)
 
-// Filters
 $filters = [
     'status_surat' => $_GET['status'] ?? '',
-    'search' => $_GET['search'] ?? ''
+    'search' => $_GET['search'] ?? '',
+    'dari_tanggal' => $_GET['dari_tanggal'] ?? '',
+    'sampai_tanggal' => $_GET['sampai_tanggal'] ?? ''
 ];
 
 // Pagination
@@ -93,25 +94,72 @@ if (!empty($filters['search'])) {
     $types .= 'sss';
 }
 
-// Count total
+// Filter Tanggal
+if (!empty($filters['dari_tanggal']) && !empty($filters['sampai_tanggal'])) {
+    $sql .= " AND DATE(d.tanggal_disposisi) BETWEEN ? AND ?";
+    $params[] = $filters['dari_tanggal'];
+    $params[] = $filters['sampai_tanggal'];
+    $types .= 'ss';
+} elseif (!empty($filters['dari_tanggal'])) {
+    $sql .= " AND DATE(d.tanggal_disposisi) >= ?";
+    $params[] = $filters['dari_tanggal'];
+    $types .= 's';
+} elseif (!empty($filters['sampai_tanggal'])) {
+    $sql .= " AND DATE(d.tanggal_disposisi) <= ?";
+    $params[] = $filters['sampai_tanggal'];
+    $types .= 's';
+}
+
+// Count total (FIXED TO USE PREPARED STATEMENT)
 $countSql = "SELECT COUNT(DISTINCT s.id) as total FROM surat s
              JOIN disposisi d ON s.id = d.id_surat
              WHERE s.status_surat NOT IN ('arsip')";
 
+$countParams = [];
+$countTypes = '';
+
 if (!in_array($userRole, [1, 4])) {
-    $countSql .= " AND d.dari_user_id = $userId";
+    $countSql .= " AND d.dari_user_id = ?";
+    $countParams[] = $userId;
+    $countTypes .= 'i';
 }
 
 if (!empty($filters['status_surat'])) {
-    $countSql .= " AND s.status_surat = '{$filters['status_surat']}'";
+    $countSql .= " AND s.status_surat = ?";
+    $countParams[] = $filters['status_surat'];
+    $countTypes .= 's';
 }
 
 if (!empty($filters['search'])) {
     $search = "%" . $filters['search'] . "%";
-    $countSql .= " AND (s.nomor_agenda LIKE '$search' OR s.perihal LIKE '$search' OR s.nomor_surat LIKE '$search')";
+    $countSql .= " AND (s.nomor_agenda LIKE ? OR s.perihal LIKE ? OR s.nomor_surat LIKE ?)";
+    $countParams[] = $search;
+    $countParams[] = $search;
+    $countParams[] = $search;
+    $countTypes .= 'sss';
 }
 
-$countResult = $conn->query($countSql)->fetch_assoc();
+if (!empty($filters['dari_tanggal']) && !empty($filters['sampai_tanggal'])) {
+    $countSql .= " AND DATE(d.tanggal_disposisi) BETWEEN ? AND ?";
+    $countParams[] = $filters['dari_tanggal'];
+    $countParams[] = $filters['sampai_tanggal'];
+    $countTypes .= 'ss';
+} elseif (!empty($filters['dari_tanggal'])) {
+    $countSql .= " AND DATE(d.tanggal_disposisi) >= ?";
+    $countParams[] = $filters['dari_tanggal'];
+    $countTypes .= 's';
+} elseif (!empty($filters['sampai_tanggal'])) {
+    $countSql .= " AND DATE(d.tanggal_disposisi) <= ?";
+    $countParams[] = $filters['sampai_tanggal'];
+    $countTypes .= 's';
+}
+
+$stmtCount = $conn->prepare($countSql);
+if (!empty($countParams)) {
+    $stmtCount->bind_param($countTypes, ...$countParams);
+}
+$stmtCount->execute();
+$countResult = $stmtCount->get_result()->fetch_assoc();
 $totalSurat = $countResult['total'];
 
 // Get data with pagination
@@ -160,8 +208,8 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
 
         <!-- Filter Section -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-            <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div class="sm:col-span-2 lg:col-span-1">
+            <form method="GET" class="flex flex-col md:flex-row flex-wrap gap-3 sm:gap-4">
+                <div class="flex-1 min-w-[200px]">
                     <label class="block text-xs font-medium text-gray-500 mb-1.5">Pencarian</label>
                     <div class="relative">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -171,7 +219,7 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                     </div>
                 </div>
 
-                <div>
+                <div class="w-full sm:w-auto min-w-[150px]">
                     <label class="block text-xs font-medium text-gray-500 mb-1.5">Status Surat</label>
                     <select name="status" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition-shadow bg-white">
                         <option value="">Semua Status</option>
@@ -181,14 +229,26 @@ $pagination = new Pagination($totalSurat, $perPage, $page);
                         <option value="ditolak" <?= $filters['status_surat'] == 'ditolak' ? 'selected' : '' ?>>Ditolak</option>
                     </select>
                 </div>
+                
+                <div class="w-full sm:w-auto min-w-[140px]">
+                    <label class="block text-xs font-medium text-gray-500 mb-1.5">Dari Tanggal</label>
+                    <input type="date" name="dari_tanggal" value="<?= htmlspecialchars($filters['dari_tanggal']) ?>"
+                           class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition-shadow">
+                </div>
 
-                <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-2">
-                    <button type="submit" class="flex-1 lg:flex-none bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition text-sm flex justify-center items-center gap-2 font-medium">
+                <div class="w-full sm:w-auto min-w-[140px]">
+                    <label class="block text-xs font-medium text-gray-500 mb-1.5">Sampai Tanggal</label>
+                    <input type="date" name="sampai_tanggal" value="<?= htmlspecialchars($filters['sampai_tanggal']) ?>"
+                           class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition-shadow">
+                </div>
+
+                <div class="flex items-end gap-2 w-full md:w-auto">
+                    <button type="submit" class="flex-1 md:flex-none bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition text-sm flex justify-center items-center gap-2 font-medium">
                         <i class="fas fa-filter"></i> <span class="hidden sm:inline">Terapkan</span>
                     </button>
                     
-                    <?php if (!empty($filters['search']) || !empty($filters['status_surat'])): ?>
-                    <a href="disposisi_outbox.php" class="flex-1 lg:flex-none bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium text-center transition-colors flex justify-center items-center gap-2">
+                    <?php if (!empty($filters['search']) || !empty($filters['status_surat']) || !empty($filters['dari_tanggal']) || !empty($filters['sampai_tanggal'])): ?>
+                    <a href="disposisi_outbox.php" class="flex-1 md:flex-none bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium text-center transition-colors flex justify-center items-center gap-2">
                         <i class="fas fa-times"></i> <span class="hidden sm:inline">Reset</span>
                     </a>
                     <?php endif; ?>
